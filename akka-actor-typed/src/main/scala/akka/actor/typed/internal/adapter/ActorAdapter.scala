@@ -73,33 +73,39 @@ import akka.util.OptionVal
   def receive: Receive = ActorAdapter.DummyReceive
 
   override protected[akka] def aroundReceive(receive: Receive, msg: Any): Unit = {
-    // as we know we never become in "normal" typed actors, it is just the current behavior that
-    // changes, we can avoid some overhead with the partial function/behavior stack of untyped entirely
-    // we also know that the receive is total, so we can avoid the orElse part as well.
-    msg match {
-      case untyped.Terminated(ref) =>
-        val msg =
-          if (failures contains ref) {
-            val ex = failures(ref)
-            failures -= ref
-            ChildFailed(ActorRefAdapter(ref), ex)
-          } else Terminated(ActorRefAdapter(ref))
-        handleSignal(msg)
-      case untyped.ReceiveTimeout =>
-        handleMessage(ctx.receiveTimeoutMsg)
-      case wrapped: AdaptMessage[Any, T] @unchecked =>
-        withSafelyAdapted(() => wrapped.adapt()) {
-          case AdaptWithRegisteredMessageAdapter(msg) =>
-            adaptAndHandle(msg)
-          case msg: T @unchecked =>
-            handleMessage(msg)
-        }
-      case AdaptWithRegisteredMessageAdapter(msg) =>
-        adaptAndHandle(msg)
-      case signal: Signal =>
-        handleSignal(signal)
-      case msg: T @unchecked =>
-        handleMessage(msg)
+    ctx.setCurrentActorThread()
+    try {
+
+      // as we know we never become in "normal" typed actors, it is just the current behavior that
+      // changes, we can avoid some overhead with the partial function/behavior stack of untyped entirely
+      // we also know that the receive is total, so we can avoid the orElse part as well.
+      msg match {
+        case untyped.Terminated(ref) =>
+          val msg =
+            if (failures contains ref) {
+              val ex = failures(ref)
+              failures -= ref
+              ChildFailed(ActorRefAdapter(ref), ex)
+            } else Terminated(ActorRefAdapter(ref))
+          handleSignal(msg)
+        case untyped.ReceiveTimeout =>
+          handleMessage(ctx.receiveTimeoutMsg)
+        case wrapped: AdaptMessage[Any, T] @unchecked =>
+          withSafelyAdapted(() => wrapped.adapt()) {
+            case AdaptWithRegisteredMessageAdapter(msg) =>
+              adaptAndHandle(msg)
+            case msg: T @unchecked =>
+              handleMessage(msg)
+          }
+        case AdaptWithRegisteredMessageAdapter(msg) =>
+          adaptAndHandle(msg)
+        case signal: Signal =>
+          handleSignal(signal)
+        case msg: T @unchecked =>
+          handleMessage(msg)
+      }
+    } finally {
+      ctx.clearCurrentActorThread()
     }
   }
 
@@ -231,6 +237,30 @@ import akka.util.OptionVal
     if (context.asInstanceOf[untyped.ActorCell].isWatching(ref)) {
       failures = failures.updated(ref, ex)
     }
+  }
+
+  override protected[akka] def aroundPreStart(): Unit = {
+    ctx.setCurrentActorThread()
+    try super.aroundPreStart()
+    finally ctx.clearCurrentActorThread()
+  }
+
+  override protected[akka] def aroundPreRestart(reason: Throwable, message: Option[Any]): Unit = {
+    ctx.setCurrentActorThread()
+    try super.aroundPreRestart(reason, message)
+    finally ctx.clearCurrentActorThread()
+  }
+
+  override protected[akka] def aroundPostRestart(reason: Throwable): Unit = {
+    ctx.setCurrentActorThread()
+    try super.aroundPostRestart(reason)
+    finally ctx.clearCurrentActorThread()
+  }
+
+  override protected[akka] def aroundPostStop(): Unit = {
+    ctx.setCurrentActorThread()
+    try super.aroundPostStop()
+    finally ctx.clearCurrentActorThread()
   }
 
   override def preStart(): Unit = {

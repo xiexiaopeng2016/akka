@@ -178,7 +178,10 @@ private[akka] final class FunctionRef[-T](override val path: ActorPath, send: (T
   private val loggingAdapter = new StubbedLogger
   private var unhandled: List[T] = Nil
 
-  override def children: Iterable[ActorRef[Nothing]] = _children.values.map(_.context.self)
+  override def children: Iterable[ActorRef[Nothing]] = {
+    checkCurrentActorThread("children")
+    _children.values.map(_.context.self)
+  }
   def childrenNames: Iterable[String] = _children.keys
 
   override def child(name: String): Option[ActorRef[Nothing]] = _children.get(name).map(_.context.self)

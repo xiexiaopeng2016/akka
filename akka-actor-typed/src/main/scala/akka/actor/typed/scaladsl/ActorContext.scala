@@ -7,11 +7,11 @@ package akka.actor.typed.scaladsl
 import akka.actor.typed._
 import akka.annotation.DoNotInherit
 import akka.util.Timeout
-
 import scala.concurrent.{ ExecutionContextExecutor, Future }
 import scala.concurrent.duration.FiniteDuration
 import scala.reflect.ClassTag
 import scala.util.Try
+
 import akka.annotation.InternalApi
 
 /**
@@ -321,5 +321,20 @@ trait ActorContext[T] extends TypedActorContext[T] {
    */
   @InternalApi
   private[akka] def cancelAllTimers(): Unit
+
+  /**
+   * INTERNAL API
+   */
+  @InternalApi private[akka] def setCurrentActorThread(): Unit
+
+  /**
+   * INTERNAL API
+   */
+  @InternalApi private[akka] def clearCurrentActorThread(): Unit
+
+  /**
+   * INTERNAL API
+   */
+  @InternalApi private[akka] def checkCurrentActorThread(operationName: String): Unit
 
 }

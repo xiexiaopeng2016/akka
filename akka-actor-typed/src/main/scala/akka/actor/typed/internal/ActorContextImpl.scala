@@ -32,11 +32,13 @@ import akka.util.JavaDurationConverters._
   private var messageAdapterRef: OptionVal[ActorRef[Any]] = OptionVal.None
   private var _messageAdapters: List[(Class[_], Any => T)] = Nil
   private var _timer: OptionVal[TimerSchedulerImpl[T]] = OptionVal.None
+  private var _currentActorThread: OptionVal[Thread] = OptionVal.None
 
   // context-shared timer needed to allow for nested timer usage
   def timer: TimerSchedulerImpl[T] = _timer match {
     case OptionVal.Some(timer) => timer
     case OptionVal.None =>
+      checkCurrentActorThread("timer")
       val timer = new TimerSchedulerImpl[T](this)
       _timer = OptionVal.Some(timer)
       timer
@@ -84,11 +86,16 @@ import akka.util.JavaDurationConverters._
   override def scheduleOnce[U](delay: java.time.Duration, target: ActorRef[U], msg: U): akka.actor.Cancellable =
     scheduleOnce(delay.asScala, target, msg)
 
-  override def spawn[U](behavior: akka.actor.typed.Behavior[U], name: String): akka.actor.typed.ActorRef[U] =
+  override def spawn[U](behavior: akka.actor.typed.Behavior[U], name: String): akka.actor.typed.ActorRef[U] = {
+    checkCurrentActorThread("spawn")
     spawn(behavior, name, Props.empty)
+  }
 
-  override def spawnAnonymous[U](behavior: akka.actor.typed.Behavior[U]): akka.actor.typed.ActorRef[U] =
+  override def spawnAnonymous[U](behavior: akka.actor.typed.Behavior[U]): akka.actor.typed.ActorRef[U] = {
+    // FIXME use checkCurrentActorThread at more places
+    checkCurrentActorThread("spawnAnonymous")
     spawnAnonymous(behavior, Props.empty)
+  }
 
   // Scala API impl
   override def ask[Req, Res](target: RecipientRef[Req])(createRequest: ActorRef[Res] => Req)(
@@ -168,4 +175,40 @@ import akka.util.JavaDurationConverters._
    * INTERNAL API
    */
   @InternalApi private[akka] def messageAdapters: List[(Class[_], Any => T)] = _messageAdapters
+
+  /**
+   * INTERNAL API
+   */
+  @InternalApi private[akka] def setCurrentActorThread(): Unit = {
+    _currentActorThread = OptionVal.Some(Thread.currentThread())
+  }
+
+  /**
+   * INTERNAL API
+   */
+  @InternalApi private[akka] def clearCurrentActorThread(): Unit = {
+    _currentActorThread = OptionVal.None
+  }
+
+  /**
+   * INTERNAL API
+   */
+  @InternalApi private[akka] def checkCurrentActorThread(operationName: String): Unit = {
+    val callerThread = Thread.currentThread()
+    // FIXME Do we need to consider visibility of _currentActorThread?
+    //       Maybe not needed since it might not matter if we would NOT detect illegal access sometimes?
+    //       It will always be seen when accessed from the right thread.
+    _currentActorThread match {
+      case OptionVal.Some(t) =>
+        if (callerThread ne t) {
+          throw new UnsupportedOperationException(
+            s"Unsupported access to [$operationName] from the outside of " +
+            s"$self. Current message is processed by $t, but [$operationName] was called from $callerThread.")
+        }
+      case OptionVal.None =>
+        throw new UnsupportedOperationException(
+          s"Unsupported access to [$operationName] from the outside of " +
+          s"$self. No message is currently processed by the actor, but [$operationName] was called from $callerThread.")
+    }
+  }
 }
