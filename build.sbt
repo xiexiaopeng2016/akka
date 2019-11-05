@@ -202,7 +202,8 @@ lazy val docs = akkaModule("akka-docs")
     NoPublish,
     ParadoxBrowse,
     ScaladocNoVerificationOfDiagrams,
-    StreamOperatorsIndexGenerator)
+    StreamOperatorsIndexGenerator,
+    Jdk9)
   .disablePlugins(MimaPlugin, WhiteSourcePlugin)
   .disablePlugins(ScalafixPlugin)
 
@@ -346,9 +347,10 @@ lazy val streamTestkit = akkaModule("akka-stream-testkit")
   .disablePlugins(MimaPlugin)
 
 lazy val streamTests = akkaModule("akka-stream-tests")
-  .dependsOn(streamTestkit % "test->test", remote % "test->test", stream)
+  .dependsOn(streamTestkit % "test->test;TestJdk9->test;TestJdk9->compile", remote % "test->test", stream)
   .settings(Dependencies.streamTests)
   .enablePlugins(NoPublish)
+  .enablePlugins(Jdk9)
   .disablePlugins(MimaPlugin, WhiteSourcePlugin)
 
 lazy val streamTestsTck = akkaModule("akka-stream-tests-tck")

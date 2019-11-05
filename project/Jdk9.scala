@@ -11,6 +11,7 @@ object Jdk9 extends AutoPlugin {
   import JdkOptions.notOnJdk8
 
   lazy val CompileJdk9 = config("CompileJdk9").extend(Compile)
+  lazy val TestJdk9 = config("TestJdk9").extend(Test)
 
   val SCALA_SOURCE_DIRECTORY = "scala-jdk-9"
   val SCALA_TEST_SOURCE_DIRECTORY = "scala-jdk9-only"
@@ -20,9 +21,20 @@ object Jdk9 extends AutoPlugin {
   val compileJdk9Settings = Seq(
     // following the scala-2.12, scala-sbt-1.0, ... convention
     unmanagedSourceDirectories := notOnJdk8(
-        Seq(
-          (Compile / sourceDirectory).value / SCALA_SOURCE_DIRECTORY,
-          (Compile / sourceDirectory).value / JAVA_SOURCE_DIRECTORY)),
+      Seq(
+        (Compile / sourceDirectory).value / SCALA_SOURCE_DIRECTORY,
+        (Compile / sourceDirectory).value / JAVA_SOURCE_DIRECTORY)),
+
+    scalacOptions := AkkaBuild.DefaultScalacOptions ++ notOnJdk8(Seq("-release", "11")),
+    javacOptions := AkkaBuild.DefaultJavacOptions ++ notOnJdk8(Seq("--release", "11")))
+
+  val testJdk9Settings = Seq(
+    // following the scala-2.12, scala-sbt-1.0, ... convention
+    unmanagedSourceDirectories := notOnJdk8(
+      Seq(
+        (Test / sourceDirectory).value / SCALA_TEST_SOURCE_DIRECTORY,
+        (Test / sourceDirectory).value / JAVA_TEST_SOURCE_DIRECTORY)),
+
     scalacOptions := AkkaBuild.DefaultScalacOptions ++ notOnJdk8(Seq("-release", "11")),
     javacOptions := AkkaBuild.DefaultJavacOptions ++ notOnJdk8(Seq("--release", "11")))
 
@@ -38,5 +50,7 @@ object Jdk9 extends AutoPlugin {
   override lazy val projectSettings =
     inConfig(CompileJdk9)(Defaults.compileSettings) ++
     inConfig(CompileJdk9)(compileJdk9Settings) ++
-    compileSettings
+    compileSettings ++
+    inConfig(TestJdk9)(Defaults.testSettings) ++
+    inConfig(TestJdk9)(testJdk9Settings)
 }
