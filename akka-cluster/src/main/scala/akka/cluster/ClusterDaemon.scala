@@ -323,7 +323,8 @@ private[cluster] class ClusterCoreDaemon(publisher: ActorRef, joinConfigCompatCh
   val selfDc = cluster.selfDataCenter
 
   private val gossipLogger =
-    new cluster.ClusterLogger(Logging(context.system, ActorWithLogClass(this, ClusterLogClass.ClusterGossip)))
+    new cluster.ClusterLogger(
+      Logging.withMarker(context.system, ActorWithLogClass(this, ClusterLogClass.ClusterGossip)))
 
   protected def selfUniqueAddress = cluster.selfUniqueAddress
 

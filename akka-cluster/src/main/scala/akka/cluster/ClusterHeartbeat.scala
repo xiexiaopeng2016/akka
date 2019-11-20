@@ -41,7 +41,8 @@ private[cluster] final class ClusterHeartbeatReceiver(getCluster: () => Cluster)
   lazy val verboseHeartbeat = cluster.settings.Debug.VerboseHeartbeatLogging
 
   private lazy val clusterLogger =
-    new cluster.ClusterLogger(Logging(context.system, ActorWithLogClass(this, ClusterLogClass.ClusterHeartbeat)))
+    new cluster.ClusterLogger(
+      Logging.withMarker(context.system, ActorWithLogClass(this, ClusterLogClass.ClusterHeartbeat)))
 
   def receive: Receive = {
     case hb: Heartbeat =>
@@ -108,7 +109,8 @@ private[cluster] class ClusterHeartbeatSender extends Actor {
   import context.dispatcher
 
   private val clusterLogger =
-    new cluster.ClusterLogger(Logging(context.system, ActorWithLogClass(this, ClusterLogClass.ClusterHeartbeat)))
+    new cluster.ClusterLogger(
+      Logging.withMarker(context.system, ActorWithLogClass(this, ClusterLogClass.ClusterHeartbeat)))
   import clusterLogger._
 
   val filterInternalClusterMembers: Member => Boolean =

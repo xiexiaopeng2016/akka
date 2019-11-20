@@ -594,6 +594,11 @@ private[akka] class RemoteActorRefProvider(
 
   def getDefaultAddress: Address = transport.defaultAddress
 
+  // FIXME
+  override private[akka] def addressString =
+    try getDefaultAddress.toString
+    catch { case NonFatal(_) => "" }
+
   // no need for volatile, only intended as cached value, not necessarily a singleton value
   private var serializationInformationCache: OptionVal[Serialization.Information] = OptionVal.None
   @InternalApi override private[akka] def serializationInformation: Serialization.Information =
