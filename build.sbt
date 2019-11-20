@@ -110,7 +110,7 @@ lazy val benchJmh = akkaModule("akka-bench-jmh")
   .disablePlugins(MimaPlugin, WhiteSourcePlugin, ValidatePullRequest, CopyrightHeaderInPr)
 
 lazy val cluster = akkaModule("akka-cluster")
-  .dependsOn(remote, remoteTests % "test->test", testkit % "test->test", jackson % "test->test")
+  .dependsOn(remote, remoteTests % "test->test", testkit % "test->test", jackson % "test->test", slf4j)
   .settings(Dependencies.cluster)
   .settings(AutomaticModuleName.settings("akka.cluster"))
   .settings(OSGi.cluster)

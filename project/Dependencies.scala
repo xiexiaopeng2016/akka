@@ -137,6 +137,10 @@ object Dependencies {
       val slf4jJul = "org.slf4j" % "jul-to-slf4j" % slf4jVersion % "test" // MIT
       val slf4jLog4j = "org.slf4j" % "log4j-over-slf4j" % slf4jVersion % "test" // MIT
 
+      val logstash = "net.logstash.logback" % "logstash-logback-encoder" % "6.2"
+      val jaxbApi = "javax.xml.bind" % "jaxb-api" % "2.3.1"
+      val jaxbRuntime = "org.glassfish.jaxb" % "jaxb-runtime" % "2.3.1"
+
       // reactive streams tck
       val reactiveStreamsTck = "org.reactivestreams" % "reactive-streams-tck" % reactiveStreamsVersion % "test" // CC0
 
@@ -199,7 +203,7 @@ object Dependencies {
 
   val multiNodeTestkit = l ++= Seq(netty)
 
-  val cluster = l ++= Seq(Test.junit, Test.scalatest.value)
+  val cluster = l ++= Seq(Test.junit, Test.scalatest.value, Test.logback, Test.logstash, Test.jaxbApi, Test.jaxbRuntime)
 
   val clusterTools = l ++= Seq(Test.junit, Test.scalatest.value)
 
