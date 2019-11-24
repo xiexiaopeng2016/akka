@@ -1,8 +1,8 @@
-# Basics and working with Flows
+# 基础知识和使用Flow
 
-## Dependency
+## 依赖
 
-To use Akka Streams, add the module to your project:
+要使用Akka Streams，请将模块添加到您的项目中：
 
 @@dependency[sbt,Maven,Gradle] {
   group="com.typesafe.akka"
@@ -10,82 +10,57 @@ To use Akka Streams, add the module to your project:
   version="$akka.version$"
 }
 
-## Introduction
+## 介绍
 
-## Core concepts
+<a id="core-concepts"></a>
+## 核心概念
 
-Akka Streams is a library to process and transfer a sequence of elements using bounded buffer space. This
-latter property is what we refer to as *boundedness*, and it is the defining feature of Akka Streams. Translated to
-everyday terms, it is possible to express a chain (or as we see later, graphs) of processing entities. Each of these
-entities executes independently (and possibly concurrently) from the others while only buffering a limited number
-of elements at any given time. This property of bounded buffers is one of the differences from the actor model, where each actor usually has
-an unbounded, or a bounded, but dropping mailbox. Akka Stream processing entities have bounded "mailboxes" that
-do not drop.
+Akka Streams是一个使用有限的缓冲区空间处理和传输元素序列的库。后一个属性就是我们所说的*boundedness*，它是Akka Streams的定义特征。翻译成日常用语，可以表示处理实体的链(或后文中的图)。这些实体中的每一个都独立于其他实体执行(并可能并发执行)，同时在任何给定时间仅缓冲有限数量的元素。
+有界缓冲区的这个属性是与actor模型的区别之一，在actor模型中，每个actor通常都有一个无界或有界，但正在丢弃的邮箱。Akka流处理实体已绑定了不会丢失的"邮箱"。
 
-Before we move on, let's define some basic terminology which will be used throughout the entire documentation:
-
-Stream
-: An active process that involves moving and transforming data.
-
-Element
-: An element is the processing unit of streams. All operations transform and transfer elements from upstream to
-downstream. Buffer sizes are always expressed as number of elements independently from the actual size of the elements.
-
-Back-pressure
-: A means of flow-control, a way for consumers of data to notify a producer about their current availability, effectively
-slowing down the upstream producer to match their consumption speeds.
-In the context of Akka Streams back-pressure is always understood as *non-blocking* and *asynchronous*.
-
-Non-Blocking
-: Means that a certain operation does not hinder the progress of the calling thread, even if it takes a long time to
-finish the requested operation.
-
-Graph
-: A description of a stream processing topology, defining the pathways through which elements shall flow when the stream
-is running.
-
-Operator
-: The common name for all building blocks that build up a Graph.
-Examples of operators are `map()`, `filter()`, custom ones extending @ref[`GraphStage`s](stream-customize.md) and graph
-junctions like `Merge` or `Broadcast`. For the full list of built-in operators see the @ref:[operator index](operators/index.md)
+在继续之前，让我们定义一些基本术语，这些术语将在整个文档中使用：
 
 
-When we talk about *asynchronous, non-blocking backpressure*, we mean that the operators available in Akka
-Streams will not use blocking calls but asynchronous message passing to exchange messages between each other.
-This way they can slow down a fast producer without blocking its thread. This is a thread-pool friendly
-design, since entities that need to wait (a fast producer waiting on a slow consumer) will not block the thread but
-can hand it back for further use to an underlying thread-pool.
+流
+: 一个活跃的过程，涉及移动和转换数据。
 
-## Defining and running streams
+元素
+: 一个元素是流的处理单元。所有操作都改变和转换元素，从上游到下游。缓冲区大小通常表示为元素的数量，与元素的实际大小无关。
 
-Linear processing pipelines can be expressed in Akka Streams using the following core abstractions:
+背压
+: flow控制的一种方法，一种数据的消费者将其当前可用性通知生产者的方法，从而有效地减慢了上游生产者的速度以适应其消费速度。在Akka Streams上下文中，背压始终被理解为*非阻塞*和*异步的*。
+
+非阻塞
+: 意味着某个操作不会妨碍调用线程的进度，即使是需要很长时间完成请求的操作。
+
+图
+: 流处理拓扑的描述，定义了流运行时元素流经的路径。
+
+运算符
+: 构成图的所有构建块的通用名称。运算符的例子是`map()`，`filter()`，自定义的扩展 @ref[`GraphStage`s](stream-customize.md)和图交叉点如`Merge`或`Broadcast`。有关内置运算符的完整列表，请参见 @ref:[运算符索引](operators/index.md)
+
+当我们谈论*异步，非阻塞背压*时，我们的意思是Akka Streams中可用的运算符将不使用阻塞调用，而是使用异步消息传递在彼此之间交换消息。通过这种方式，它们可以降低快速生产者的速度，而不阻塞它的线程。这是一种线程池友好的设计，因为需要等待的实体(快速的生产者等待缓慢的消费者)不会阻塞线程，而是可以将它交给底层线程池以供将来使用。
+
+<a id="defining-and-running-streams"></a>
+## 定义和运行流
+
+可以使用以下核心抽象在Akka流中表示线性处理管道：
 
 Source
-: An operator with *exactly one output*, emitting data elements whenever downstream operators are
-ready to receive them.
+: 一个*恰好一个输出*的运算符，只要下游运算符准备好接收它们，就发出数据元素。
 
 Sink
-: An operator with *exactly one input*, requesting and accepting data elements, possibly slowing down the upstream
-producer of elements.
+: 一个*恰好一个输入*的运算符，请求和接受数据元素，可能会减慢元素的上游生产者的速度。
 
 Flow
-: An operator which has *exactly one input and output*, which connects its upstream and downstream by
-transforming the data elements flowing through it.
+: 一个*恰好一个输入和输出*的运算符，它通过转换流经它的数据元素来连接其上游和下游。
 
 RunnableGraph
-: A Flow that has both ends "attached" to a Source and Sink respectively, and is ready to be `run()`.
+: 一个Flow的两端分别"附加"到源和接收器，并准备`run()`。
 
+可以将一个`Flow`附加到一个`Source`产生一个复合源，也可以在`Sink`之前加上一个`Flow`来得到一个新的Sink。当一个流通过同时拥有一个源和一个接收器而正确地终止后，它将由`RunnableGraph`类型表示，这表明它已经准备好执行了。在同时具有源和接收器的流正确终止后，该流将由RunnableGraph类型表示，表明它已准备好被执行。
 
-It is possible to attach a `Flow` to a `Source` resulting in a composite source, and it is also possible to prepend
-a `Flow` to a `Sink` to get a new sink. After a stream is properly terminated by having both a source and a sink,
-it will be represented by the `RunnableGraph` type, indicating that it is ready to be executed.
-
-It is important to remember that even after constructing the `RunnableGraph` by connecting all the source, sink and
-different operators, no data will flow through it until it is materialized. Materialization is the process of
-allocating all resources needed to run the computation described by a Graph (in Akka Streams this will often involve
-starting up Actors). Thanks to Flows being a description of the processing pipeline they are *immutable,
-thread-safe, and freely shareable*, which means that it is for example safe to share and send them between actors, to have
-one actor prepare the work, and then have it be materialized at some completely different place in the code.
+重要的是要记住，即使通过连接所有的源、接收器和不同的运算符构造了`RunnableGraph`之后，也不会有数据流经它，直到它被物化。物化是分配运行图描述的计算所需的所有资源的过程(在Akka Streams中，这通常涉及启动Actor)。由于Flow是对处理管道的描述，因此它们是*不可变的，线程安全的和可自由共享的*，这意味着例如可以安全地在actors之间共享和发送它们，让一个actor准备工作，然后让它在代码中完全不同的地方物化。
 
 Scala
 :   @@snip [FlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/FlowDocSpec.scala) { #materialization-in-steps }
@@ -95,18 +70,9 @@ Java
 
 @@@ div { .group-scala }
 
-After running (materializing) the `RunnableGraph[T]` we get back the materialized value of type T. Every stream
-operator can produce a materialized value, and it is the responsibility of the user to combine them to a new type.
-In the above example, we used `toMat` to indicate that we want to transform the materialized value of the source and
-sink, and we used the convenience function `Keep.right` to say that we are only interested in the materialized value
-of the sink.
+运行(物化)`RunnableGraph[T]`后，我们将获得类型T的物化值。每个stream运算符都可以产生物化值，用户有责任将它们组合成一个新类型。在上面的示例中，我们使用`toMat`来表示我们想要转换的源和接收器的物化值，并且使用便利函数`Keep.right`来表示我们只对接收器的物化值感兴趣。
 
-In our example, the `FoldSink` materializes a value of type `Future` which will represent the result
-of the folding process over the stream.  In general, a stream can expose multiple materialized values,
-but it is quite common to be interested in only the value of the Source or the Sink in the stream. For this reason
-there is a convenience method called `runWith()` available for `Sink`, `Source` or `Flow` requiring, respectively,
-a supplied `Source` (in order to run a `Sink`), a `Sink` (in order to run a `Source`) or
-both a `Source` and a `Sink` (in order to run a `Flow`, since it has neither attached yet).
+在我们的示例中，`FoldSink`物化了一个`Future`类型的值，它表示流折叠过程的结果。通常，流可以暴露多个物化值，但是仅对流中的`Source`或`Sink`的值感兴趣是很常见的。由于这个原因，一个称为`runWith()`的便捷方法可用于`Sink`，`Source`或`Flow`的需求，分别供给`Source`(为了运行一个`Sink`)，`Sink`(为了运行一个`Source`)或两者`Source`和`Sink`(为了运行一个`Flow`，因为它两者都均未连上)。
 
 @@@
 
@@ -130,8 +96,7 @@ Scala
 Java
 :   @@snip [FlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/FlowDocTest.java) { #materialization-runWith }
 
-It is worth pointing out that since operators are *immutable*, connecting them returns a new operator,
-instead of modifying the existing instance, so while constructing long flows, remember to assign the new value to a variable or run it:
+值得指出的是，由于运算符是*不可变的*，连接它们将返回一个新的运算符，而不是修改现有实例，因此在构造长flows时，请记住将新值分配给变量或运行它：
 
 Scala
 :   @@snip [FlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/FlowDocSpec.scala) { #source-immutable }
@@ -141,21 +106,13 @@ Java
 
 @@@ note
 
-By default, Akka Streams elements support **exactly one** downstream operator.
-Making fan-out (supporting multiple downstream operators) an explicit opt-in feature allows default stream elements to
-be less complex and more efficient. Also, it allows for greater flexibility on *how exactly* to handle the multicast scenarios,
-by providing named fan-out elements such as broadcast (signals all down-stream elements) or balance (signals one of available down-stream elements).
+默认情况下，Akka Streams元素仅支持**恰好一个**下游运算符。通过将扇出(支持多个下游运算符)作为一个显式的扇入功能，可以使默认流元素更简单和更高效。此外，它还提供了更大的灵活性来处理多播场景，它通过提供命名的扇出元素，例如broadcast(向所有下游元素发出信号)，或balance(向其中一个可用的下游元件发出信号)
 
 @@@
 
-In the above example we used the `runWith` method, which both materializes the stream and returns the materialized value
-of the given sink or source.
+在上面的示例中，我们使用了`runWith`方法，它既物化了stream又返回了给定接收器或源的物化值。
 
-Since a stream can be materialized multiple times, the @scala[materialized value will also be calculated anew] @java[`MaterializedMap` returned is different] for each such
-materialization, usually leading to different values being returned each time.
-In the example below, we create two running materialized instances of the stream that we described in the `runnable`
-variable. Both materializations give us a different @scala[`Future`] @java[`CompletionStage`] from the map even though we used the same `sink`
-to refer to the future:
+由于可以多次物化一个stream，因此对于每个这样的实现，物化值也将重新计算，通常会导致每次返回不同的值。在下面的示例中，我们创建了在`runnable`变量中描述的stream的两个正在运行的物化实例。这两个物化从map给了我们一个不同的 @scala[`Future`] @java[`CompletionStage`]，尽管我们使用相同的`sink`来引用future:
 
 Scala
 :   @@snip [FlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/FlowDocSpec.scala) { #stream-reuse }
@@ -163,10 +120,9 @@ Scala
 Java
 :   @@snip [FlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/FlowDocTest.java) { #stream-reuse }
 
-### Defining sources, sinks and flows
+### 定义sources，sinks和flows
 
-The objects `Source` and `Sink` define various ways to create sources and sinks of elements. The following
-examples show some of the most useful constructs (refer to the API documentation for more details):
+对象`Source`和`Sink`定义了创建元素sources和sinks的不同方式。以下示例显示了一些最有用的构造(有关更多详细信息，请参阅API文档)：
 
 Scala
 :   @@snip [FlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/FlowDocSpec.scala) { #source-sink }
@@ -174,7 +130,7 @@ Scala
 Java
 :   @@snip [FlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/FlowDocTest.java) { #source-sink }
 
-There are various ways to wire up different parts of a stream, the following examples show some of the available options:
+连接一个流的不同部分有多种方法，以下示例显示了一些可用的选项：
 
 Scala
 :   @@snip [FlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/FlowDocSpec.scala) { #flow-connecting }
@@ -182,115 +138,80 @@ Scala
 Java
 :   @@snip [FlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/FlowDocTest.java) { #flow-connecting }
 
-### Illegal stream elements
+### 非法流元素
 
-In accordance to the Reactive Streams specification ([Rule 2.13](https://github.com/reactive-streams/reactive-streams-jvm#2.13))
-Akka Streams do not allow `null` to be passed through the stream as an element. In case you want to model the concept
-of absence of a value we recommend using @scala[`scala.Option` or `scala.util.Either`] @java[`java.util.Optional` which is available since Java 8].
+根据Reactive Streams规范([规则2.13](https://github.com/reactive-streams/reactive-streams-jvm#2.13))，Akka流不允许`null`作为一个元素通过流传递。如果您想对不存在值的概念建模，我们建议使用 @scala[`scala.Option`或`scala.util.Either`]。
 
-## Back-pressure explained
+<a id="back-pressure-explained"></a>
+## 背压说明
 
-Akka Streams implement an asynchronous non-blocking back-pressure protocol standardised by the [Reactive Streams](http://reactive-streams.org/)
-specification, which Akka is a founding member of.
+Akka流实现了由[Reactive Streams](http://reactive-streams.org/)规范标准化的一个异步无阻塞背压协议，Akka是该规范的创始成员。
 
-The user of the library does not have to write any explicit back-pressure handling code — it is built in
-and dealt with automatically by all of the provided Akka Streams operators. It is possible however to add
-explicit buffer operators with overflow strategies that can influence the behavior of the stream. This is especially important
-in complex processing graphs which may even contain loops (which *must* be treated with very special
-care, as explained in @ref:[Graph cycles, liveness and deadlocks](stream-graphs.md#graph-cycles)).
+库的用户不必编写任何显式的背压处理代码 - 它是内置的，并且由所有提供的Akka Streams运算符自动处理。
+但是，可以添加具有溢出策略的显式缓冲区运算符，它可以影响流的行为。
+这对于复杂的处理图尤其重要，因为它甚至可能包含循环(那些*必须*特别小心地处理，如 @ref:[图周期, 活跃性和死锁](stream-graphs.md#graph-cycles)中所述)。
 
-The back pressure protocol is defined in terms of the number of elements a downstream `Subscriber` is able to receive
-and buffer, referred to as `demand`.
-The source of data, referred to as `Publisher` in Reactive Streams terminology and implemented as `Source` in Akka
-Streams, guarantees that it will never emit more elements than the received total demand for any given `Subscriber`.
+背压协议是根据下游`Subscriber`能够接收和缓冲的元素数目定义的，参考`demand`。数据的源，在Reactive Streams术语中称为`Publisher`，在Akka流中实现为`Source`，保证它永远不会发出比任何给定`Subscriber`接收的总需求更多的元素。
 
 @@@ note
 
-The Reactive Streams specification defines its protocol in terms of `Publisher` and `Subscriber`.
-These types are **not** meant to be user facing API, instead they serve as the low-level building blocks for
-different Reactive Streams implementations.
+Reactive Streams规范根据`Publisher`和`Subscriber`定义它的协议。这些类型并**不**意味着是面向用户的API，而是作为不同Reactive Streams实现的低级构建块。
 
-Akka Streams implements these concepts as `Source`, `Flow` (referred to as `Processor` in Reactive Streams)
-and `Sink` without exposing the Reactive Streams interfaces directly.
-If you need to integrate with other Reactive Stream libraries, read @ref:[Integrating with Reactive Streams](stream-integrations.md#reactive-streams-integration).
+Akka Streams将这些概念实现为`Source`，`Flow`(在Reactive Streams中称为`Processor`)和`Sink`，没有直接公开Reactive Streams接口。如果您需要与其他Reactive Stream库集成，请阅读 @ref:[与Reactive Streams集成](stream-integrations.md#reactive-streams-integration)。
 
 @@@
 
-The mode in which Reactive Streams back-pressure works can be colloquially described as "dynamic push / pull mode",
-since it will switch between push and pull based back-pressure models depending on the downstream being able to cope
-with the upstream production rate or not.
+Reactive Streams背压的工作模式可以通俗地描述为"动态推/拉模式"，因为它将根据下游是否能够应付上游的生产速度，在推和拉的背压模式之间进行切换。
 
-To illustrate this further let us consider both problem situations and how the back-pressure protocol handles them:
+为了进一步说明这一点，让我们考虑两个问题情境，以及背压协议如何处理它们:
 
-### Slow Publisher, fast Subscriber
+### 发布者慢，订阅者快
 
-This is the happy case – we do not need to slow down the Publisher in this case. However signalling rates are
-rarely constant and could change at any point in time, suddenly ending up in a situation where the Subscriber is now
-slower than the Publisher. In order to safeguard from these situations, the back-pressure protocol must still be enabled
-during such situations, however we do not want to pay a high penalty for this safety net being enabled.
+这是很好的情况 – 在这种情况下，我们不需要放慢发布者的速度。
+然而，信号速度很少是恒定的，并且可能在任何时间点发生变化，最终会导致订阅方的速度比发布方慢。为了避免这些情况，在这种情况下仍然必须启用背压协议，但是我们不希望为启用这个安全网付出高昂的代价。
 
-The Reactive Streams protocol solves this by asynchronously signalling from the Subscriber to the Publisher
-@scala[`Request(n:Int)`] @java[`Request(int n)`] signals. The protocol guarantees that the Publisher will never signal *more* elements than the
-signalled demand. Since the Subscriber however is currently faster, it will be signalling these Request messages at a higher
-rate (and possibly also batching together the demand - requesting multiple elements in one Request signal). This means
-that the Publisher should not ever have to wait (be back-pressured) with publishing its incoming elements.
+Reactive Streams协议通过从订阅者发送异步信号 @scala[`Request(n:Int)`]@java[`Request(int n)`]到发布者来解决此问题。该协议保证了发布者永远不会发送比信号的需求更多的元素。
 
-As we can see, in this scenario we effectively operate in so called push-mode since the Publisher can continue producing
-elements as fast as it can, since the pending demand will be recovered just-in-time while it is emitting elements.
+但是，由于订阅者当前更快，它将以更高的频率发送这些请求消息(可能还会将需求批量处理 - 在一个请求信号中请求多个元素)。这意味着发布者永远不必等待(被背压)发布其传入的元素。
 
-### Fast Publisher, slow Subscriber
+如我们所见，在这种情况下，我们可以在所谓的推模式下有效地运作。因为发布者可以用它最快的速度继续生产元素，挂起的需求将在发出元素时及时恢复。
 
-This is the case when back-pressuring the `Publisher` is required, because the `Subscriber` is not able to cope with
-the rate at which its upstream would like to emit data elements.
+### 发布者快，订阅者慢
 
-Since the `Publisher` is not allowed to signal more elements than the pending demand signalled by the `Subscriber`,
-it will have to abide to this back-pressure by applying one of the below strategies:
+当需要对`Publisher`进行背压时就是这种情况，因为`Subscriber`不能应付其上游想要发射数据元素的速度。
 
- * not generate elements, if it is able to control their production rate,
- * try buffering the elements in a *bounded* manner until more demand is signalled,
- * drop elements until more demand is signalled,
- * tear down the stream if unable to apply any of the above strategies.
+由于`Publisher`不允许发出比`Subscriber`挂起的需求更多的元素，因此它将不得不通过应用以下策略之一来承受这种背压：
 
-As we can see, this scenario effectively means that the `Subscriber` will *pull* the elements from the Publisher –
-this mode of operation is referred to as pull-based back-pressure.
+ * 不生成元素，如果能够控制它的生产速度
+ * 尝试以*有界的*方式缓冲元素，直到发出更多需求，
+ * 删除元素，直到发出更多需求，
+ * 请拆除该流，如果无法应用上述任何策略。
 
-## Stream Materialization
+正如我们所看到的，这个场景实际上意味着`Subscriber`将从发布者*拉*元素 - 这种操作方式被称为基于拉的背压。
 
-When constructing flows and graphs in Akka Streams think of them as preparing a blueprint, an execution plan.
-Stream materialization is the process of taking a stream description (`RunnableGraph`) and allocating all the necessary resources
-it needs in order to run. In the case of Akka Streams this often means starting up Actors which power the processing,
-but is not restricted to that—it could also mean opening files or socket connections etc.—depending on what the stream needs.
+<a id="stream-materialization"></a>
+## Stream物化(Materialization)
 
-Materialization is triggered at so called "terminal operations". Most notably this includes the various forms of the `run()`
-and `runWith()` methods defined on `Source` and `Flow` elements as well as a small number of special syntactic sugars for running with
-well-known sinks, such as @scala[`runForeach(el => ...)`]@java[`runForeach(el -> ...)`]
-(being an alias to @scala[`runWith(Sink.foreach(el => ...))`]@java[`runWith(Sink.foreach(el -> ...))`]).
+当在Akka流中构建流和图时，可以将它们看作是准备一个蓝图，一个执行计划。流物化是获取流描述(`RunnableGraph`)并分配它运行所需的所有必要资源的过程。对于Akka流，这通常意味着启动支持处理的Actor，但不仅限于此 — 还可能意味着打开文件或套接字连接等，具体取决于流的需求。
 
-Materialization is performed synchronously on the materializing thread by an `ActorSystem` global `Materializer`.
-The actual stream processing is handled by actors started up during the streams materialization,
-which will be running on the thread pools they have been configured to run on - which defaults to the dispatcher set in
-the `ActorSystem` config or provided as attributes on the stream that is getting materialized.
+物化在所谓的"终点操作"处触发。最显著的是，这包括在`Source`和`Flow`元素上定义的各种形式的`run()`和`runWith()`方法，以及少量特殊的语法糖，用于与众所周知的接收器一起运行，例如 @scala[`runForeach(el => ...)`]@java[`runForeach(el -> ...)`](是 @scala[`runWith(Sink.foreach(el => ...))`]@java[`runWith(Sink.foreach(el -> ...))`]的别名)。
+
+物化是由一个`ActorSystem`的全局`Materializer`在物化线程上同步执行的。实际的流处理由在流物化过程中启动的actor负责的，这些actor将在为它们运行而配置的线程池上运行 - 它默认设置为在`ActorSystem`配置中设置的dispatcher，或者作为将要物化的流的属性提供。
 
 @@@ note
 
-Reusing *instances* of linear computation operators (Source, Sink, Flow) inside composite Graphs is legal,
-yet will materialize that operator multiple times.
+在组合图内重用线性计算运算符(Source, Sink, Flow)的*实例*是合法的，但会多次物化该运算符。
 
 @@@
 
-### Operator Fusion
+### 运算符融合
 
-By default, Akka Streams will fuse the stream operators. This means that the processing steps of a flow or
-stream can be executed within the same Actor and has two consequences:
+默认情况下，Akka流将融合流运算符。这意味着一个flow或流的处理步骤可以在同一Actor中执行，并且有两个结果：
 
- * passing elements from one operator to the next is a lot faster between fused
-operators due to avoiding the asynchronous messaging overhead
- * fused stream operators do not run in parallel to each other, meaning that
-only up to one CPU core is used for each fused part
+ * 由于避免了异步消息传递开销，在融合运算符之间将元素从一个运算符传递到下一个运算符要快得多
+ * 融合流运算符不能彼此并行运行，这意味着每个融合部分最多只能使用一个CPU内核
 
-To allow for parallel processing you will have to insert asynchronous boundaries manually into your flows and
-operators by way of adding `Attributes.asyncBoundary` using the method `async` on `Source`, `Sink` and `Flow`
-to operators that shall communicate with the downstream of the graph in an asynchronous fashion.
+为了支持并行处理，您必须手动将异步边界插入到flows和运算符中，通过添加`Attributes.asyncBoundary`的方式，使用`Source`,`Sink`和`Flow`上的`async`方法到运算符，它将以异步方式与图的下游通信。
 
 Scala
 :   @@snip [FlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/FlowDocSpec.scala) { #flow-async }
@@ -298,36 +219,22 @@ Scala
 Java
 :   @@snip [FlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/FlowDocTest.java) { #flow-async }
 
-In this example we create two regions within the flow which will be executed in one Actor each—assuming that adding
-and multiplying integers is an extremely costly operation this will lead to a performance gain since two CPUs can
-work on the tasks in parallel. It is important to note that asynchronous boundaries are not singular places within a
-flow where elements are passed asynchronously (as in other streaming libraries), but instead attributes always work
-by adding information to the flow graph that has been constructed up to this point:
+在此示例中，我们在流中创建两个区域，每个区域将在一个Actor中执行 - 假设整数的相加和相乘是一个非常昂贵的操作，这将导致性能提升，因为两个CPU可以并行处理任务。重要的是要注意，异步边界不是一个flow - 元素在其中异步传递 - 中的单个位置(就像在其他流式库中一样)，相反，属性总是通过向flow图添加信息来起作用，而该信息已被构建到这个点
 
 ![asyncBoundary.png](../images/asyncBoundary.png)
 
-This means that everything that is inside the red bubble will be executed by one actor and everything outside of it
-by another. This scheme can be applied successively, always having one such boundary enclose the previous ones plus all
-operators that have been added since then.
+这意味着红色气泡内的所有内容都将由一个actor执行，它外面的所有内容将由另一个actor执行。这个方案可以连续应用，始终有一个这样的边界，包括前面的一个边界，再加上之后添加的所有运算符。
 
 @@@ warning
 
-Without fusing (i.e. up to version 2.0-M2) each stream operator had an implicit input buffer
-that holds a few elements for efficiency reasons. If your flow graphs contain cycles then these buffers
-may have been crucial in order to avoid deadlocks. With fusing these implicit buffers are no longer
-there, data elements are passed without buffering between fused operators. In those cases where buffering
-is needed in order to allow the stream to run at all, you will have to insert explicit buffers with the
-`.buffer()` operator—typically a buffer of size 2 is enough to allow a feedback loop to function.
+在不融合的情况下(即版本2.0-M2之前)，每个流运算符都有一个隐式输入缓冲区，出于效率考虑，该缓冲区保存一些元素。如果flow图包含循环，那么为了避免死锁，这些缓冲区可能是至关重要的。通过融合，这些隐式缓冲区不再存在，数据元素在融合的操作符之间传递时不需要缓冲。在那些需要缓冲以使流能够完全运行的情况下，您必须使用`.buffer()` 操作符插入显式缓冲区 - 通常情况下，一个大小为2的缓冲区就足以允许一个反馈循环发挥作用。
 
 @@@
 
 <a id="flow-combine-mat"></a>
-### Combining materialized values
+### 组合物化值
 
-Since every operator in Akka Streams can provide a materialized value after being materialized, it is necessary
-to somehow express how these values should be composed to a final value when we plug these operators together. For this,
-many operator methods have variants that take an additional argument, a function, that will be used to combine the
-resulting values. Some examples of using these combiners are illustrated in the example below.
+由于Akka流中的每个运算符在被物化之后都可以提供一个物化的值，因此当我们将这些运算符连接在一起时，有必要以某种方式表达这些值应如何组合成一个最终值。为此，许多运算符方法都有一些变体，它们接受一个额外的参数，即一个函数，该函数将用于合并结果值。下面的示例说明了使用这些组合器的一些示例。
 
 Scala
 :   @@snip [FlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/FlowDocSpec.scala) { #flow-mat-combine }
@@ -337,17 +244,15 @@ Java
 
 @@@ note
 
-In Graphs it is possible to access the materialized value from inside the stream. For details see @ref:[Accessing the materialized value inside the Graph](stream-graphs.md#graph-matvalue).
+在图中，可以从流内部访问物化的值。有关详细信息，请参见 @ref:[访问图内的物化值](stream-graphs.md#graph-matvalue)。
 
 @@@
 
-### Source pre-materialization
+### 源预物化
 
-There are situations in which you require a `Source` materialized value **before** the `Source` gets hooked up to the rest of the graph.
-This is particularly useful in the case of "materialized value powered" `Source`s, like `Source.queue`, `Source.actorRef` or `Source.maybe`.
+有些情况下，你在`Source`连接到图的其余部分**之前**就需要一个`Source`物化值。这在"物化值驱动"`Source`的情况下是特别有用，像`Source.queue`，`Source.actorRef`或`Source.maybe`。
 
-By using the `preMaterialize` operator on a `Source`, you can obtain its materialized value and another `Source`. The latter can be used
-to consume messages from the original `Source`. Note that this can be materialized multiple times.
+通过对一个`Source`使用`preMaterialize`运算符，您可以获得它的物化值和另一个`Source`。后者可用于消费来自原始`Source`的消息。请注意，这可以多次物化。
 
 Scala
 :   @@snip [FlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/FlowDocSpec.scala) { #source-prematerialization }
@@ -355,47 +260,34 @@ Scala
 Java
 :   @@snip [FlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/FlowDocTest.java) { #source-prematerialization }
 
-## Stream ordering
+## 流排序
 
-In Akka Streams almost all computation operators *preserve input order* of elements. This means that if inputs `{IA1,IA2,...,IAn}`
-"cause" outputs `{OA1,OA2,...,OAk}` and inputs `{IB1,IB2,...,IBm}` "cause" outputs `{OB1,OB2,...,OBl}` and all of
-`IAi` happened before all `IBi` then `OAi` happens before `OBi`.
+在Akka流中，几乎所有计算运算符都*保持元素的输入顺序*。这意味着，如果输入 `{IA1,IA2,...,IAn}`"导致"输出`{OA1,OA2,...,OAk}`，以及输入`{IB1,IB2,...,IBm}`"导致"输出`{IB1,IB2,...,IBm}`，且所有`IAi`发生在所有`IBi`之前，然后`OAi`发生在`OBi`之前。
 
-This property is even upheld by async operations such as `mapAsync`, however an unordered version exists
-called `mapAsyncUnordered` which does not preserve this ordering.
+该属性甚至可以通过异步操作来维护，例如`mapAsync`，但是存在一个不排序的版本`mapAsyncUnordered`，该版本不会保留此排序。
 
-However, in the case of Junctions which handle multiple input streams (e.g. `Merge`) the output order is,
-in general, *not defined* for elements arriving on different input ports. That is a merge-like operation may emit `Ai`
-before emitting `Bi`, and it is up to its internal logic to decide the order of emitted elements. Specialized elements
-such as `Zip` however *do guarantee* their outputs order, as each output element depends on all upstream elements having
-been signalled already – thus the ordering in the case of zipping is defined by this property.
+然而，在交叉点的情况下，处理多个输入流(例如`Merge`)，对于从不同输入端口到达的元素，输出顺序通常是*未定义*。这是一个类似于合并的操作，在发出`Bi`之前可能会发出`Ai`，并由它的内部逻辑决定发射元素的顺序。然而，像`Zip`这样的特殊元素*保证*了它们的输出顺序，因为每个输出元素依赖于所有已经被标记的上游元素 - 因此，压缩时的排序是由这个属性定义的。
 
-If you find yourself in need of fine grained control over order of emitted elements in fan-in
-scenarios consider using `MergePreferred`, `MergePrioritized` or @ref[`GraphStage`](stream-customize.md) – which gives you full control over how the
-merge is performed.
+如果您发现自己需要对扇入场景中发出元素的顺序进行细粒度控制，请考虑使用 `MergePreferred`，`MergePrioritized`或 @ref[`GraphStage`](stream-customize.md) - 这将使您能够完全控制如何执行合并。
 
-## Actor Materializer Lifecycle
+<a id="actor-materializer-lifecycle"></a>
+## Actor物化器生命周期
 
-The `Materializer` is a component that is responsible for turning the stream blueprint into a running stream
-and emitting the "materialized value". An `ActorSystem` wide `Materializer` is provided by the Akka `Extension` 
-`SystemMaterializer` by @scala[having an implicit `ActorSystem` in scope]@java[passing the `ActorSystem` to the 
-various `run` methods] this way there is no need to worry about the `Materializer` unless there are special requirements.
+`Materializer`是一个组件，它负责将流蓝图转换为一个运行的流并发出"物化值"。
+Akka Extension SystemMaterializer提供了一个ActorSystem范围内的Materializer，它通过来实现，这样就不需要担心Materializer，除非有特殊的要求。
 
-The use case that may require a custom instance of `Materializer` is when all streams materialized in an actor should be tied to the Actor lifecycle and stop if the Actor stops or crashes 
+一个`ActorSystem`视野内的`Materializer`是由Akka `Extension` `SystemMaterializer`提供的，通过作用域内一个隐式的`ActorSystem`，这样就不需要担心`Materializer`，除非有特殊要求。
 
-An important aspect of working with streams and actors is understanding a `Materializer`'s life-cycle.
-The materializer is bound to the lifecycle of the `ActorRefFactory` it is created from, which in practice will
-be either an `ActorSystem` or `ActorContext` (when the materializer is created within an `Actor`). 
+可能需要一个自定义`Materializer`实例的用例是，当所有的流都在一个actor上物化的时候，都应该与actor生命周期绑定，并且在actor停止或崩溃时停止。
 
-Tying it to the `ActorSystem` should be replaced with using the system materializer from Akka 2.6 and on.
+使流和actor一起工作的一个重要方面是理解`Materializer`的生命周期。物化器被绑定到创建它的`ActorRefFactory`的生命周期，在实践中它可以是一个`ActorSystem`或`ActorContext`(当物化器在一个`Actor`内部创建时)。
 
-When run by the system materializer the streams will run until the `ActorSystem` is shut down. When the materializer is shut down
-*before* the streams have run to completion, they will be terminated abruptly. This is a little different than the
-usual way to terminate streams, which is by cancelling/completing them. The stream lifecycles are bound to the materializer
-like this to prevent leaks, and in normal operations you should not rely on the mechanism and rather use `KillSwitch` or
-normal completion signals to manage the lifecycles of your streams.  
+将它与`ActorSystem`搭配应该替换为使用Akka 2.6等版本中的系统物化器。
 
-If we look at the following example, where we create the `Materializer` within an `Actor`:
+当由系统物化器运行时，流将一直运行，直到`ActorSystem`关闭。在流运行完成*之前*关闭物化器时，流将硬生生地终止。
+这与通常终止流的方法略有不同，那是通过cancelling/completing它们。像这样将流生命周期绑定到物化器是为了防止泄漏。在正常操作中，您不应依赖该机制，而应使用`KillSwitch`或正常完成信号来管理流的生命周期。
+
+如果我们看一下下面的例子，那里我们在一个`Actor`内部创建`Materializer`：
 
 Scala
 :   @@snip [FlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/FlowDocSpec.scala) { #materializer-from-actor-context }
@@ -403,14 +295,12 @@ Scala
 Java
 :   @@snip [FlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/FlowDocTest.java) { #materializer-from-actor-context }
 
-In the above example we used the `ActorContext` to create the materializer. This binds its lifecycle to the surrounding `Actor`. In other words, while the stream we started there would under normal circumstances run forever, if we stop the Actor it would terminate the stream as well. We have *bound the stream's lifecycle to the surrounding actor's lifecycle*.
-This is a very useful technique if the stream is closely related to the actor, e.g. when the actor represents a user or other entity, that we continuously query using the created stream -- and it would not make sense to keep the stream alive when the actor has terminated already. The streams termination will be signalled by an "Abrupt termination exception" signaled by the stream.
+在上面的示例中，我们使用`ActorContext`来创建物化器。这将其生命周期绑定到周围环境中的`Actor`。换句话说，在正常情况下，我们从那里开始的流会一直运行，如果我们停止Actor，它也将终止流。我们已经将*流的生命周期绑定到周围的actor的生命周期*。如果流与actor紧密相关，这是一种非常有用的技术，例如，当actor代表一个用户或其他实体时，它使用创建的流不断地进行查询 – 而当actor已经终止时，让流继续存在是没有意义的。流终止将通过流发出的"突然终止异常"来指示。
 
-You may also cause a `Materializer` to shut down by explicitly calling `shutdown()` on it, resulting in abruptly terminating all of the streams it has been running then. 
+您还可以通过显式调用一个`Materializer`的`shutdown()`方法来使其关闭，从而突然终止其当时正在运行的所有流。
 
-Sometimes, however, you may want to explicitly create a stream that will out-last the actor's life.
-For example, you are using an Akka stream to push some large stream of data to an external service.
-You may want to eagerly stop the Actor since it has performed all of its duties already:
+然而，有时您可能想要显式地创建一个流，它会比actor的生命更长久。例如，您正在使用Akka流将一些大数据流推送到外部服务。您可能想急切地停止Actor，因为它已经履行了所有职责：
+
 
 Scala
 :   @@snip [FlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/FlowDocSpec.scala) { #materializer-from-system-in-actor }
@@ -418,13 +308,10 @@ Scala
 Java
 :   @@snip [FlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/FlowDocTest.java) { #materializer-from-system-in-actor }
 
-In the above example we pass in a materializer to the Actor, which results in binding its lifecycle to the entire `ActorSystem` rather than the single enclosing actor. This can be useful if you want to share a materializer or group streams into specific materializers,
-for example because of the materializer's settings etc.
+在上面的示例中，我们将物化器传递给Actor，这导致其生命周期绑定到整个`ActorSystem`而不是单个封闭的actor。这将很有用，如果您要共享一个物化器或将流分组到特定的物化器中，例如，由于物化器的设置等。
 
 @@@ warning
 
-Do not create new actor materializers inside actors by passing the `context.system` to it. 
-This will cause a new `Materializer` to be created and potentially leaked (unless you shut it down explicitly) for each such actor.
-It is instead recommended to either pass-in the Materializer or create one using the actor's `context`.
+不要通过传递`context.system`在actor中创建新的actor物化器。这将导致为每个这样的actor创建一个新的`Materializer`，并可能会泄露(除非你明确地关闭它)。相反，建议您传入物化器或使用actor的`context`创建一个。
 
 @@@

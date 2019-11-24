@@ -1,76 +1,37 @@
 ---
 project.description: What is an Actor and sending messages between independent units of computation in Akka.
 ---
-# What is an Actor?
+# 什么是Actor?
 
-The previous section about @ref:[Actor Systems](actor-systems.md) explained how actors form
-hierarchies and are the smallest unit when building an application. This
-section looks at one such actor in isolation, explaining the concepts you
-encounter while implementing it. For a more in depth reference with all the
-details please refer to @ref:[Introduction to Actors](../typed/actors.md).
+关于 @ref:[Actor Systems](actor-systems.md) 的前一节说明了actor如何形成层次结构，并且是构建应用程序时最小的单元。本节单独讨论这样一个actor，解释您在实现它时遇到的概念。想要更深入地了解所有细节，请参考 @ref:[Actor介绍](../typed/actors.md)。
 
-The [Actor Model](http://en.wikipedia.org/wiki/Actor_model) as defined by
-Hewitt, Bishop and Steiger in 1973 is a computational model that expresses
-exactly what it means for computation to be distributed. The processing
-units—Actors—can only communicate by exchanging messages and upon reception of a
-message an Actor can do the following three fundamental actions:
+[Actor Model](http://en.wikipedia.org/wiki/Actor_model) 是Hewitt，Bishop和Steiger在1973年定义的，是一个计算模型，它准确地表达了分布式计算的含义。处理单元—Actor—只能通过交换消息进行通信，而在接收到消息之后，Actor可以执行以下三个基本操作：
 
-  1. send a finite number of messages to Actors it knows
-  2. create a finite number of new Actors
-  3. designate the behavior to be applied to the next message
+  1. 向它知道的Actor发送有限数量的消息
+  2. 创建有限数量的新Actor
+  3. 指定要应用于下一条消息的行为
 
-An actor is a container for @ref:[State](#state), @ref:[Behavior](#behavior), a @ref:[Mailbox](#mailbox), @ref:[Child Actors](#child-actors)
-and a @ref:[Supervisor Strategy](#supervisor-strategy). All of this is encapsulated behind an @ref:[Actor Reference](#actor-reference).
-One noteworthy aspect is that actors have an explicit lifecycle,
-they are not automatically destroyed when no longer referenced; after having
-created one, it is your responsibility to make sure that it will eventually be
-terminated as well—which also gives you control over how resources are released
-@ref:[When an Actor Terminates](#when-an-actor-terminates).
+actor是 @ref:[状态](#state)，@ref:[行为](#behavior)，@ref:[邮箱](#mailbox)，@ref:[子Actor](#child-actors)和 @ref:[监督策略](#supervisor-strategy) 的容器。所有这些都封装在一个 @ref:[Actor引用](#actor-reference) 背后。一个值得注意的方面是actor具有明确的生命周期，当不再引用它们时，它们不会自动销毁。创建完一个后，您有责任确保它最终也将终止，这也使您可以控制 @ref:[当一个Actor终止时](#when-an-actor-terminates)时如何释放资源。
 
-## Actor Reference
+<a id="actor-reference"></a>
+## Actor引用
 
-As detailed below, an actor object needs to be shielded from the outside in
-order to benefit from the actor model. Therefore, actors are represented to the
-outside using actor references, which are objects that can be passed around
-freely and without restriction. This split into inner and outer object enables
-transparency for all the desired operations: restarting an actor without
-needing to update references elsewhere, placing the actual actor object on
-remote hosts, sending messages to actors independent of where they are running.
-But the most important aspect is that it is not possible to look inside an
-actor and get hold of its state from the outside, unless the actor unwisely
-publishes this information itself.
+如下所述，为了从actor模型中受益，需要从外部屏蔽actor对象。因此，使用actor引用将actor呈现给外部，actor引用是可以自由传递且不受限制的对象。这种分为内部和外部对象的功能使所有所需操作的透明性得以实现：重新启动actor，无需在其他地方更新引用；将实际的actor对象放置在远程主机上；向运行在完全不同的位置的actor发送消息。但最重要的方面是，不可能从查看actor的内部并从外部获取其状态，除非参与者不明智地发布了自己的信息。
 
-Actor references are parameterized and only messages that are of the specified
-type can be sent to them.
+Actor引用是参数化的，只有特定类型的消息才能发送给它们。
 
-## State
+<a id="state"></a>
+## 状态
 
-Actor objects will typically contain some variables which reflect possible
-states the actor may be in. This can be an explicit state machine,
-or it could be a counter, set of listeners, pending requests, etc.
-These data are what make an actor valuable, and they
-must be protected from corruption by other actors. The good news is that Akka
-actors conceptually each have their own light-weight thread, which is
-completely shielded from the rest of the system. This means that instead of
-having to synchronize access using locks you can write your actor code
-without worrying about concurrency at all.
+Actor对象通常将包含一些变量，这些变量反映Actor可能处于的状态。这可以是显式状态机，或者它也可以是计数器，侦听器集合，未决的请求等。这些数据是使一个演员有价值的东西，必须保护它们免受其他actor的腐蚀。好消息是，Akka actor从概念上讲都有各自的轻量级线程，该线程与系统的其余部分完全隔离。这意味着不必使用锁来同步访问，您可以编写自己的actor代码，而不必担心并发性。
 
-Behind the scenes Akka will run sets of actors on sets of real threads, where
-typically many actors share one thread, and subsequent invocations of one actor
-may end up being processed on different threads. Akka ensures that this
-implementation detail does not affect the single-threadedness of handling the
-actor’s state.
+在后台，Akka将在一组实际线程上运行一组actor，其中通常有许多actor共享一个线程，而对一个actor的后续调用最终可能会在不同的线程上进行处理。Akka确保此实现细节不会影响处理actor状态的单线程。
 
-Because the internal state is vital to an actor’s operations, having
-inconsistent state is fatal. Thus, when the actor fails and is restarted by its
-supervisor, the state will be created from scratch, like upon first creating
-the actor. This is to enable the ability of self-healing of the system.
+因为内部状态对actor的操作至关重要，所以不一致的状态是致命的。因此，当actor失败并由其上级重新启动时，状态将从零开始创建，就像第一次创建actor时一样。这是为了使系统能够自我修复。
 
-Optionally, an actor's state can be automatically recovered to the state
-before a restart by persisting received messages and replaying them after
-restart (see @ref:[Event Sourcing](../typed/persistence.md)).
+另外，可以通过持久化接收到的消息，将参与者的状态自动恢复到重启之前的状态，且重启后重播(查看 @ref:[Event Sourcing](../typed/persistence.md))。
 
-## Behavior
+## 行为
 
 Every time a message is processed, it is matched against the current behavior
 of the actor. Behavior means a function which defines the actions to be taken

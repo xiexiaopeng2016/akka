@@ -1,8 +1,9 @@
-# Streams Quickstart Guide
+<a id="stream-quickstart"></a>
+# Streams快速入门指南
 
-## Dependency
+## 依赖
 
-To use Akka Streams, add the module to your project:
+要使用Akka流，请将模块添加到您的项目中：
 
 @@dependency[sbt,Maven,Gradle] {
   group="com.typesafe.akka"
@@ -12,14 +13,13 @@ To use Akka Streams, add the module to your project:
 
 @@@ note
 
-Both the Java and Scala DSLs of Akka Streams are bundled in the same JAR. For a smooth development experience, when using an IDE such as Eclipse or IntelliJ, you can disable the auto-importer from suggesting `javadsl` imports when working in Scala,
-or viceversa. See @ref:[IDE Tips](../additional/ide.md). 
+Akka流的Java和Scala DSL都捆绑在同一JAR中。为了获得流畅的开发体验，在使用诸如Eclipse或IntelliJ IDE时，可以在使用Scala时禁止自动导入器建议的`javadsl`导入，反之亦然。请参阅 @ref:[IDE技巧](../additional/ide.md)。
+
 @@@
 
-## First steps
+## 第一步
 
-A stream usually begins at a source, so this is also how we start an Akka
-Stream. Before we create one, we import the full complement of streaming tools:
+流通常从一个源开始，因此这也是我们启动Akka流的方式。在创建一个流之前，我们先导入完整的流工具：
 
 Scala
 :   @@snip [QuickStartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/QuickStartDocSpec.scala) { #stream-imports }
@@ -27,7 +27,7 @@ Scala
 Java
 :   @@snip [QuickStartDocTest.java](/akka-docs/src/test/java/jdocs/stream/QuickStartDocTest.java) { #stream-imports }
 
-If you want to execute the code samples while you read through the quick start guide, you will also need the following imports:
+如果您想在阅读快速入门指南的同时执行代码示例，则还需要进行以下导入：
 
 Scala
 :   @@snip [QuickStartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/QuickStartDocSpec.scala) { #other-imports }
@@ -35,8 +35,7 @@ Scala
 Java
 :   @@snip [QuickStartDocTest.java](/akka-docs/src/test/java/jdocs/stream/QuickStartDocTest.java) { #other-imports }
 
-And @scala[an object]@java[a class] to start an Akka `ActorSystem` and hold your code @scala[. Making the `ActorSystem`
-implicit makes it available to the streams without manually passing it when running them]:
+还有 @scala[一个对象]@java[一个类]来启动Akka `ActorSystem`并保存您的代码。设置`ActorSystem`为隐式使其可用于流，而无需在运行它们时手动传递它们：
 
 Scala
 :   @@snip [QuickStartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/QuickStartDocSpec.scala) { #main-app }
@@ -44,7 +43,7 @@ Scala
 Java
 :   @@snip [Main.java](/akka-docs/src/test/java/jdocs/stream/Main.java) { #main-app }
 
-Now we will start with a rather simple source, emitting the integers 1 to 100:
+现在，我们将从一个非常简单的源开始，发出1到100的整数：
 
 Scala
 :   @@snip [QuickStartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/QuickStartDocSpec.scala) { #create-source }
@@ -52,17 +51,9 @@ Scala
 Java
 :   @@snip [QuickStartDocTest.java](/akka-docs/src/test/java/jdocs/stream/QuickStartDocTest.java) { #create-source }
 
-The `Source` type is parameterized with two types: the first one is the
-type of element that this source emits and the second one, the "materialized value", allows
-running the source to produce some auxiliary value (e.g. a network source may
-provide information about the bound port or the peer’s address). Where no
-auxiliary information is produced, the type `akka.NotUsed` is used. A
-simple range of integers falls into this category - running our stream produces
-a `NotUsed`.
+用两个类型对`Source`类型进行参数化：第一个是该源发出的元素的类型，第二个是"实体化值"，允许运行该源以产生一些辅助值(例如，网络源可以提供有关绑定的端口或对等方的地址的信息)。如果没有产生辅助信息，则使用`akka.NotUsed`类型。一个简单的整数范围属于此类别 - 运行我们的流会生成一个`NotUsed`。
 
-Having created this source means that we have a description of how to emit the
-first 100 natural numbers, but this source is not yet active. In order to get
-those numbers out we have to run it:
+创建此源意味着我们已经对如何发出前100个自然数进行了描述，但是该源尚未激活。为了获得这些数字，我们必须运行它：
 
 Scala
 :   @@snip [QuickStartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/QuickStartDocSpec.scala) { #run-source }
@@ -70,15 +61,9 @@ Scala
 Java
 :   @@snip [QuickStartDocTest.java](/akka-docs/src/test/java/jdocs/stream/QuickStartDocTest.java) { #run-source }
 
-This line will complement the source with a consumer function—in this example
-we print out the numbers to the console—and pass this little stream
-setup to an Actor that runs it. This activation is signaled by having “run” be
-part of the method name; there are other methods that run Akka Streams, and
-they all follow this pattern.
+这行代码将使用一个消费者函数对源进行补充 - 在本示例中我们将数字输出到控制台 - 并传递这个微小的流，设置到一个运行它的Actor。通过将"run"作为方法名称的一部分来表示激活。还有其他运行Akka流的方法，它们都遵循这种模式。
 
-When running this @scala[source in a `scala.App`]@java[program] you might notice it does not
-terminate, because the `ActorSystem` is never terminated. Luckily
-`runForeach` returns a @scala[`Future[Done]`]@java[`CompletionStage<Done>`] which resolves when the stream finishes:
+在`scala.App`中运行此源时，您可能会注意到它不会终止，因为`ActorSystem`永远不会终止。幸运的是，`runForeach`返回一个`Future[Done]`，其在流结束时解决：
 
 Scala
 :   @@snip [QuickStartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/QuickStartDocSpec.scala) { #run-source-and-terminate }
@@ -86,10 +71,7 @@ Scala
 Java
 :   @@snip [QuickStartDocTest.java](/akka-docs/src/test/java/jdocs/stream/QuickStartDocTest.java) { #run-source-and-terminate }
 
-The nice thing about Akka Streams is that the `Source` is a
-description of what you want to run, and like an architect’s blueprint it can
-be reused, incorporated into a larger design. We may choose to transform the
-source of integers and write it to a file instead:
+关于Akka流的好事是，`Source`是对您要运行的内容的描述，并且像建筑师的蓝图一样，可以重复使用，并整合到更大的设计中。我们可以选择转换整数的源并将其写入文件：
 
 Scala
 :   @@snip [QuickStartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/QuickStartDocSpec.scala) { #transform-source }
@@ -97,40 +79,24 @@ Scala
 Java
 :   @@snip [QuickStartDocTest.java](/akka-docs/src/test/java/jdocs/stream/QuickStartDocTest.java) { #transform-source }
 
-First we use the `scan` operator to run a computation over the whole
-stream: starting with the number 1 (@scala[`BigInt(1)`]@java[`BigInteger.ONE`]) we multiply by each of
-the incoming numbers, one after the other; the scan operation emits the initial
-value and then every calculation result. This yields the series of factorial
-numbers which we stash away as a `Source` for later reuse—it is
-important to keep in mind that nothing is actually computed yet, this is a
-description of what we want to have computed once we run the stream. Then we
-convert the resulting series of numbers into a stream of `ByteString`
-objects describing lines in a text file. This stream is then run by attaching a
-file as the receiver of the data. In the terminology of Akka Streams this is
-called a `Sink`. `IOResult` is a type that IO operations return in
-Akka Streams in order to tell you how many bytes or elements were consumed and
-whether the stream terminated normally or exceptionally.
+首先，我们使用`scan`操作符对整个流进行计算：从数字1( @scala[`BigInt(1)`]@java[`BigInteger.ONE`])开始，我们将每个传入的数字相乘，一个接一个。scan操作将发出初始值，然后发出每个计算结果。这产生了一系列阶乘数，我们将其作为一个 `Source` 存储起来以备以后重用 - 要注意的是，实际上还没有计算任何东西，这是对运行流后要计算的内容的描述，这一点很重要。然后，我们将得到的一系列数字转换为`ByteString`对象流，这些对象描述文本文件中的行。然后，通过附加一个文件作为数据的接收者来运行这个流。在Akka流的术语中，这称为`Sink`。
+`IOResult`是一种IO操作在Akka流中返回的类型，用于告诉您消费了多少字节或元素，以及流是正常终止还是异常终止。
+BigInt(1)SourceByteStringSinkIOResult IO操作在Akka流中返回的一种类型，以告诉您消耗了多少字节或元素以及流是正常终止还是异常终止。
 
-### Browser-embedded example
+### 浏览器嵌入式示例
 
-FIXME: fiddle won't work until Akka 2.6 is released and fiddle updated with that [#27510](https://github.com/akka/akka/issues/27510)
+FIXME：fiddle要等到Akka 2.6发布并用[#27510](https://github.com/akka/akka/issues/27510)更新fiddle后才能工作
  
 <a name="here-is-another-example-that-you-can-edit-and-run-in-the-browser-"></a>
-Here is another example that you can edit and run in the browser:
+这是您可以在浏览器中编辑和运行的另一个示例：
 
 @@fiddle [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #fiddle_code template=Akka layout=v75 minheight=400px }
 
 
-## Reusable Pieces
+## 可重用的部分(Pieces)
 
-One of the nice parts of Akka Streams—and something that other stream libraries
-do not offer—is that not only sources can be reused like blueprints, all other
-elements can be as well. We can take the file-writing `Sink`, prepend
-the processing steps necessary to get the `ByteString` elements from
-incoming strings and package that up as a reusable piece as well. Since the
-language for writing these streams always flows from left to right (just like
-plain English), we need a starting point that is like a source but with an
-“open” input. In Akka Streams this is called a `Flow`:
+Akka流的一些优点 - 其他流库没有提供的一些 - 是，不仅源可以像蓝图一样重用，所有其他元素也可以。
+我们可以使用文件写入`Sink`，预先完成从传入字符串获取`ByteString`元素所需的处理步骤，并将其打包为可重用的部分。由于编写这些流的语言始终从左到右流动(就像普通的英语一样)，因此我们需要一个像源一样的起点，但使用“开放”的输入。在Akka流中，这称为Flow:
 
 Scala
 :   @@snip [QuickStartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/QuickStartDocSpec.scala) { #transform-sink }
@@ -138,19 +104,9 @@ Scala
 Java
 :   @@snip [QuickStartDocTest.java](/akka-docs/src/test/java/jdocs/stream/QuickStartDocTest.java) { #transform-sink }
 
-Starting from a flow of strings we convert each to `ByteString` and then
-feed to the already known file-writing `Sink`. The resulting blueprint
-is a @scala[`Sink[String, Future[IOResult]]`]@java[`Sink<String, CompletionStage<IOResult>>`], which means that it
-accepts strings as its input and when materialized it will create auxiliary
-information of type @scala[`Future[IOResult]`]@java[`CompletionStage<IOResult>`] (when chaining operations on
-a `Source` or `Flow` the type of the auxiliary information—called
-the “materialized value”—is given by the leftmost starting point; since we want
-to retain what the `FileIO.toPath` sink has to offer, we need to say
-@scala[`Keep.right`]@java[`Keep.right()`]).
+从一个字符串流开始，我们将每个字符串转换为`ByteString`，然后供应给已知的文件写入`Sink`。产生的蓝图是一个 @scala[`Sink[String, Future[IOResult]]`]@java[`Sink<String, CompletionStage<IOResult>>`]，这意味着它接受字符串作为输入，并且在具体化时会创建 @scala[`Future[IOResult]`]@java[`CompletionStage<IOResult>`] 类型的辅助信息(当对一个`Source`或`Flow`的类型进行链接操作时，辅助信息的类型 - 称为"具体化值" - 由最左边的起点给出；由于我们想保留`FileIO.toPath`接收器提供的东西，我们需要说 @scala[`Keep.right`]@java[`Keep.right()`])。
 
-We can use the new and shiny `Sink` we just created by
-attaching it to our `factorials` source—after a small adaptation to turn the
-numbers into strings:
+我们可以使用我们刚刚创建的新而闪亮的`Sink`，把它附加到我们的`factorials`源上 - 经过一个小小的改编，把数字转换成字符串:
 
 Scala
 :   @@snip [QuickStartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/QuickStartDocSpec.scala) { #use-transformed-sink }
@@ -158,15 +114,9 @@ Scala
 Java
 :   @@snip [QuickStartDocTest.java](/akka-docs/src/test/java/jdocs/stream/QuickStartDocTest.java) { #use-transformed-sink }
 
-## Time-Based Processing
+## 基于时间的处理
 
-Before we start looking at a more involved example we explore the streaming
-nature of what Akka Streams can do. Starting from the `factorials` source
-we transform the stream by zipping it together with another stream,
-represented by a `Source` that emits the number 0 to 100: the first
-number emitted by the `factorials` source is the factorial of zero, the
-second is the factorial of one, and so on. We combine these two by forming
-strings like `"3! = 6"`.
+在开始看一个更复杂的示例之前，我们先探讨Akka流可以做到的流性质。从`factorials`源开始，我们通过将它与另一个流压缩在一起来转换流，代表一个`Source`，其发射数字0到100：`factorials`源发出的第一个数字是零的阶乘，第二个是一的阶乘，以此类推。我们通过形成像`"3! = 6"`这样的字符串来组合这两个。
 
 Scala
 :   @@snip [QuickStartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/QuickStartDocSpec.scala) { #add-streams }
@@ -174,41 +124,19 @@ Scala
 Java
 :   @@snip [QuickStartDocTest.java](/akka-docs/src/test/java/jdocs/stream/QuickStartDocTest.java) { #add-streams }
 
-All operations so far have been time-independent and could have been performed
-in the same fashion on strict collections of elements. The next line
-demonstrates that we are in fact dealing with streams that can flow at a
-certain speed: we use the `throttle` operator to slow down the stream to 1
-element per second.
+到目前为止，所有操作都与时间无关，并且可以在严格的元素集合上以相同的方式执行。下一行表明，我们实际上是在处理以一定速度流动的流：我们使用`throttle`操作符将流的速度降至每秒1个元素。
 
-If you run this program you will see one line printed per second. One aspect
-that is not immediately visible deserves mention, though: if you try and set
-the streams to produce a billion numbers each then you will notice that your
-JVM does not crash with an OutOfMemoryError, even though you will also notice
-that running the streams happens in the background, asynchronously (this is the
-reason for the auxiliary information to be provided as a @scala[`Future`]@java[`CompletionStage`], in the future). The
-secret that makes this work is that Akka Streams implicitly implement pervasive
-flow control, all operators respect back-pressure. This allows the throttle
-operator to signal to all its upstream sources of data that it can only
-accept elements at a certain rate—when the incoming rate is higher than one per
-second the throttle operator will assert *back-pressure* upstream.
+如果你运行此程序，您将看到每秒打印一行。不过，有一个方面是不能马上看到的，然而值得一提：如果您尝试将流设置为每个产生十亿个数字，那么您将注意到JVM不会因为一个OutOfMemoryError而崩溃，即使您也注意到运行流会发生在后台，异步地(这是将来将辅助信息提供为 @scala[`Future`]@java[`CompletionStage`]的原因)。进行这项工作的秘诀是Akka流隐式地实现了普遍的流控制，所有的操作符都遵守背压。这使节流操作符可以向所有上游数据源发出信号，表明它只能以一定的速率接受元素 - 当输入速率高于每秒一秒时，节流操作符将断言*back-pressure*上游。
 
-This is all there is to Akka Streams in a nutshell—glossing over the
-fact that there are dozens of sources and sinks and many more stream
-transformation operators to choose from, see also @ref:[operator index](operators/index.md).
+简而言之，这就是Akka流的全部 - 反映了一个事实，即有几十个源和接收器，还有更多的Stream转换运算符可供选择，另请参阅 @ref:[运算符索引](operators/index.md)。
 
-# Reactive Tweets
+# 反应式Tweets
 
-A typical use case for stream processing is consuming a live stream of data that we want to extract or aggregate some
-other data from. In this example we'll consider consuming a stream of tweets and extracting information concerning Akka from them.
+流处理的典型用例是消费实时数据流，我们要从中提取或聚合其他数据。在这个示例中，我们将考虑使用一个tweet流，并从中提取有关Akka的信息。
 
-We will also consider the problem inherent to all non-blocking streaming
-solutions: *"What if the subscriber is too slow to consume the live stream of
-data?"*. Traditionally the solution is often to buffer the elements, but this
-can—and usually will—cause eventual buffer overflows and instability of such
-systems. Instead Akka Streams depend on internal backpressure signals that
-allow to control what should happen in such scenarios.
+我们还将考虑所有非阻塞流解决方案固有的问题：*"如果订阅者太慢而无法使用实时数据流怎么办?"*。传统的解决方案通常是对元素进行缓冲，但这可能(通常也会)导致最终的缓冲区溢出和此类系统的不稳定性。相反，Akka流依靠内部背压信号来控制在这种情况下应该发生什么。
 
-Here's the data model we'll be working with throughout the quickstart examples:
+在快速入门示例中，我们将使用以下数据模型：
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #model }
@@ -218,18 +146,15 @@ Java
 
 @@@ note
 
-If you would like to get an overview of the used vocabulary first instead of diving head-first
-into an actual example you can have a look at the @ref:[Core concepts](stream-flows-and-basics.md#core-concepts) and @ref:[Defining and running streams](stream-flows-and-basics.md#defining-and-running-streams)
-sections of the docs, and then come back to this quickstart to see it all pieced together into a simple example application.
+如果您想先概览所用词汇，而不是先深入实际的示例，则可以查看文档的 @ref:[核心 概念](stream-flows-and-basics.md#core-concepts) 以及 @ref:[定义和运行streams](stream-flows-and-basics.md#defining-and-running-streams)部分，然后回到此快速入门看到所有这些拼凑成一个简单的示例应用程序。
 
 @@@
 
-## Transforming and consuming simple streams
+## 转换和消费简单流
 
-The example application we will be looking at is a simple Twitter feed stream from which we'll want to extract certain information,
-like for example finding all twitter handles of users who tweet about `#akka`.
+我们将要看的示例应用程序是一个简单的Twitter feed流，我们将希望从中提取某些信息，例如查找发`#akka`推文的用户的所有twitter句柄。
 
-In order to prepare our environment by creating an `ActorSystem` which will be responsible for running the streams we are about to create:
+为了准备我们的环境，创建一个`ActorSystem`，它将负责运行我们将要创建的流:
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #system-setup }
@@ -237,7 +162,7 @@ Scala
 Java
 :   @@snip [TwitterStreamQuickstartDocTest.java](/akka-docs/src/test/java/jdocs/stream/TwitterStreamQuickstartDocTest.java) { #system-setup }
 
-Let's assume we have a stream of tweets readily available. In Akka this is expressed as a @scala[`Source[Out, M]`]@java[`Source<Out, M>`]:
+假设我们有一个即时可用的tweet流。在Akka中，这表示为一个 @scala[`Source[Out, M]`]@java[`Source<Out, M>`]：
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #tweet-source }
@@ -245,18 +170,9 @@ Scala
 Java
 :   @@snip [TwitterStreamQuickstartDocTest.java](/akka-docs/src/test/java/jdocs/stream/TwitterStreamQuickstartDocTest.java) { #tweet-source }
 
-Streams always start flowing from a @scala[`Source[Out,M1]`]@java[`Source<Out,M1>`] then can continue through @scala[`Flow[In,Out,M2]`]@java[`Flow<In,Out,M2>`] elements or
-more advanced operators to finally be consumed by a @scala[`Sink[In,M3]`]@java[`Sink<In,M3>`] @scala[(ignore the type parameters `M1`, `M2`
-and `M3` for now, they are not relevant to the types of the elements produced/consumed by these classes – they are
-"materialized types", which we'll talk about @ref:[below](#materialized-values-quick))]@java[. The first type parameter—`Tweet` in this case—designates the kind of elements produced
-by the source while the `M` type parameters describe the object that is created during
-materialization ([see below](#materialized-values-quick))—`NotUsed` (from the `scala.runtime`
-package) means that no value is produced, it is the generic equivalent of `void`.]
+流总是从一个 @scala[`Source[Out,M1]`]@java[`Source<Out,M1>`] 开始流动，然后可以继续通过 @scala[`Flow[In,Out,M2]`]@java[`Flow<In,Out,M2>`] 元素或更高级的操作符，最终可以被一个 @scala[`Sink[In,M3]`]@java[`Sink<In,M3>`]消耗 @scala[(忽略类型参数`M1`，`M2`和`M3`，目前而言，它们与这些类产生/消耗的元素的类型无关 - 它们是"实体化类型"，我们将在 @ref:[下面](#materialized-values-quick) 讨论它)]
 
-
-The operations should look familiar to anyone who has used the Scala Collections library,
-however they operate on streams and not collections of data (which is a very important distinction, as some operations
-only make sense in streaming and vice versa):
+对于使用过Scala集合库的人来说，这些操作应该很熟悉，但是它们是在流上操作的，而不是数据集合(这是非常重要的区别，因为某些操作仅在流中有意义，反之亦然)：
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #authors-filter-map }
@@ -264,11 +180,7 @@ Scala
 Java
 :   @@snip [TwitterStreamQuickstartDocTest.java](/akka-docs/src/test/java/jdocs/stream/TwitterStreamQuickstartDocTest.java) { #authors-filter-map }
 
-Finally in order to @ref:[materialize](stream-flows-and-basics.md#stream-materialization) and run the stream computation we need to attach
-the Flow to a @scala[`Sink`]@java[`Sink<T, M>`] that will get the Flow running. The simplest way to do this is to call
-`runWith(sink)` on a @scala[`Source`]@java[`Source<Out, M>`]. For convenience a number of common Sinks are predefined and collected as @java[static] methods on
-the @scala[`Sink` companion object]@java[`Sink class`].
-For now let's print each author:
+最后，为了 @ref:[具体化](stream-flows-and-basics.md#stream-materialization) 和运行流计算，我们需要将Flow附加到一个 @scala[`Sink`]@java[`Sink<T, M>`]，那将使Flow运行。要做到这一点最简单的方法是在 @scala[`Source`]@java[`Source<Out, M>`]上调用 `runWith(sink)`。为了方便，预定义了一些常见的接收器，并将其聚集为`Sink`伴生对象上的方法。现在，让我们打印每个作者：
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #authors-foreachsink-println }
@@ -276,7 +188,7 @@ Scala
 Java
 :   @@snip [TwitterStreamQuickstartDocTest.java](/akka-docs/src/test/java/jdocs/stream/TwitterStreamQuickstartDocTest.java) { #authors-foreachsink-println }
 
-or by using the shorthand version (which are defined only for the most popular Sinks such as `Sink.fold` and `Sink.foreach`):
+或使用简写版本(那些仅针对最流行的接收器例如`Sink.fold`和`Sink.foreach`定义)：
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #authors-foreach-println }
@@ -284,10 +196,9 @@ Scala
 Java
 :   @@snip [TwitterStreamQuickstartDocTest.java](/akka-docs/src/test/java/jdocs/stream/TwitterStreamQuickstartDocTest.java) { #authors-foreach-println }
 
-Materializing and running a stream always requires a `Materializer` to be @scala[in implicit scope (or passed in explicitly,
-like this: `.run(materializer)`)]@java[passed in explicitly, like this: `.run(mat)`].
+物化(Materializing)和运行流总是需要一个`Materializer`在隐式作用域(或明确的传递，像这样：`.run(materializer)`)。
 
-The complete snippet looks like this:
+完整的代码段如下所示：
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #first-sample }
@@ -295,12 +206,9 @@ Scala
 Java
 :   @@snip [TwitterStreamQuickstartDocTest.java](/akka-docs/src/test/java/jdocs/stream/TwitterStreamQuickstartDocTest.java) { #first-sample }
 
-## Flattening sequences in streams
+## 在流中扁平序列
 
-In the previous section we were working on 1:1 relationships of elements which is the most common case, but sometimes
-we might want to map from one element to a number of elements and receive a "flattened" stream, similarly like `flatMap`
-works on Scala Collections. In order to get a flattened stream of hashtags from our stream of tweets we can use the `mapConcat`
-operator:
+在上一节中，我们工作在元素的1:1关系，这是最常见的情况，但是有时我们可能想要从一个元素映射到多个元素并接收"扁平化"的流，就像`flatMap`工作在Scala集合上一样。为了从我们的tweets流中获得一个话题标签的扁平化流，我们可以使用`mapConcat`操作符:
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #hashtags-mapConcat }
@@ -310,31 +218,21 @@ Java
 
 @@@ note
 
-The name `flatMap` was consciously avoided due to its proximity with for-comprehensions and monadic composition.
-It is problematic for two reasons: @scala[first]@java[firstly], flattening by concatenation is often undesirable in bounded stream processing
-due to the risk of deadlock (with merge being the preferred strategy), and @scala[second]@java[secondly], the monad laws would not hold for
-our implementation of flatMap (due to the liveness issues).
+`flatMap`这个名字是特意地避免的，因为它接近for-推导和一元组成。这是有问题的，原因有两个：首先，在有界流处理中，由于存在死锁的风险，通常不希望使用串联进行展平(在合并时是首选策略)；其次，monad法则不适用于我们的`flatMap`的实现(由于存活性(liveness)问题)。
 
-Please note that the `mapConcat` requires the supplied function to return @scala[an iterable (`f: Out => immutable.Iterable[T]`]@java[a strict collection (`Out f -> java.util.List<T>`)],
-whereas `flatMap` would have to operate on streams all the way through.
+请注意，`mapConcat` 要求提供的函数必须返回 @scala[一个可迭代的 (`f: Out => immutable.Iterable[T]`]@java[a strict collection (`Out f -> java.util.List<T>`)]，而`flatMap`则需要在数据流由始至终的操作。
 
 @@@
 
-## Broadcasting a stream
+## 广播一个流
 
-Now let's say we want to persist all hashtags, as well as all author names from this one live stream.
-For example we'd like to write all author handles into one file, and all hashtags into another file on disk.
-This means we have to split the source stream into two streams which will handle the writing to these different files.
+现在让我们说，我们要保存该实时流中的所有主题标签以及所有作者姓名。例如，我们想将所有作者句柄写入磁盘上的一个文件，并将所有主题标签写入另一个文件。这意味着我们必须将源流分成两个流，以处理对这些不同文件的写入。
 
-Elements that can be used to form such "fan-out" (or "fan-in") structures are referred to as "junctions" in Akka Streams.
-One of these that we'll be using in this example is called `Broadcast`, and it emits elements from its
-input port to all of its output ports.
+可用于形成此类"扇出"(或"扇入")结构的元素在Akka流中称为"交叉点(junctions)"。在此示例中，我们将使用的其中一个称为`Broadcast`，它将元素从其输入端口发射到其所有输出端口。
 
-Akka Streams intentionally separate the linear stream structures (Flows) from the non-linear, branching ones (Graphs)
-in order to offer the most convenient API for both of these cases. Graphs can express arbitrarily complex stream setups
-at the expense of not reading as familiarly as collection transformations.
+Akka流有意将线性流结构(Flows)与非线性分支结构(Graphs)分开，以便为这两种情况提供最方便的API。图可以表达任意复杂的流设置，但代价是阅读起来不像集合转换那样熟悉。
 
-Graphs are constructed using `GraphDSL` like this:
+使用`GraphDSL`构造图，如下所示：
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #graph-dsl-broadcast }
@@ -342,35 +240,19 @@ Scala
 Java
 :   @@snip [TwitterStreamQuickstartDocTest.java](/akka-docs/src/test/java/jdocs/stream/TwitterStreamQuickstartDocTest.java) { #graph-dsl-broadcast }
 
-As you can see, @scala[inside the `GraphDSL` we use an implicit graph builder `b` to mutably construct the graph
-using the `~>` "edge operator" (also read as "connect" or "via" or "to"). The operator is provided implicitly
-by importing `GraphDSL.Implicits._`]@java[we use graph builder `b` to construct the graph using `UniformFanOutShape` and `Flow` s].
+如您所见，在`GraphDSL`内部，我们使用隐式图构建器`b`使用`~>`"edge操作符"(也读成"connect"或"via"或"to")来不定地(mutably)构建图。运算符通过导入`GraphDSL.Implicits._`隐式提供。
 
-`GraphDSL.create` returns a `Graph`, in this example a @scala[`Graph[ClosedShape, NotUsed]`]@java[`Graph<ClosedShape,NotUsed>`] where
-`ClosedShape` means that it is *a fully connected graph* or "closed" - there are no unconnected inputs or outputs.
-Since it is closed it is possible to transform the graph into a `RunnableGraph` using `RunnableGraph.fromGraph`.
-The `RunnableGraph` can then be `run()` to materialize a stream out of it.
+`GraphDSL.create`返回一个`Graph`，在此示例中，一个 @scala[`Graph[ClosedShape, NotUsed]`]@java[`Graph<ClosedShape,NotUsed>`]。这里`ClosedShape`表示它是*一个完全连接的图形*或"闭合"-没有未连接的输入或输出。由于它是闭合的，因此可以使用`RunnableGraph.fromGraph`将图形转换为一个`RunnableGraph`。`RunnableGraph`然后可被`run()`，在它之外具体化一个流。。
 
-Both `Graph` and `RunnableGraph` are *immutable, thread-safe, and freely shareable*.
+`Graph`和`RunnableGraph`两者都是*不可变的，线程安全的，并自由地共享的*。
 
-A graph can also have one of several other shapes, with one or more unconnected ports. Having unconnected ports
-expresses a graph that is a *partial graph*. Concepts around composing and nesting graphs in large structures are
-explained in detail in @ref:[Modularity, Composition and Hierarchy](stream-composition.md). It is also possible to wrap complex computation graphs
-as Flows, Sinks or Sources, which will be explained in detail in
-@scala[@ref:[Constructing Sources, Sinks and Flows from Partial Graphs](stream-graphs.md#constructing-sources-sinks-flows-from-partial-graphs)]@java[@ref:[Constructing and combining Partial Graphs](stream-graphs.md#partial-graph-dsl)].
+一个图还可以具有其他几种形状之一，并具有一个或多个未连接的端口。具有未连接的端口表示一个图是*部分图*。有关大型结构中的组合图和嵌套图的概念，将在 @ref:[模块化，组合和层次结构](stream-composition.md)中进行详细说明。还可以将复杂的计算图包装为Flows，Sinks或Sources，这将在 @scala[@ref:[从部分图构造Sources, Sinks和Flows](stream-graphs.md#constructing-sources-sinks-flows-from-partial-graphs)]中进行详细说明。
 
-## Back-pressure in action
+## 背压实战
 
-One of the main advantages of Akka Streams is that they *always* propagate back-pressure information from stream Sinks
-(Subscribers) to their Sources (Publishers). It is not an optional feature, and is enabled at all times. To learn more
-about the back-pressure protocol used by Akka Streams and all other Reactive Streams compatible implementations read
-@ref:[Back-pressure explained](stream-flows-and-basics.md#back-pressure-explained).
+Akka流的主要优点之一是，它们*始终*将背压信息从流Sinks(订阅者)传播到其Sources(发布者)。它不是一项可选功能，并且始终处于启用状态。要了解有关Akka流和所有其他Reactive Streams兼容实现所使用的背压协议的更多信息，请阅读 @ref:[Back-pressure解释](stream-flows-and-basics.md#back-pressure-explained)。
 
-A typical problem applications (not using Akka Streams) like this often face is that they are unable to process the incoming data fast enough,
-either temporarily or by design, and will start buffering incoming data until there's no more space to buffer, resulting
-in either `OutOfMemoryError` s or other severe degradations of service responsiveness. With Akka Streams buffering can
-and must be handled explicitly. For example, if we are only interested in the "*most recent tweets, with a buffer of 10
-elements*" this can be expressed using the `buffer` element:
+像这样的典型问题(不使用Akka流)应用程序经常面临的问题是，它们不能足够快地处理传入数据，无论是临时的还是有意的，并且将开始缓冲传入数据，直到没有更多空间可缓冲为止，导致`OutOfMemoryError`或其他服务响应能力严重下降。使用Akka流可以而且必须明确地使用缓冲。例如，如果我们仅对"*最近的推文，具有10个元素的缓冲区*"感兴趣，这可以用`buffer`元素来表示：
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #tweets-slow-consumption-dropHead }
@@ -378,21 +260,14 @@ Scala
 Java
 :  @@snip [TwitterStreamQuickstartDocTest.java](/akka-docs/src/test/java/jdocs/stream/TwitterStreamQuickstartDocTest.java) { #tweets-slow-consumption-dropHead }
 
-The `buffer` element takes an explicit and required `OverflowStrategy`, which defines how the buffer should react
-when it receives another element while it is full. Strategies provided include dropping the oldest element (`dropHead`),
-dropping the entire buffer, signalling @scala[errors]@java[failures] etc. Be sure to pick and choose the strategy that fits your use case best.
+该`buffer`元素具有一个显式且必需的`OverflowStrategy`，它定义了缓冲区在已满的时候接收另一个元素时的反应。提供的策略包括删除最旧的元素(`dropHead`)，删除整个缓冲区，发出 @scala[错误]@java[失败]信号等。请务必选择最适合您的用例的策略。
 
 <a id="materialized-values-quick"></a>
-## Materialized values
+## 物化值
 
-So far we've been only processing data using Flows and consuming it into some kind of external Sink - be it by printing
-values or storing them in some external system. However sometimes we may be interested in some value that can be
-obtained from the materialized processing pipeline. For example, we want to know how many tweets we have processed.
-While this question is not as obvious to give an answer to in case of an infinite stream of tweets (one way to answer
-this question in a streaming setting would be to create a stream of counts described as "*up until now*, we've processed N tweets"),
-but in general it is possible to deal with finite streams and come up with a nice result such as a total count of elements.
+到目前为止，我们仅使用Flow处理数据，并将其消耗到某种外部Sink中 - 通过打印值或将其存储在某些外部系统中来实现它。然而，有时我们可能会对从物化处理管道中获得的一些值感兴趣。例如，我们想知道我们处理了多少条推文。尽管在无限的tweets流的情况下，这个问题不太容易回答(在一个流设置中回答此问题的一种方法是创建一个计数流，描述为"*到目前为止*，我们已经处理了N条推文")。但是一般来说，处理有限的流并得到一个不错的结果是可能的，比如元素的总数。
 
-First, let's write such an element counter using @scala[`Sink.fold` and]@java[`Flow.of(Class)` and `Sink.fold` to]  see how the types look like:
+首先，让我们使用 @scala[`Sink.fold`]@java[`Flow.of(Class)`和`Sink.fold`]来编写这样的元素计数器，并看看类型是什么样的：
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #tweets-fold-count }
@@ -400,31 +275,13 @@ Scala
 Java
 :   @@snip [TwitterStreamQuickstartDocTest.java](/akka-docs/src/test/java/jdocs/stream/TwitterStreamQuickstartDocTest.java) { #tweets-fold-count }
 
-@scala[First we prepare a reusable `Flow` that will change each incoming tweet into an integer of value `1`. We'll use this in
-order to combine those with a `Sink.fold` that will sum all `Int` elements of the stream and make its result available as
-a `Future[Int]`. Next we connect the `tweets` stream to `count` with `via`. Finally we connect the Flow to the previously
-prepared Sink using `toMat`]@java[`Sink.fold` will sum all `Integer` elements of the stream and make its result available as
-a `CompletionStage<Integer>`. Next we use the `map` method of `tweets` `Source` which will change each incoming tweet
-into an integer value `1`.  Finally we connect the Flow to the previously prepared Sink using `toMat`].
+首先，我们准备一个可重用的对象`Flow`，它将每个传入的tweet变成值为`1`的整数。我们将用这个以便把它们和一个`Sink.fold`结合起来，它将合计流的所有`Int`元素，并使其结果作为一个`Future[Int]`可用。接下来，我们使用`via`将`tweets`流连接到`count`。最后，我们使用`toMat`将Flow连接到先前已准备的接收器。
 
-Remember those mysterious `Mat` type parameters on @scala[`Source[+Out, +Mat]`, `Flow[-In, +Out, +Mat]` and `Sink[-In, +Mat]`]@java[`Source<Out, Mat>`, `Flow<In, Out, Mat>` and `Sink<In, Mat>`]?
-They represent the type of values these processing parts return when materialized. When you chain these together,
-you can explicitly combine their materialized values. In our example we used the @scala[`Keep.right`]@java[`Keep.right()`] predefined function,
-which tells the implementation to only care about the materialized type of the operator currently appended to the right.
-The materialized type of `sumSink` is @scala[`Future[Int]`]@java[`CompletionStage<Integer>`] and because of using @scala[`Keep.right`]@java[`Keep.right()`], the resulting `RunnableGraph`
-has also a type parameter of @scala[`Future[Int]`]@java[`CompletionStage<Integer>`].
+还记得 @scala[`Source[+Out, +Mat]`, `Flow[-In, +Out, +Mat]`和`Sink[-In, +Mat]`]@java[`Source<Out, Mat>`, `Flow<In, Out, Mat>`和`Sink<In, Mat>`]上的那些神秘的`Mat`类型参数吗？它们表示这些处理部件在物化时返回的值的类型。当你将它们链接在一起时，可以显式组合其物化值。在我们的示例中，我们使用了预定义的 @scala[`Keep.right`]@java[`Keep.right()`]函数，这告诉实现只关心当前附加到右边的操作符的物化类型。`sumSink`的物化类型为 @scala[`Future[Int]`]@java[`CompletionStage<Integer>`]，由于使用 @scala[`Keep.right`]@java[`Keep.right()`]，结果`RunnableGraph`也具有一个 @scala[`Future[Int]`]@java[`CompletionStage<Integer>`]类型参数。
 
-This step does *not* yet materialize the
-processing pipeline, it merely prepares the description of the Flow, which is now connected to a Sink, and therefore can
-be `run()`, as indicated by its type: @scala[`RunnableGraph[Future[Int]]`]@java[`RunnableGraph<CompletionStage<Integer>>`]. Next we call `run()` which uses the @scala[implicit] `Materializer`
-to materialize and run the Flow. The value returned by calling `run()` on a @scala[`RunnableGraph[T]`]@java[`RunnableGraph<T>`] is of type `T`.
-In our case this type is @scala[`Future[Int]`]@java[`CompletionStage<Integer>`] which, when completed, will contain the total length of our `tweets` stream.
-In case of the stream failing, this future would complete with a Failure.
+这个步骤还*没有*物化处理管道，它只是准备流的描述，现在连接到一个接收器，并且因此可以被`run()`，由它的类型所指示的：@scala[`RunnableGraph[Future[Int]]`]@java[`RunnableGraph<CompletionStage<Integer>>`]。接下来我们调用`run()`，它使用 @scala[隐式] `Materializer` 来物化和运行Flow。通过在 @scala[`RunnableGraph[T]`]@java[`RunnableGraph<T>`]上调用`run()`返回的值是`T`类型。在我们的情况下，此类型是@scala[`Future[Int]`]@java[`CompletionStage<Integer>`]，在完成后，它将包含`tweets`流的总长度。如果流失败，则这个future将以失败完成。
 
-A `RunnableGraph` may be reused
-and materialized multiple times, because it is only the "blueprint" of the stream. This means that if we materialize a stream,
-for example one that consumes a live stream of tweets within a minute, the materialized values for those two materializations
-will be different, as illustrated by this example:
+一个`RunnableGraph`可以多次重用和物化，因为它只是流的"蓝图"。这意味着，如果我们物化一个流，例如，在一分钟内消耗了一条实时推文流，那么这两个物化的物化值将有所不同，如以下示例所示：
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #tweets-runnable-flow-materialized-twice }
@@ -432,9 +289,7 @@ Scala
 Java
 :   @@snip [TwitterStreamQuickstartDocTest.java](/akka-docs/src/test/java/jdocs/stream/TwitterStreamQuickstartDocTest.java) { #tweets-runnable-flow-materialized-twice }
 
-Many elements in Akka Streams provide materialized values which can be used for obtaining either results of computation or
-steering these elements which will be discussed in detail in @ref:[Stream Materialization](stream-flows-and-basics.md#stream-materialization). Summing up this section, now we know
-what happens behind the scenes when we run this one-liner, which is equivalent to the multi line version above:
+Akka流中的许多元素提供了物化值，可用于获取计算结果或操纵这些元素，这将在 @ref:[流物化](stream-flows-and-basics.md#stream-materialization)中进行详细讨论。总结这一节，现在我们知道运行此单行代码时幕后发生了什么，这等效于上面的多行版本：
 
 Scala
 :   @@snip [TwitterStreamQuickstartDocSpec.scala](/akka-docs/src/test/scala/docs/stream/TwitterStreamQuickstartDocSpec.scala) { #tweets-fold-count-oneline }
@@ -444,8 +299,8 @@ Java
 
 @@@ note
 
-`runWith()` is a convenience method that automatically ignores the materialized value of any other operators except
-those appended by the `runWith()` itself. In the above example it translates to using @scala[`Keep.right`]@java[`Keep.right()`] as the combiner
-for materialized values.
+`runWith()`是一种便捷的方法，它会自动忽略除`runWith()`自身附加的运算符之外的任何其他运算符的物化值。
+在上面的例子中，它转换为使用 @scala[`Keep.right`]@java[`Keep.right()`] 作为物化值的组合器。
+在上面的示例中，它转换为用作实现值的组合器。
 
 @@@

@@ -1,8 +1,8 @@
-# Working with Graphs
+# 使用图(Graph)
 
-## Dependency
+## 依赖
 
-To use Akka Streams, add the module to your project:
+要使用Akka Streams，请将模块添加到您的项目中：
 
 @@dependency[sbt,Maven,Gradle] {
   group="com.typesafe.akka"
@@ -10,55 +10,41 @@ To use Akka Streams, add the module to your project:
   version="$akka.version$"
 }
 
-## Introduction
+## 介绍
 
-In Akka Streams computation graphs are not expressed using a fluent DSL like linear computations are, instead they are
-written in a more graph-resembling DSL which aims to make translating graph drawings (e.g. from notes taken
-from design discussions, or illustrations in protocol specifications) to and from code simpler. In this section we'll
-dive into the multiple ways of constructing and re-using graphs, as well as explain common pitfalls and how to avoid them.
+在Akka流中，计算图不是像线性计算那样使用流畅的DSL来表达的，相反，它们是用一种更类似于图形的DSL编写的，目的是使翻译图形图纸(例如，来自设计讨论的注释或协议规范中的插图)到(从)代码更简单。在本节中，我们将深入探讨构建和重用图的多种方法，并说明常见的陷阱和如何避开它们。
 
-Graphs are needed whenever you want to perform any kind of fan-in ("multiple inputs") or fan-out ("multiple outputs") operations.
-Considering linear Flows to be like roads, we can picture graph operations as junctions: multiple flows being connected at a single point.
-Some operators which are common enough and fit the linear style of Flows, such as `concat` (which concatenates two
-streams, such that the second one is consumed after the first one has completed), may have shorthand methods defined on
-`Flow` or `Source` themselves, however you should keep in mind that those are also implemented as graph junctions.
+当您希望执行任何类型的扇入("多个输入")或扇出("多个输出")操作时，都需要使用图。考虑到线性Flow就像道路，我们可以把图操作描绘成交叉点：多个flow在单个点处连接。一些很常见且适合于线性形式的Flows的运算符，例如`concat`(它将两个流连接起来，以便在第一个流完成后消耗第二个流)，可能`Flow`或`Source`它们本身已定义了速记方法，但是您应保留请记住，它们也被实现为图交叉点。
 
-<a id="graph-dsl"></a>
-## Constructing Graphs
+<a id="constructing-graphs"></a>
+## 构建图
 
-Graphs are built from simple Flows which serve as the linear connections within the graphs as well as junctions
-which serve as fan-in and fan-out points for Flows. Thanks to the junctions having meaningful types based on their behavior
-and making them explicit elements these elements should be rather straightforward to use.
+图是由简单的Flow构建的，这些简单的流充当图中的线性连接，和交叉点充当Flow的扇入和扇出点一样。得益于交叉点具有基于其行为的有意义的类型，并使它们成为显式元素，所以这些元素的使用非常容易。
 
-Akka Streams currently provide these junctions (for a detailed list see the @ref[operator index](operators/index.md)):
+Akka流当前提供这些交叉点(有关详细列表，请参见@ref[运算符索引](operators/index.md))：
 
- * **Fan-out**
+ * **扇出**
 
-    * @scala[`Broadcast[T]`]@java[`Broadcast<T>`] – *(1 input, N outputs)* given an input element emits to each output
-    * @scala[`Balance[T]`]@java[`Balance<T>`] – *(1 input, N outputs)* given an input element emits to one of its output ports
-    * @scala[`UnzipWith[In,A,B,...]`]@java[`UnzipWith<In,A,B,...>`] – *(1 input, N outputs)* takes a function of 1 input that given a value for each input emits N output elements (where N <= 20)
-    * @scala[`UnZip[A,B]`]@java[`UnZip<A,B>`] – *(1 input, 2 outputs)* splits a stream of @scala[`(A,B)`]@java[`Pair<A,B>`] tuples into two streams, one of type `A` and one of type `B`
+    * @scala[`Broadcast[T]`]@java[`Broadcast<T>`] – *(1个输入，N个输出)* 给定一个输入元素，发射到每个输出端口
+    * @scala[`Balance[T]`]@java[`Balance<T>`] – *(1个输入，N个输出)* 给定一个输入元素发射到其一个输出端口
+    * @scala[`UnzipWith[In,A,B,...]`]@java[`UnzipWith<In,A,B,...>`] – *(1个输入，N个输出)*在1个输入获得一个函数，该函数给与每个输入一个值，发射N个输出元素(其中N <= 20)
+    * @scala[`UnZip[A,B]`]@java[`UnZip<A,B>`] – *(1个输入，2个输出)* 将一个元组流 @scala[`(A,B)`]@java[`Pair<A,B>`]拆分成两个流，一个`A`类型，另一个`B`类型
 
- * **Fan-in**
+ * **扇入**
 
-    * @scala[`Merge[In]`]@java[`Merge<In>`] – *(N inputs , 1 output)* picks randomly from inputs pushing them one by one to its output
-    * @scala[`MergePreferred[In]`]@java[`MergePreferred<In>`] – like `Merge` but if elements are available on `preferred` port, it picks from it, otherwise randomly from `others`
-    * @scala[`MergePrioritized[In]`]@java[`MergePrioritized<In>`] – like `Merge` but if elements are available on all input ports, it picks from them randomly based on their `priority`
-    * @scala[`MergeLatest[In]`]@java[`MergeLatest<In>`] – *(N inputs, 1 output)* emits `List[In]`, when i-th input stream emits element, then i-th element in emitted list is updated
-    * @scala[`ZipWith[A,B,...,Out]`]@java[`ZipWith<A,B,...,Out>`] – *(N inputs, 1 output)* which takes a function of N inputs that given a value for each input emits 1 output element
-    * @scala[`Zip[A,B]`]@java[`Zip<A,B>`] – *(2 inputs, 1 output)* is a `ZipWith` specialised to zipping input streams of `A` and `B` into a @scala[`(A,B)`]@java[`Pair(A,B)`] tuple stream
-    * @scala[`Concat[A]`]@java[`Concat<A>`] – *(2 inputs, 1 output)* concatenates two streams (first consume one, then the second one)
+    * @scala[`Merge[In]`]@java[`Merge<In>`] – *(N个输入，1个输出)* 从输入中随机选择，将它们逐个推到它的输出
+    * @scala[`MergePreferred[In]`]@java[`MergePreferred<In>`] – 类似`Merge`，但如果`preferred`端口上有可用元素，则从中选择，否则从`others`中随机选择
+    * @scala[`MergePrioritized[In]`]@java[`MergePrioritized<In>`] – 类似`Merge`，但如果元素在所有输入端口上可用，则会根据其`priority`从它们中随机选择
+    * @scala[`MergeLatest[In]`]@java[`MergeLatest<In>`] – *(N个输入，1个输出)* 发射`List[In]`，当第i个输入流发射元素时，则已发射列表中的第i个元素是更新过的
+    * @scala[`ZipWith[A,B,...,Out]`]@java[`ZipWith<A,B,...,Out>`] – *(N个输入，1个输出)* which takes a function of N inputs that given a value for each input emits 1 output element
+    * @scala[`Zip[A,B]`]@java[`Zip<A,B>`] – *(2个输入，1个输出)* 是一个`ZipWith`专门用于将`A`和`B`的输入流压缩到一个元组流 @scala[`(A,B)`]@java[`Pair(A,B)`]
+    * @scala[`Concat[A]`]@java[`Concat<A>`] – *(2个输入，1个输出)* 连接两个流(首先消耗一个，然后消耗第二个)
 
-One of the goals of the GraphDSL DSL is to look similar to how one would draw a graph on a whiteboard, so that it is
-simple to translate a design from whiteboard to code and be able to relate those two. Let's illustrate this by translating
-the below hand drawn graph into Akka Streams:
+GraphDSL DSL的目标之一是使其看起来就像在白板上画图形一样，从而可以轻松地将设计从白板转换为代码，并能将两者联系起来。让我们通过将下面的手绘图转换为Akka流来说明这一点：
 
 ![simple-graph-example.png](../images/simple-graph-example.png)
 
-Such graph is simple to translate to the Graph DSL since each linear element corresponds to a `Flow`,
-and each circle corresponds to either a `Junction` or a `Source` or `Sink` if it is beginning
-or ending a `Flow`. @scala[Junctions must always be created with defined type parameters, as otherwise the `Nothing` type
-will be inferred.]
+这种图很容易转换为图DSL，因为每个线性元素都对应到一个`Flow`，并且每个圆都要么对应到一个`Junction`，要么对应到一个`Source`或`Sink`，假如它是在一个`Flow`的开头或结尾。@scala[交叉点必须始终使用定义的类型参数创建，否则将推断成`Nothing`类型。]
 
 Scala
 :   @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #simple-graph-dsl }
@@ -68,32 +54,17 @@ Java
 
 @@@ note
 
-Junction *reference equality* defines *graph node equality* (i.e. the same merge *instance* used in a GraphDSL
-refers to the same location in the resulting graph).
+交叉点*引用相等性*定义*图节点相等性*(例如，在一个GraphDSL中使用的同一个merge *实例*指的是结果图中相同的位置)。
 
 @@@
 
-@scala[Notice the `import GraphDSL.Implicits._` which brings into scope the `~>` operator (read as "edge", "via" or "to")
-and its inverted counterpart `<~` (for noting down flows in the opposite direction where appropriate).]
+@scala[请注意`import GraphDSL.Implicits._`，它将`~>`运算符(读作"edge"，"via"或"to")及其反向的对应项`<~`(for noting down flows in the opposite direction where appropriate)纳入作用域内。]
 
-By looking at the snippets above, it should be apparent that the @scala[`GraphDSL.Builder`]@java[`builder`] object is *mutable*.
-@scala[It is used (implicitly) by the `~>` operator, also making it a mutable operation as well.]
-The reason for this design choice is to enable simpler creation of complex graphs, which may even contain cycles.
-Once the GraphDSL has been constructed though, the @scala[`GraphDSL`]@java[`RunnableGraph`] instance *is immutable, thread-safe, and freely shareable*.
-The same is true of all operators—sources, sinks, and flows—once they are constructed.
-This means that you can safely re-use one given Flow or junction in multiple places in a processing graph.
+通过查看上面的代码片段，很明显 @scala[`GraphDSL.Builder`]@java[`builder`]对象是*可变的*。@scala[它由`~>`运算符(隐式)使用，也使它成为一个可变的操作。]选择这种设计的原因是为了能够更简单地创建复杂的图，这些图甚至可能包含循环。一旦GraphDSL构建完成，@scala[`GraphDSL`]@java[`RunnableGraph`]实例将*是不可变的，线程安全的和可自由共享的*。所有操作符 —sources，sinks和flows— 在构建之后都是如此。这意味着您可以在处理图中的多个位置安全地重用一个给定的Flow或交叉点。
 
-We have seen examples of such re-use already above: the merge and broadcast junctions were imported
-into the graph using `builder.add(...)`, an operation that will make a copy of the blueprint that
-is passed to it and return the inlets and outlets of the resulting copy so that they can be wired up.
-Another alternative is to pass existing graphs—of any shape—into the factory method that produces a
-new graph. The difference between these approaches is that importing using `builder.add(...)` ignores the
-materialized value of the imported graph while importing via the factory method allows its inclusion;
-for more details see @ref[Stream Materialization](stream-flows-and-basics.md#stream-materialization).
+我们已经在上面看到了这种重用的例子：合并和广播交叉点是使用`builder.add(...)`导入到图中的，一个运算将传递给它的蓝图复制一份，并返回结果副本的入口和出口，因此他们可以连接起来。另一种选择是传递现有的图 - 任何形状的 - 到生成新图形的工厂方法中。这两种方法之间的区别在于，使用`builder.add(...)`导入会忽略已导入图的物化值，而通过工厂方法导入则允许包含它; 有关更多详细信息，请参见 @ref[流物化](stream-flows-and-basics.md#stream-materialization)。
 
-In the example below we prepare a graph that consists of two parallel streams,
-in which we re-use the same instance of `Flow`, yet it will properly be
-materialized as two connections between the corresponding Sources and Sinks:
+在下面的示例中，我们准备了一个由两个并行流组成的图，在它里面我们重用了相同`Flow`实例，然而，它将被适当地物化为相应的Source和Sink之间的两个连接：
 
 Scala
 :   @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #graph-dsl-reusing-a-flow }
@@ -112,24 +83,13 @@ Java
 
 
 <a id="partial-graph-dsl"></a>
-## Constructing and combining Partial Graphs
+## 构造和组合部分图
 
-Sometimes it is not possible (or needed) to construct the entire computation graph in one place, but instead construct
-all of its different phases in different places and in the end connect them all into a complete graph and run it.
+有时不可能(或需要)在一个地方构造整个计算图，而是在不同地方构造它的所有不同阶段，最后将它们全部连接成一个完整的图并运行它。
 
-This can be achieved by @scala[returning a different `Shape` than `ClosedShape`, for example `FlowShape(in, out)`, from the
-function given to `GraphDSL.create`. See @ref:[Predefined shapes](#predefined-shapes) for a list of such predefined shapes.
-Making a `Graph` a `RunnableGraph`]@java[using the returned `Graph` from `GraphDSL.create()` rather than
-passing it to `RunnableGraph.fromGraph()` to wrap it in a `RunnableGraph`.The reason of representing it as a different type is that a
-`RunnableGraph`] requires all ports to be connected, and if they are not
-it will throw an exception at construction time, which helps to avoid simple
-wiring errors while working with graphs. A partial graph however allows
-you to return the set of yet to be connected ports from the code block that
-performs the internal wiring.
+这可以通过以下方式实现，@scala[从给`GraphDSL.create`的函数中返回一个不同于`ClosedShape`的`Shape`，例如`FlowShape(in, out)`。有关此类预定义形状的列表，请参见 @ref:[预定义形状](#predefined-shapes)。将一个`Graph`变成`RunnableGraph`]@java[using the returned `Graph` from `GraphDSL.create()` rather than passing it to `RunnableGraph.fromGraph()` to wrap it in a `RunnableGraph`.The reason of representing it as a different type is that a `RunnableGraph`]需要连接所有端口，如果没有连接，则会在构建时抛出异常，这有助于避免在使用图时出现简单的连接错误。然而，局部图允许您从执行内部连接的代码块返回尚未连接的端口集。
 
-Let's imagine we want to provide users with a specialized element that given 3 inputs will pick
-the greatest int value of each zipped triple. We'll want to expose 3 input ports (unconnected sources) and one output port
-(unconnected sink).
+让我们想象一下，我们想为用户提供一个特殊的元素，给定3个输入，为每个压缩后的三元组选择最大的int值。我们将要公开3个输入端口(未连接的源)和1个输出端口(未连接的接收器)。
 
 Scala
 :   @@snip [StreamPartialGraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/StreamPartialGraphDSLDocSpec.scala) { #simple-partial-graph-dsl }  
@@ -139,52 +99,42 @@ Java
 
 @@@ note
 
-While the above example shows composing two 2-input `ZipWith`s, in reality ZipWith already provides 
-numerous overloads including a 3 (and many more) parameter versions. So this could be implemented 
-using one ZipWith using the 3 parameter version, like this: @scala[`ZipWith((a, b, c) => out)`]@java[`ZipWith.create((a, b, c) -> out)`].
-(The ZipWith with N input has N+1 type parameter; the last type param is the output type.)
+虽然上面的例子展示了如何组合两个2个输入的`ZipWith`，但实际上ZipWith已经提供了大量的重载，包括一个3个(以及更多)参数版本。因此，这可以使用一个使用3参数版本的ZipWith来实现，像这样：@scala[`ZipWith((a, b, c) => out)`]@java[`ZipWith.create((a, b, c) -> out)`]。(带有N输入的ZipWith具有N + 1类型参数；最后一个类型参数是输出类型。)
 
 @@@
 
-As you can see, first we construct the partial graph that @scala[contains all the zipping and comparing of stream
-elements. This partial graph will have three inputs and one output, wherefore we use the `UniformFanInShape`]@java[describes how to compute the maximum of two input streams.
-then we reuse that twice while constructing the partial graph that extends this to three input streams].
-Then we import it (all of its nodes and connections) explicitly into the @scala[closed graph built in the second step]@java[last graph] in which all
-the undefined elements are rewired to real sources and sinks. The graph can then be run and yields the expected result.
+正如您所看到的，首先我们构造一个局部图，它 @scala[包含流元素的所有压缩和比较。这个局部图将有三个输入和一个输出，因此我们使用`UniformFanInShape`]。然后，我们将它(它的所有节点和连接)显式地导入第二步构建的封闭图，在那里所有未定义的元素都被重新连接到实际的源和接收器。然后可以运行该图并产生预期的结果。
 
 @@@ warning
 
-Please note that `GraphDSL` is not able to provide compile time type-safety about whether or not all
-elements have been properly connected—this validation is performed as a runtime check during the graph's instantiation.
+请注意，`GraphDSL`无法提供编译时类型 - 关于是否所有元件都已正确连接的安全性 - 此验证在图的实例化期间作为运行时的检查执行的。
 
-A partial graph also verifies that all ports are either connected or part of the returned `Shape`.
+一个局部图还可以验证所有端口是否已连接或已返回的`Shape`的一部分。
 
 @@@
 
 <a id="constructing-sources-sinks-flows-from-partial-graphs"></a>
-## Constructing Sources, Sinks and Flows from Partial Graphs
+## 从局部图构造源，汇和Flow
 
-Instead of treating a @scala[partial graph]@java[`Graph`] as a collection of flows and junctions which may not yet all be
-connected it is sometimes useful to expose such a complex graph as a simpler structure,
-such as a `Source`, `Sink` or `Flow`.
+与其将 @scala[局部图]@java[`Graph`]视为可能尚未全部连接的flow和交叉点的集合，不如将这样一个复杂的图公开为一个更简单的结构，如一个`Source`，`Sink`或`Flow`，这样做有时很有用。
 
-In fact, these concepts can be expressed as special cases of a partially connected graph:
+实际上，这些概念可以表示为局部连接图的特殊情况：
 
- * `Source` is a partial graph with *exactly one* output, that is it returns a `SourceShape`.
- * `Sink` is a partial graph with *exactly one* input, that is it returns a `SinkShape`.
- * `Flow` is a partial graph with *exactly one* input and *exactly one* output, that is it returns a `FlowShape`.
+Source是仅具有一个输出的部分图形，即返回a SourceShape。
+Sink是仅具有一个输入的部分图形，即返回一个SinkShape。
+Flow是具有正好一个输入和正好一个输出的部分图形，即返回a FlowShape。
 
-Being able to hide complex graphs inside of simple elements such as Sink / Source / Flow enables you to create one
-complex element and from there on treat it as simple compound operator for linear computations.
+ * `Source` 是一个*仅有一个*输出的局部图，它会返回一个`SourceShape`。
+ * `Sink` 是一个*仅有一个*输入的局部图，它会返回一个`SinkShape`。
+ * `Flow` 是一个*仅有一个*输入和*仅有一个*输出的局部图，它会返回一个`FlowShape`。
 
-In order to create a Source from a graph the method `Source.fromGraph` is used, to use it we must have a
-@scala[`Graph[SourceShape, T]`]@java[`Graph` with a `SourceShape`]. This is constructed using
-@scala[`GraphDSL.create` and returning a `SourceShape` from the function passed in]@java[`GraphDSL.create` and providing building a `SourceShape` graph].
-The single outlet must be provided to the `SourceShape.of` method and will become
-“the sink that must be attached before this Source can run”.
+能够在诸如Sink/Source/Flow之类的简单元素中隐藏复杂图，使您能够创建一个复杂元素，在此基础上，将其视为用于线性计算的简单复合运算符。
 
-Refer to the example below, in which we create a Source that zips together two numbers, to see this graph
-construction in action:
+为了从图创建Source要使用`Source.fromGraph`方法，要使用它，我们必须有一个`Graph[SourceShape, T]`。
+
+这是使用`GraphDSL.create`构造的，并从传入的函数返回一个`SourceShape`。必须为`SourceShape.of`方法提供一个出口，并将成为"在这个源运行之前必须附加的接收器"。
+
+参考下面的例子，在这个例子中，我们创建了一个将两个数字压缩在一起的源，以在实战中查看这个图的结构:
 
 Scala
 :   @@snip [StreamPartialGraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/StreamPartialGraphDSLDocSpec.scala) { #source-from-partial-graph-dsl }    
@@ -192,9 +142,7 @@ Scala
 Java
 :   @@snip [StreamPartialGraphDSLDocTest.java](/akka-docs/src/test/java/jdocs/stream/StreamPartialGraphDSLDocTest.java) { #source-from-partial-graph-dsl }
 
-
-Similarly the same can be done for a @scala[`Sink[T]`]@java[`Sink<T>`], using `SinkShape.of` in which case the provided value
-must be an @scala[`Inlet[T]`]@java[`Inlet<T>`]. For defining a @scala[`Flow[T]`]@java[`Flow<T>`] we need to expose both an @scala[inlet and an outlet]@java[undefined source and sink]:
+类似地，使用`SinkShape.of`可以对一个`Sink[T]`执行相同的操作。在这种情况下，所提供的值必须是一个`Inlet[T]`。为了定义一个`Flow[T]`，我们需要同时暴露一个入口和一个出口：
 
 Scala
 :   @@snip [StreamPartialGraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/StreamPartialGraphDSLDocSpec.scala) { #flow-from-partial-graph-dsl }    
@@ -203,12 +151,9 @@ Java
 :   @@snip [StreamPartialGraphDSLDocTest.java](/akka-docs/src/test/java/jdocs/stream/StreamPartialGraphDSLDocTest.java) { #flow-from-partial-graph-dsl }
 
 
-## Combining Sources and Sinks with simplified API
+## 将源和接收器与简化的API组合
 
-There is a simplified API you can use to combine sources and sinks with junctions like:
-@scala[`Broadcast[T]`, `Balance[T]`, `Merge[In]` and `Concat[A]`]@java[`Broadcast<T>`, `Balance<T>`, `Merge<In>` and `Concat<A>`]
-without the need for using the Graph DSL. The combine method takes care of constructing
-the necessary graph underneath. In following example we combine two sources into one (fan-in):
+有一个简化的API，可以用来将源和汇与接口交叉点组合起来，比如：`Broadcast[T]`，`Balance[T]`，`Merge[In]`和`Concat[A]`，不需要使用图DSL。`combine`方法负责在幕后构造必要的图。在以下示例中，我们将两个来源组合成一个(扇入)：
 
 Scala
 :   @@snip [StreamPartialGraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/StreamPartialGraphDSLDocSpec.scala) { #source-combine }   
@@ -216,8 +161,7 @@ Scala
 Java
 :   @@snip [StreamPartialGraphDSLDocTest.java](/akka-docs/src/test/java/jdocs/stream/StreamPartialGraphDSLDocTest.java) { #source-combine }
 
-
-The same can be done for a @scala[`Sink[T]`]@java[`Sink`] but in this case it will be fan-out:
+可以对一个`Sink[T]`进行相同的操作，但是在这种情况下，它会是扇出：
 
 Scala
 :   @@snip [StreamPartialGraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/StreamPartialGraphDSLDocSpec.scala) { #sink-combine }  
@@ -226,84 +170,49 @@ Java
 :   @@snip [StreamPartialGraphDSLDocTest.java](/akka-docs/src/test/java/jdocs/stream/StreamPartialGraphDSLDocTest.java) { #sink-combine }
 
 
-## Building reusable Graph components
+## 构建可重用的Graph组件
 
-It is possible to build reusable, encapsulated components of arbitrary input and output ports using the graph DSL.
+可以使用图DSL构建可重用的、任意输入和输出端口的封装组件。
 
-As an example, we will build a graph junction that represents a pool of workers, where a worker is expressed
-as a @scala[`Flow[I,O,_]`]@java[`Flow<I,O,M>`], i.e. a simple transformation of jobs of type `I` to results of type `O` (as you have seen
-already, this flow can actually contain a complex graph inside). Our reusable worker pool junction will
-not preserve the order of the incoming jobs (they are assumed to have a proper ID field) and it will use a `Balance`
-junction to schedule jobs to available workers. On top of this, our junction will feature a "fastlane", a dedicated port
-where jobs of higher priority can be sent.
+作为一个例子，我们会建立一个图交叉点代表一群工人，在那里一个`Flow[I,O,_]`表示一个工人，一个简单的转换的作业，即从类型`I`到结果类型`O`(如您所见，这个flow内部实际上可以包含一个内复杂的图)。我们可重用的工人池交叉点将不会保留传入作业的顺序(假定它们具有合适的ID字段)，它将使用一个`Balance`交叉点将作业调度给可用的工人。除此以外，我们的交叉点将扮演一个"快速通道"，一个专用端口，在那里可以发送更高优先级的作业。
 
-Altogether, our junction will have two input ports of type `I` (for the normal and priority jobs) and an output port
-of type `O`. To represent this interface, we need to define a custom `Shape`. The following lines show how to do that.
+总而言之，我们的交叉点将具有两个`I`类型的输入端口(分别用于普通和优先作业)和一个`O`类型的输出端口。要表示此接口，我们需要定义一个自定义`Shape`。以下几行显示了如何执行此操作
 
 Scala
 :   @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #graph-dsl-components-shape }  
 
+<a id="predefined-shapes"></a>
+## 预定义形状(Shape)
 
+通常，一个自定义`Shape`需要能够提供它的所有输入和输出端口，能够复制自身，并且还能够从给定的端口创建新实例。这里提供了一些预定义的形状，以避免不必要的样板文件：
 
-## Predefined shapes
+ * `SourceShape`，`SinkShape`，`FlowShape` 很简单的形状，
+ * `UniformFanInShape`和`UniformFanOutShape` 用于具有多个相同类型的输入(或输出)端口的交叉点，
+ * `FanInShape1`，`FanInShape2`， ...，`FanOutShape1`，`FanOutShape2`，... 用于具有多个不同类型的输入(或输出)端口的交叉点。
 
-In general a custom `Shape` needs to be able to provide all its input and output ports, be able to copy itself, and also be
-able to create a new instance from given ports. There are some predefined shapes provided to avoid unnecessary
-boilerplate:
-
- * `SourceShape`, `SinkShape`, `FlowShape` for simpler shapes,
- * `UniformFanInShape` and `UniformFanOutShape` for junctions with multiple input (or output) ports
-of the same type,
- * `FanInShape1`, `FanInShape2`, ..., `FanOutShape1`, `FanOutShape2`, ... for junctions
-with multiple input (or output) ports of different types.
-
-Since our shape has two input ports and one output port, we can use the `FanInShape` DSL to define
-our custom shape:
+由于我们的形状有两个输入端口和一个输出端口，我们可以使用`FanInShape`DSL来定义我们的自定义形状：
 
 Scala
 :  @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #graph-dsl-components-shape2 }  
 
-
-
-Now that we have a `Shape` we can wire up a Graph that represents
-our worker pool. First, we will merge incoming normal and priority jobs using `MergePreferred`, then we will send the jobs
-to a `Balance` junction which will fan-out to a configurable number of workers (flows), finally we merge all these
-results together and send them out through our only output port. This is expressed by the following code:
+现在我们有了一个`Shape`，我们可以连接一个代表我们的工人池的图。首先，我们将使用`MergePreferred`合并传入的普通和优先作业，然后我们将作业发送到一个`Balance`交叉点，该交叉点将扇出到一个可配置数量的工人(flows)，最后我们将所有结果合并在一起，然后通过我们唯一的输出端口发送出去。这由以下代码表示：
 
 Scala
-:   @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #graph-dsl-components-create }    
+:   @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #graph-dsl-components-create }  
 
-
-
-
-All we need to do now is to use our custom junction in a graph. The following code simulates some simple workers
-and jobs using plain strings and prints out the results. Actually we used *two* instances of our worker pool junction
-using `add()` twice.
+我们现在要做的就是在图中使用我们的自定义交叉点。以下代码使用纯字符串模拟一些简单的工人和作业，并打印出结果。实际上，我们使用了*2*个工人池交叉点的实例，使用`add()`两次。
 
 Scala
 :   @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #graph-dsl-components-use }
 
-
-
-
 <a id="bidi-flow"></a>
-## Bidirectional Flows
+## 双向Flows
 
-A graph topology that is often useful is that of two flows going in opposite
-directions. Take for example a codec operator that serializes outgoing messages
-and deserializes incoming octet streams. Another such operator could add a framing
-protocol that attaches a length header to outgoing data and parses incoming
-frames back into the original octet stream chunks. These two operators are meant
-to be composed, applying one atop the other as part of a protocol stack. For
-this purpose exists the special type `BidiFlow` which is a graph that
-has exactly two open inlets and two open outlets. The corresponding shape is
-called `BidiShape` and is defined like this:
+通常一个有用的图拓扑是向相反方向的两个flows。以编解码器运算符为例，它序列化传出消息，并反序列化传入的八字节流。另一个这样的运算符可以添加一个帧协议，它将长度头附加到传出数据，并将传入的帧解析回原始的八字节流块。这两个运算符要被组合在一起，作为协议栈的一部分，一个运算符应用于另一个运算符之上。为此，存在一种特殊的类型`BidiFlow`，它是一种图形，它恰好拥有两个开放的入口和两个开放的出口。相应的形状被称为`BidiShape`，并定义如下：
 
 @@snip [Shape.scala](/akka-stream/src/main/scala/akka/stream/Shape.scala) { #bidi-shape }   
 
-
-A bidirectional flow is defined just like a unidirectional `Flow` as
-demonstrated for the codec mentioned above:
+一个双向flow的定义就像单向`Flow`一样，上述编解码器的演示：
 
 Scala
 :   @@snip [BidiFlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/BidiFlowDocSpec.scala) { #codec }
@@ -311,11 +220,7 @@ Scala
 Java
 :   @@snip [BidiFlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/BidiFlowDocTest.java) { #codec }
 
-
-The first version resembles the partial graph constructor, while for the simple
-case of a functional 1:1 transformation there is a concise convenience method
-as shown on the last line. The implementation of the two functions is not
-difficult either:
+第一个版本类似于局部图构造器，而对于一个1:1转换功能的简单情况，有一种简洁方便的方法，如最后一行所示。这两个函数的实现也不难：
 
 Scala
 :   @@snip [BidiFlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/BidiFlowDocSpec.scala) { #codec-impl }  
@@ -323,14 +228,9 @@ Scala
 Java
 :   @@snip [BidiFlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/BidiFlowDocTest.java) { #codec-impl }
 
+通过这种方式，您可以集成任何其他序列化库，它将一个对象转换为一个字节序列。
 
-In this way you can integrate any other serialization library that
-turns an object into a sequence of bytes.
-
-The other operator that we talked about is a little more involved since reversing
-a framing protocol means that any received chunk of bytes may correspond to
-zero or more messages. This is best implemented using @ref[`GraphStage`](stream-customize.md)
-(see also @ref[Custom processing with GraphStage](stream-customize.md#graphstage)).
+我们讨论的另一个运算符要稍微复杂一些，因为反转成帧协议意味着任何接收到的字节块都可能对应到零或多个消息。最好使用 @ref[`GraphStage`](stream-customize.md)来实现(请参见 @ref[使用GraphStage进行自定义处理](stream-customize.md#graphstage))。
 
 Scala
 :   @@snip [BidiFlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/BidiFlowDocSpec.scala) { #framing }  
@@ -338,8 +238,7 @@ Scala
 Java
 :   @@snip [BidiFlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/BidiFlowDocTest.java) { #framing }
 
-
-With these implementations we can build a protocol stack and test it:
+通过这些实现，我们可以构建协议栈并对其进行测试：
 
 Scala
 :   @@snip [BidiFlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/BidiFlowDocSpec.scala) { #compose }  
@@ -347,20 +246,12 @@ Scala
 Java
 :   @@snip [BidiFlowDocTest.java](/akka-docs/src/test/java/jdocs/stream/BidiFlowDocTest.java) { #compose }
 
-
-This example demonstrates how `BidiFlow` subgraphs can be hooked
-together and also turned around with the @scala[`.reversed`]@java[`.reversed()`] method. The test
-simulates both parties of a network communication protocol without actually
-having to open a network connection—the flows can be connected directly.
+此示例演示了多少`BidiFlow`子图可以被连接在一起，而且还要使用`.reversed`方法将其翻转。该测试模拟了网络通信协议的双方，而无需实际打开网络连接 - flows可被直接连接。
 
 <a id="graph-matvalue"></a>
-## Accessing the materialized value inside the Graph
+## 访问图内部的物化值
 
-In certain cases it might be necessary to feed back the materialized value of a Graph (partial, closed or backing a
-Source, Sink, Flow or BidiFlow). This is possible by using `builder.materializedValue` which gives an `Outlet` that
-can be used in the graph as an ordinary source or outlet, and which will eventually emit the materialized value.
-If the materialized value is needed at more than one place, it is possible to call `materializedValue` any number of
-times to acquire the necessary number of outlets.
+在某些情况下，可能需要反馈图的物化值(局部的，闭合或返回一个Source，Sink，Flow或BidiFlow)。这可以通过使用`builder.materializedValue`做到，它提供一个`Outlet`，可以在图形中用作普通源或出口，并最终发出物化值。如果在一个以上的地方需要物化价值，则可以调用`materializedValue`任意次以获得必要数量的出口。
 
 Scala
 :   @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #graph-dsl-matvalue }
@@ -368,9 +259,7 @@ Scala
 Java
 :   @@snip [GraphDSLTest.java](/akka-stream-tests/src/test/java/akka/stream/javadsl/GraphDslTest.java) { #graph-dsl-matvalue }
 
-
-Be careful not to introduce a cycle where the materialized value actually contributes to the materialized value.
-The following example demonstrates a case where the materialized @scala[`Future`]@java[`CompletionStage`] of a fold is fed back to the fold itself.
+注意不要引入一个循环，在循环中，物化值实际上会贡献给物化值。以下示例演示了一个折叠(fold)的物化的`Future`被反馈到折痕折叠的案例。
 
 Scala
 :  @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #graph-dsl-matvalue-cycle }
@@ -378,26 +267,18 @@ Scala
 Java
 :  @@snip [GraphDSLTest.java](/akka-stream-tests/src/test/java/akka/stream/javadsl/GraphDslTest.java) { #graph-dsl-matvalue-cycle }
 
-
 <a id="graph-cycles"></a>
-## Graph cycles, liveness and deadlocks
+## 图循环，存活性和死锁
 
-Cycles in bounded stream topologies need special considerations to avoid potential deadlocks and other liveness issues.
-This section shows several examples of problems that can arise from the presence of feedback arcs in stream processing
-graphs.
+有界流拓扑中的循环需要特殊的考虑，以避免潜在的死锁和其他存活性问题。本节展示了几个示例，关于在流处理图中存在反馈弧时可能出现的问题。
 
-In the following examples runnable graphs are created but do not run because each have some issue and will deadlock after start.
-`Source` variable is not defined as the nature and number of element does not matter for described problems.
+在以下示例中，可运行图已经创建好了，但是不能运行，因为每个图都有一些问题而且启动后会死锁。`Source`变量没有定义，因为元素的性质和数量与所描述的问题无关。
 
-The first example demonstrates a graph that contains a naïve cycle.
-The graph takes elements from the source, prints them, then broadcasts those elements
-to a consumer (we just used `Sink.ignore` for now) and to a feedback arc that is merged back into the main stream via
-a `Merge` junction.
+第一个示例演示了一个包含简单循环的图。该图从源中获取元素，打印它们，然后将这些元素广播给消费者(目前我们只是使用`Sink.ignore`)和给一个反馈弧，它通过`Merge`交叉点合并回到主流中。
 
 @@@ note
 
-The graph DSL allows the connection arrows to be reversed, which is particularly handy when writing cycles—as we will
-see there are cases where this is very helpful.
+图DSL允许反转连接箭头，这在编写循环时特别方便 - 我们将看到，在一些情况下，这是非常有用的。
 
 @@@
 
@@ -407,22 +288,14 @@ Scala
 Java
 :   @@snip [GraphCyclesDocTest.java](/akka-docs/src/test/java/jdocs/stream/GraphCyclesDocTest.java) { #deadlocked }
 
+运行这段代码，我们观察到，在打印了一些数字之后，不再有任何元素输出日志到控制台 - 一段时间后所有处理停止。经过一些调查，我们发现：
 
-Running this we observe that after a few numbers have been printed, no more elements are logged to the console -
-all processing stops after some time. After some investigation we observe that:
+ * 通过从`source`合并，我们增加了循环中流动的元素数量
+ * 由广播回到循环，我们没有减少循环中的元素数量
 
- * through merging from `source` we increase the number of elements flowing in the cycle
- * by broadcasting back to the cycle we do not decrease the number of elements in the cycle
+由于Akka流(和通常的响应流)保证有界处理(请参阅"缓冲"部分以了解更多详细信息)，这意味着在任何时间范围内只有有限数量的元素被缓冲。由于我们的循环获得越来越多的元素，最终它的所有内部缓冲区都变满了，一直背压`source`。为了能够处理来自`source`的更多元素，元素需要以某种方式离开循环。
 
-Since Akka Streams (and Reactive Streams in general) guarantee bounded processing (see the "Buffering" section for more
-details) it means that only a bounded number of elements are buffered over any time span. Since our cycle gains more and
-more elements, eventually all of its internal buffers become full, backpressuring `source` forever. To be able
-to process more elements from `source` elements would need to leave the cycle somehow.
-
-If we modify our feedback loop by replacing the `Merge` junction with a `MergePreferred` we can avoid the deadlock.
-`MergePreferred` is unfair as it always tries to consume from a preferred input port if there are elements available
-before trying the other lower priority input ports. Since we feed back through the preferred port it is always guaranteed
-that the elements in the cycles can flow.
+如果我们修改我们的反馈循环，将`Merge`交叉点替换为一个`MergePreferred`，就可以避免死锁。`MergePreferred`是不公平的，由于它总是试图先从一个优先的输入端口消费，如果那里有元素可用，然后再尝试其他较低优先级的输入端口。由于我们通过优先的端口进行反馈，因此始终保证循环中的元素可以流动。
 
 Scala
 :   @@snip [GraphCyclesSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphCyclesSpec.scala) { #unfair }
@@ -430,22 +303,15 @@ Scala
 Java
 :   @@snip [GraphCyclesDocTest.java](/akka-docs/src/test/java/jdocs/stream/GraphCyclesDocTest.java) { #unfair }
 
-
-If we run the example we see that the same sequence of numbers are printed
-over and over again, but the processing does not stop. Hence, we avoided the deadlock, but `source` is still
-back-pressured forever, because buffer space is never recovered: the only action we see is the circulation of a couple
-of initial elements from `source`.
+如果我们运行这个例子，我们会看到相同的数字序列被一次又一次地打印出来，但是这个处理不会停止。从此，我们避免了死锁，但`source`仍然一直背压，因为缓冲区空间从未恢复：我们看到的唯一动作是来自`source`的几个初始元素的循环。
 
 @@@ note
 
-What we see here is that in certain cases we need to choose between boundedness and liveness. Our first example would
-not deadlock if there were an infinite buffer in the loop, or vice versa, if the elements in the cycle were 
-balanced (as many elements are removed as many are injected) then there would be no deadlock.
+我们在这里看到的是，在某些情况下，我们需要在有界与活跃度之间做出选择。如果循环中有无穷大的缓冲区，我们的第一个示例将不会死锁，反之亦然，如果循环中的元素是平衡的(移除的元素数量与注入的元素数量相同)，也不会出现死锁。
 
 @@@
 
-To make our cycle both live (not deadlocking) and fair we can introduce a dropping element on the feedback arc. In this
-case we chose the `buffer()` operation giving it a dropping strategy `OverflowStrategy.dropHead`.
+为了使我们的循环既活跃(不死锁)又公平，我们可以在反馈弧上引入一个丢弃(dropping)元素。在这种情况下，我们选择`buffer()`运算，给它一个丢弃策略`OverflowStrategy.dropHead`。
 
 Scala
 :   @@snip [GraphCyclesSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphCyclesSpec.scala) { #dropping }
@@ -453,23 +319,14 @@ Scala
 Java
 :   @@snip [GraphCyclesDocTest.java](/akka-docs/src/test/java/jdocs/stream/GraphCyclesDocTest.java) { #dropping }
 
+如果我们运行这个示例，我们将会看到
 
-If we run this example we see that
+ * 元素的流动不会停止，总是在打印元素
+ * 我们看到一些数字随着时间的推移被打印了几次(由于反馈循环)，但平均起来，这个数字还在增长，从长期来看
 
- * The flow of elements does not stop, there are always elements printed
- * We see that some of the numbers are printed several times over time (due to the feedback loop) but on average
-the numbers are increasing in the long term
+这个例子强调了一个解决方案，它可以避免当潜在的不平衡循环(循环的元素的数量是无限的)存在时出现的死锁，这个方案是丢弃元素。一种替代方法是使用`OverflowStrategy.fail`定义一个较大的缓冲区，它将使流失败，而不是在消耗完所有缓冲区空间后将其死锁。
 
-This example highlights that one solution to avoid deadlocks in the presence of potentially unbalanced cycles
-(cycles where the number of circulating elements are unbounded) is to drop elements. An alternative would be to
-define a larger buffer with `OverflowStrategy.fail` which would fail the stream instead of deadlocking it after
-all buffer space has been consumed.
-
-As we discovered in the previous examples, the core problem was the unbalanced nature of the feedback loop. We
-circumvented this issue by adding a dropping element, but now we want to build a cycle that is balanced from
-the beginning instead. To achieve this we modify our first graph by replacing the `Merge` junction with a `ZipWith`.
-Since `ZipWith` takes one element from `source` *and* from the feedback arc to inject one element into the cycle,
-we maintain the balance of elements.
+正如我们在前面的例子中发现的那样，核心问题是反馈循环的不平衡性质。我们通过添加一个丢弃元素来避开这个问题，但现在我们想建立一个从一开始就平衡的循环。为了实现这一点，我们通过用一个`ZipWith`替换`Merge`交叉点来修改我们的第一个图。由于`ZipWith`从`source`取走一个元素，*并*从反馈弧注入一个元素到循环中，我们保持了元素的平衡。
 
 Scala
 :   @@snip [GraphCyclesSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphCyclesSpec.scala) { #zipping-dead }    
@@ -477,16 +334,12 @@ Scala
 Java
 :   @@snip [GraphCyclesDocTest.java](/akka-docs/src/test/java/jdocs/stream/GraphCyclesDocTest.java) { #zipping-dead }
 
+尽管如此，当我们尝试运行这个示例时，却发现根本没有打印任何元素! 经过一些调查，我们意识到:
 
-Still, when we try to run the example it turns out that no element is printed at all! After some investigation we
-realize that:
+ * 为了使第一个元素从`source`进入循环，我们需要一个循环中已经存在的元素
+ * 为了获得循环中的初始元素，我们需要一个来自`source`的元素
 
- * In order to get the first element from `source` into the cycle we need an already existing element in the cycle
- * In order to get an initial element in the cycle we need an element from `source`
-
-These two conditions are a typical "chicken-and-egg" problem. The solution is to inject an initial
-element into the cycle that is independent from `source`. We do this by using a `Concat` junction on the backwards
-arc that injects a single element using `Source.single`.
+这两个条件是一个典型的"鸡与蛋"的问题。解决方案是将一个初始元素注入到独立于`source`的循环中。为此，我们在向逆向(backwards)弧上使用一个`Concat`交叉点，它使用`Source.single`注入单个元素。
 
 Scala
 :   @@snip [GraphCyclesSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphCyclesSpec.scala) { #zipping-live }    
@@ -494,6 +347,4 @@ Scala
 Java
 :   @@snip [GraphCyclesDocTest.java](/akka-docs/src/test/java/jdocs/stream/GraphCyclesDocTest.java) { #zipping-live }
 
-
-When we run the above example we see that processing starts and never stops. The important takeaway from this example
-is that balanced cycles often need an initial "kick-off" element to be injected into the cycle.
+当我们运行上面的例子时，我们看到处理开始并且不会停止。从这个例子中得出的要点是，平衡的循环通常需要一个初始的"开球"元素注入到循环中。

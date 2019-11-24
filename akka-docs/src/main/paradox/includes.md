@@ -2,10 +2,7 @@
 <!--- #actor-api --->
 @@@ note
 
-Akka Classic pertains to the original Actor APIs, which have been improved by more type safe and guided Actor APIs. 
-Akka Classic is still fully supported and existing applications can continue to use the classic APIs. It is also
-possible to use the new Actor APIs together with classic actors in the same ActorSystem, see @ref:[coexistence](typed/coexisting.md).
-For new projects we recommend using @ref:[the new Actor API](typed/actors.md).
-       
+Akka经典与原始的Actor API有关，并已通过类型更安全且受指导的Actor API进行了改进。Akka经典仍然受到完全支持，现有的应用程序可以继续使用经典api。也可以在同一ActorSystem中将新的Actor API与经典actor一起使用，请参见 @ref:[共存](typed/coexisting.md)。对于新项目，我们建议使用 @ref:[新的Actor API](typed/actors.md)。
+
 @@@
 <!--- #actor-api --->

@@ -1,11 +1,11 @@
-# Classic Routing
+# 经典路由
 
 @@include[includes.md](includes.md) { #actor-api }
-For the documentation of the new API of this feature and for new projects see @ref:[routers](typed/routers.md).
+新项目中有关此功能的完整文档，请参阅 @ref:[路由器](typed/routers.md) 。
 
 ## Dependency
 
-To use Routing, you must add the following dependency in your project:
+要使用路由，您必须在您的项目中添加以下依赖项:
 
 @@dependency[sbt,Maven,Gradle] {
   group="com.typesafe.akka"
@@ -13,20 +13,16 @@ To use Routing, you must add the following dependency in your project:
   version="$akka.version$"
 }
 
-## Introduction
+## 介绍
 
-Messages can be sent via a router to efficiently route them to destination actors, known as
-its *routees*. A `Router` can be used inside or outside of an actor, and you can manage the
-routees yourselves or use a self contained router actor with configuration capabilities.
+消息可以通过路由器发送，以有效地将它们路由到目的地actor，它们被称为*routees*。一个`Router`可以在actor的内部或外部使用，并且您可以自己管理路由或使用一个具有配置功能的自包含路由器actor。
 
-Different routing strategies can be used, according to your application's needs. Akka comes with
-several useful routing strategies right out of the box. But, as you will see in this chapter, it is
-also possible to @ref:[create your own](#custom-router).
+根据您的应用程序需求，可以使用不同的路由策略。Akka开箱即用地提供了几种有用的路由策略。但是，正如您将在本章中看到的那样，也可以 @ref:[创建自己的](#custom-router)。
 
 <a id="simple-router"></a>
-## A Simple Router
+## 一个简单的路由器
 
-The following example illustrates how to use a `Router` and manage the routees from within an actor.
+以下示例说明了如何在角色内部使用一个`Router`和管理routees。
 
 Scala
 :  @@snip [RouterDocSpec.scala](/akka-docs/src/test/scala/docs/routing/RouterDocSpec.scala) { #router-in-actor }
@@ -34,10 +30,9 @@ Scala
 Java
 :  @@snip [RouterDocTest.java](/akka-docs/src/test/java/jdocs/routing/RouterDocTest.java) { #router-in-actor }
 
-We create a `Router` and specify that it should use `RoundRobinRoutingLogic` when routing the
-messages to the routees.
+我们创建一个`Router`，并指定它在将消息路由到routees时应使用`RoundRobinRoutingLogic`。
 
-The routing logic shipped with Akka are:
+Akka提供的路由逻辑为：
 
  * `akka.routing.RoundRobinRoutingLogic`
  * `akka.routing.RandomRoutingLogic`
@@ -47,58 +42,40 @@ The routing logic shipped with Akka are:
  * `akka.routing.TailChoppingRoutingLogic`
  * `akka.routing.ConsistentHashingRoutingLogic`
 
-We create the routees as ordinary child actors wrapped in `ActorRefRoutee`. We watch
-the routees to be able to replace them if they are terminated.
+我们将routees创建为包裹在`ActorRefRoutee`中的普通子actors。我们监视routees，如果它们被终止，则能够替换它们。
 
-Sending messages via the router is done with the `route` method, as is done for the `Work` messages
-in the example above.
+通过路由器发送消息是通过`route`方法完成的，就像上面示例中的`Work`消息一样。
 
-The `Router` is immutable and the `RoutingLogic` is thread safe; meaning that they can also be used
-outside of actors.  
+该`Router`是不可变的且`RoutingLogic`是线程安全的; 意味着它们也可以在actors之外使用。
 
 @@@ note
 
-In general, any message sent to a router will be sent onwards to its routees, but there is one exception.
-The special @ref:[Broadcast Messages](#broadcast-messages) will send to *all* of a router's routees.
-However, do not use @ref:[Broadcast Messages](#broadcast-messages) when you use @ref:[BalancingPool](#balancing-pool) for routees
-as described in @ref:[Specially Handled Messages](#router-special-messages).
+通常，发送到路由器的任何消息都将继续发送到其routees，但是有一个例外。特殊的 @ref:[广播消息](#broadcast-messages)将发送到路由器的*所有*routees。但是，当你将 @ref:[BalancingPool](#balancing-pool) 用于在特殊处理的消息中所述routees时，请勿使用 @ref:[广播消息](#broadcast-messages)。
 
 @@@
 
-## A Router Actor
+## 一个路由器Actor
 
-A router can also be created as a self contained actor that manages the routees itself and
-loads routing logic and other settings from configuration.
+路由器也可以被创建为一个自包含的actor，它自己管理routees并从配置中加载路由逻辑和其他设置。
 
-This type of router actor comes in two distinct flavors:
+这种类型的路由器actor有两种截然不同的风格：
 
- * Pool - The router creates routees as child actors and removes them from the router if they
-terminate.
- * Group - The routee actors are created externally to the router and the router sends
-messages to the specified path using actor selection, without watching for termination.
+ * Pool - 路由器将routees创建为子actors，并在它们终止时将它们从路由器中删除。
+ * Group - routee actors在路由器外部创建，路由器使用actor selection 将消息发送到指定路径，无需监视终止。
 
-The settings for a router actor can be defined in configuration or programmatically. 
-In order to make an actor to make use of an externally configurable router the `FromConfig` props wrapper must be used
-to denote that the actor accepts routing settings from configuration.
-This is in contrast with Remote Deployment where such marker props is not necessary.
-If the props of an actor is NOT wrapped in `FromConfig` it will ignore the router section of the deployment configuration.
+可以在配置中或通过编程定义路由器actor的设置。为了使actor能够使用外部可配置路由器，必须使用`FromConfig` props 包装器来表示actor从配置中接受路由设置。这与不需要这种标记props的远程部署相反。如果actor的props没有包装在`FromConfig`中，它将忽略路由器的部署配置部分。
 
-You send messages to the routees via the router actor in the same way as for ordinary actors,
-i.e. via its `ActorRef`. The router actor forwards messages onto its routees without changing 
-the original sender. When a routee replies to a routed message, the reply will be sent to the 
-original sender, not to the router actor.
+您可以通过路由器actor将消息发送到routees，使用与普通actor相同的方式，即通过它的`ActorRef`。路由器actor将消息转发到其routees上，不会改变原始发送者。当routee答复被路由的消息时，该答复将发送给原始发送者，而不是路由器actor。
 
 @@@ note
 
-In general, any message sent to a router will be sent onwards to its routees, but there are a
-few exceptions. These are documented in the @ref:[Specially Handled Messages](#router-special-messages) section below.
+通常，发送到路由器的任何消息都将继续发送到其routees，但是也有一些例外。这些内容记录在下面的 @ref:[特殊处理的消息](#router-special-messages)部分中。
 
 @@@
 
 ### Pool
 
-The following code and configuration snippets show how to create a @ref:[round-robin](#round-robin-router) router that forwards messages to five `Worker` routees. The
-routees will be created as the router's children.
+以下代码和配置片段显示了如何创建一个 @ref:[round-robin](#round-robin-router)路由器，它将消息转发到五个`Worker` routees。routees将被创建为路由器的后代。
 
 @@snip [RouterDocSpec.scala](/akka-docs/src/test/scala/docs/routing/RouterDocSpec.scala) { #config-round-robin-pool }
 
@@ -108,8 +85,7 @@ Scala
 Java
 :  @@snip [RouterDocTest.java](/akka-docs/src/test/java/jdocs/routing/RouterDocTest.java) { #round-robin-pool-1 }
 
-Here is the same example, but with the router configuration provided programmatically instead of
-from configuration.
+这是同一示例，但是路由器配置是通过编程提供的，而不是通过配置提供。
 
 Scala
 :  @@snip [RouterDocSpec.scala](/akka-docs/src/test/scala/docs/routing/RouterDocSpec.scala) { #round-robin-pool-2 }
@@ -117,13 +93,9 @@ Scala
 Java
 :  @@snip [RouterDocTest.java](/akka-docs/src/test/java/jdocs/routing/RouterDocTest.java) { #round-robin-pool-2 }
 
-#### Remote Deployed Routees
+#### 远程部署的Routees
 
-In addition to being able to create local actors as routees, you can instruct the router to
-deploy its created children on a set of remote hosts. Routees will be deployed in round-robin
-fashion. In order to deploy routees remotely, wrap the router configuration in a
-`RemoteRouterConfig`, attaching the remote addresses of the nodes to deploy to. Remote
-deployment requires the `akka-remote` module to be included in the classpath.
+除了能够将本地actors创建为routees之外，您还可以指示路由器将其创建的后代部署在一组远程主机上。Routees将以round-robin方式进行部署。为了远程部署routees，请将路由器配置包装在`RemoteRouterConfig`中，并附加要部署到的节点的远程地址。远程部署要求将`akka-remote`模块包含在classpath中。
 
 Scala
 :  @@snip [RouterDocSpec.scala](/akka-docs/src/test/scala/docs/routing/RouterDocSpec.scala) { #remoteRoutees }
@@ -131,16 +103,17 @@ Scala
 Java
 :  @@snip [RouterDocTest.java](/akka-docs/src/test/java/jdocs/routing/RouterDocTest.java) { #remoteRoutees }
 
-#### Senders
+#### 发送者
 
-By default, when a routee sends a message, it will @ref:[implicitly set itself as the sender
-](actors.md#actors-tell-sender).
+默认情况下，当一个routee发送消息时，它将 @ref:[隐式地将自身设置为发送者](actors.md#actors-tell-sender)。
 
 Scala
 :  @@snip [ActorDocSpec.scala](/akka-docs/src/test/scala/docs/actor/ActorDocSpec.scala) { #reply-without-sender }
 
 Java
 :  @@snip [RouterDocTest.java](/akka-docs/src/test/java/jdocs/routing/RouterDocTest.java) { #reply-with-self }
+
+但是，对于routees而言，将*路由器*设置为发送者通常很有用。例如，如果要隐藏路由器后面的路由的详细信息，则可能要将路由器设置为发送者。以下代码段显示了如何将父路由器设置为发送者。
 
 However, it is often useful for routees to set the *router* as a sender. For example, you might want
 to set the router as the sender if you want to hide the details of the routees behind the router.

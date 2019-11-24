@@ -1,123 +1,115 @@
-# Design Principles behind Akka Streams
+# Akka Streams背后的设计原理
 
-It took quite a while until we were reasonably happy with the look and feel of the API and the architecture of the implementation, and while being guided by intuition the design phase was very much exploratory research. This section details the findings and codifies them into a set of principles that have emerged during the process.
-
-@@@ note
-
-As detailed in the introduction keep in mind that the Akka Streams API is completely decoupled from the Reactive Streams interfaces which are an implementation detail for how to pass stream data between individual operators.
-
-@@@
-
-## What shall users of Akka Streams expect?
-
-Akka is built upon a conscious decision to offer APIs that are minimal and consistent—as opposed to easy or intuitive. The credo is that we favor explicitness over magic, and if we provide a feature then it must work always, no exceptions. Another way to say this is that we minimize the number of rules a user has to learn instead of trying to keep the rules close to what we think users might expect.
-
-From this follows that the principles implemented by Akka Streams are:
-
- * all features are explicit in the API, no magic
- * supreme compositionality: combined pieces retain the function of each part
- * exhaustive model of the domain of distributed bounded stream processing
-
-This means that we provide all the tools necessary to express any stream processing topology, that we model all the essential aspects of this domain (back-pressure, buffering, transformations, failure recovery, etc.) and that whatever the user builds is reusable in a larger context.
-
-### Akka Streams does not send dropped stream elements to the dead letter office
-
-One important consequence of offering only features that can be relied upon is the restriction that Akka Streams cannot ensure that all objects sent through a processing topology will be processed. Elements can be dropped for a number of reasons:
-
- * plain user code can consume one element in a *map(...)* operator and produce an entirely different one as its result
- * common stream operators drop elements intentionally, e.g. take/drop/filter/conflate/buffer/…
- * stream failure will tear down the stream without waiting for processing to finish, all elements that are in flight will be discarded
- * stream cancellation will propagate upstream (e.g. from a *take* operator) leading to upstream processing steps being terminated without having processed all of their inputs
-
-This means that sending JVM objects into a stream that need to be cleaned up will require the user to ensure that this happens outside of the Akka Streams facilities (e.g. by cleaning them up after a timeout or when their results are observed on the stream output, or by using other means like finalizers etc.).
-
-### Resulting Implementation Considerations
-
-Compositionality entails reusability of partial stream topologies, which led us to the lifted approach of describing data flows as (partial) graphs that can act as composite sources, flows (a.k.a. pipes) and sinks of data. These building blocks shall then be freely shareable, with the ability to combine them freely to form larger graphs. The representation of these pieces must therefore be an immutable blueprint that is materialized in an explicit step in order to start the stream processing. The resulting stream processing engine is then also immutable in the sense of having a fixed topology that is prescribed by the blueprint. Dynamic networks need to be modeled by explicitly using the Reactive Streams interfaces for plugging different engines together.
-
-The process of materialization will often create specific objects that are useful to interact with the processing engine once it is running, for example for shutting it down or for extracting metrics. This means that the materialization function produces a result termed the *materialized value of a graph*.
-
-## Interoperation with other Reactive Streams implementations
-
-Akka Streams fully implement the Reactive Streams specification and interoperate with all other conformant implementations. We chose to completely separate the Reactive Streams interfaces from the user-level API because we regard them to be an SPI that is not targeted at endusers. In order to obtain a `Publisher` or `Subscriber` from an Akka Stream topology, a corresponding `Sink.asPublisher` or `Source.asSubscriber` element must be used.
-
-All stream Processors produced by the default materialization of Akka Streams are restricted to having a single Subscriber, additional Subscribers will be rejected. The reason for this is that the stream topologies described using our DSL never require fan-out behavior from the Publisher sides of the elements, all fan-out is done using explicit elements like `Broadcast[T]`.
-
-This means that `Sink.asPublisher(true)` (for enabling fan-out support) must be used where broadcast behavior is needed for interoperation with other Reactive Streams implementations.
-
-### Rationale and benefits from Sink/Source/Flow not directly extending Reactive Streams interfaces
-
-A sometimes overlooked crucial piece of information about [Reactive Streams](https://github.com/reactive-streams/reactive-streams-jvm/) is that they are a [Service Provider Interface](https://en.m.wikipedia.org/wiki/Service_provider_interface), as explained in depth in one of the [early discussions](https://github.com/reactive-streams/reactive-streams-jvm/pull/25) about the specification.
-Akka Streams was designed during the development of Reactive Streams, so they both heavily influenced one another.
-
-It may be enlightening to learn that even within the Reactive Specification the types had initially attempted to hide `Publisher`, `Subscriber` and the other SPI types from users of the API.
-Though since those internal SPI types would end up surfacing to end users of the standard in some cases, it was decided to [remove the API types, and only keep the SPI types](https://github.com/reactive-streams/reactive-streams-jvm/pull/25) which are the `Publisher`, `Subscriber` et al.
-
-With this historical knowledge and context about the purpose of the standard – being an internal detail of interoperable libraries - we can with certainty say that it can't be really said that an direct _inheritance_ relationship with these types can be considered some form of advantage or meaningful differentiator between libraries.
-Rather, it could be seen that APIs which expose those SPI types to end-users are leaking internal implementation details accidentally. 
-
-The `Source`, `Sink` and `Flow` types which are part of Akka Streams have the purpose of providing the fluent DSL, as well as to be "factories" for running those streams.
-Their direct counterparts in Reactive Streams are, respectively, `Publisher`, `Subscriber` and `Processor`. 
-In other words, Akka Streams operate on a lifted representation of the computing graph,
-which then is materialized and executed in accordance to Reactive Streams rules. This also allows Akka Streams to perform optimizations like fusing and dispatcher configuration during the materialization step.
-
-Another not obvious gain from hiding the Reactive Streams interfaces comes from the fact that `org.reactivestreams.Subscriber` (et al) have now been included in Java 9+, and thus become part of Java itself, so libraries should migrate to using the `java.util.concurrent.Flow.Subscriber` instead of `org.reactivestreams.Subscriber`.
-Libraries which selected to expose and directly extend the Reactive Streams types will now have a tougher time to adapt the JDK9+ types -- all their classes that extend Subscriber and friends will need to be copied or changed to extend the exact same interface,
-but from a different package. In Akka we simply expose the new type when asked to -- already supporting JDK9 types, from the day JDK9 was released.
-
-The other, and perhaps more important reason for hiding the Reactive Streams interfaces comes back to the first points of this explanation: the fact of Reactive Streams being an SPI, and as such is hard to "get right" in ad-hoc implementations. Thus Akka Streams discourages the use of the hard to implement pieces of the underlying infrastructure, and offers simpler, more type-safe, yet more powerful abstractions for users to work with: GraphStages and operators. It is of course still (and easily) possible to accept or obtain Reactive Streams (or JDK+ Flow) representations of the stream operators by using methods like `asPublisher` or `fromSubscriber`.
-
-## What shall users of streaming libraries expect?
-
-We expect libraries to be built on top of Akka Streams, in fact Akka HTTP is one such example that lives within the Akka project itself. In order to allow users to profit from the principles that are described for Akka Streams above, the following rules are established:
-
- * libraries shall provide their users with reusable pieces, i.e. expose factories that return operators, allowing full compositionality
- * libraries may optionally and additionally provide facilities that consume and materialize operators
-
-The reasoning behind the first rule is that compositionality would be destroyed if different libraries only accepted operators and expected to materialize them: using two of these together would be impossible because materialization can only happen once. As a consequence, the functionality of a library must be expressed such that materialization can be done by the user, outside of the library’s control.
-
-The second rule allows a library to additionally provide nice sugar for the common case, an example of which is the Akka HTTP API that provides a `handleWith` method for convenient materialization.
+我们花了很长时间才对API和实现的架构的面貌感到满意，并且在直觉的指导下，设计阶段是非常探索性的研究。本节详细介绍了这些发现，并将它们编入在此过程中出现的一套原则。
 
 @@@ note
 
-One important consequence of this is that a reusable flow description cannot be bound to “live” resources, any connection to or allocation of such resources must be deferred until materialization time. Examples of “live” resources are already existing TCP connections, a multicast Publisher, etc.; a TickSource does not fall into this category if its timer is created only upon materialization (as is the case for our implementation).
-
-Exceptions from this need to be well-justified and carefully documented.
+如简介中所述，请记住，Akka Streams API与Reactive Streams接口完全解耦，它是关于如何在各个运算符之间传递流数据的实现细节。
 
 @@@
 
-### Resulting Implementation Constraints
+## Akka Streams的用户应该期待什么?
 
-Akka Streams must enable a library to express any stream processing utility in terms of immutable blueprints. The most common building blocks are
+Akka建立在一个有意的决策上，即提供最小且一致的api - 而不是简单或直观的api。我们的信条是，与魔术相比，我们更喜欢明确性，如果我们提供一个功能，那么它必须始终工作，没有例外。另一种说法是，我们尽量减少用户必须学习的规则数量，而不是尝试使规则接近我们认为用户可能期望的规则。
 
- * Source: something with exactly one output stream
- * Sink: something with exactly one input stream
- * Flow: something with exactly one input and one output stream
- * BidiFlow: something with exactly two input streams and two output streams that conceptually behave like two Flows of opposite direction
- * Graph: a packaged stream processing topology that exposes a certain set of input and output ports, characterized by an object of type `Shape`.
+由此可见，Akka Streams实现的原则是：
+
+ * API中的所有功能都是明确的，没有魔术
+ * 最高的组合性：组合件保留了每个部件的功能
+ * 分布式有界流处理领域的详尽模型
+
+这意味着我们提供了所有必要的工具来表达任何流处理拓扑，我们对这个域的所有基本方面建模(背压、缓冲、转换、故障恢复等)，并且无论用户构建什么都可以在更大的上下文中重用。
+
+### Akka Streams不会将掉线的流元素发送到死信办公室
+
+只提供可以信赖的特性的一个重要后果是，Akka流不能确保通过处理拓扑发送的所有对象都得到处理。元素可能被删除的原因有很多:
+
+ * 普通的用户代码可以消费*map(...)*运算符中的一个元素，并产生一个完全不同的元素作为结果
+ * 常见的流运算符有意地删除元素，例如take/drop/filter/conflate/buffer/…
+ * 流故障将在没有等待处理完成的情况下中断流，所有处于迁徙状态的元素都将被丢弃
+ * 流取消将向上传播(例如，来自*take*操作符)，导致上游处理步骤终止，而没有处理它们的所有输入
+
+这意味着，将JVM对象发送到需要清除的流中将需要用户确保此操作在Akka Streams设施之外发生(例如，在超时后或在流输出中观察到它们的结果时清理它们，或使用终结器等其他方法)。
+
+### 最终实现的注意事项
+
+组合性要求部分流拓扑具有可重用性，这导致我们采用了一种将数据流描述为(部分)图的提升方法，这些图可以充当复合的源，flows(即管道)和数据接收器。这些构建块将要可以自由共享，并能够自由地组合它们，形成更大的图形。因此，这些片段的表述必须是一个不可变的蓝图，并在显式步骤中物化，以便启动流处理。作为结果的流处理引擎也是不可变的，因为它具有由蓝图规定的固定拓扑结构。动态网络需要通过显式地使用反应式流接口将不同的引擎连接在一起来建模。
+
+物化过程通常会创建特定的对象，这些对象在处理引擎运行时非常有用，例如用于关闭它或提取度量。这意味着物化函数产生的结果称为*图的物化值*。
+
+## 与其他Reactive Streams实现的交互
+
+Akka Streams完全实现了Reactive Streams规范，并可以与所有其他一致的实现进行交互。我们选择将Reactive Streams接口与用户级API彻底地解耦，因为我们认为它们是不面向最终用户的SPI。为了从Akka Stream拓扑获得一个`Publisher`或`Subscriber`，必须使用一个对应的`Sink.asPublisher`或`Source.asSubscriber`元素。
+
+所有由Akka Streams的默认物化产生的流处理器都被限制为只有一个订阅者，额外的订阅者将被拒绝。这样做的原因是，使用DSL描述的流拓扑永远不需要元素的发布端的扇出行为，所有扇出都使用诸如`Broadcast[T]`的显式元素来完成。
+
+这意味着`Sink.asPublisher(true)`(用于启用扇出支持)必须在需要广播行为与其他响应流实现交互的地方使用。
+
+### Sink/Source/Flow没有直接扩展Reactive Streams接口的原理和好处 
+
+关于[Reactive Streams](https://github.com/reactive-streams/reactive-streams-jvm/)的一个有时被忽略的关键信息是它们是一个 [服务提供者接口](https://en.m.wikipedia.org/wiki/Service_provider_interface)，正如在有关该规范的 [早期讨论](https://github.com/reactive-streams/reactive-streams-jvm/pull/25)之一中所深入解释的那样。Akka Streams是在Reactive Streams的开发过程中设计的，因此它们彼此之间有很大的影响。
+
+了解到即使在响应式规范中，类型最初也试图向API的用户隐藏`Publisher`、`Subscriber`和其他SPI类型，这可能会有所启发。尽管在某些情况下，这些内部SPI类型最终会出现在标准的最终用户面前，所以决定 [删除API类型，只有保持SPI类型](https://github.com/reactive-streams/reactive-streams-jvm/pull/25)它们是`Publisher`，`Subscriber`等等。
+
+有了标准目标的历史知识和上下文 – 作为交互库的内部细节 – 我们可以肯定地说，它不能真的被说成与这些类型的一种直接的_继承_关系视为某种形式的优势或库之间有意义的区别。相反，可以看出向最终用户公开那些SPI类型的API意外泄漏了内部实现细节。
+
+`Source`，`Sink`和`Flow`类型是Akka Streams的一部分，它们的目的是提供流畅的DSL，并充当运行这些流的"工厂"。它们在Reactive Streams中的直接对应项分别是`Publisher`，`Subscriber`和`Processor`。换句话说，Akka Streams对计算图的提升表示进行操作，然后根据Reactive Streams规则将其物化并执行。这还允许Akka Streams在物化步骤中执行诸如融合和调度程序配置之类的优化。
+
+源于隐藏Reactive Streams接口的另一个不明显的收获来自于这样一个事实，即`org.reactivestreams.Subscriber`(等等)现在已包含在Java 9+中，并因此成为Java本身的一部分，因此库应迁移到使用`java.util.concurrent.Flow.Subscriber`代替`org.reactivestreams.Subscriber`。选择公开和直接扩展Reactive Streams类型的库现在将更难适应JDK9 +类型 -- 他们所有扩展Subscriber和Friends的类都将需要复制或更改以扩展完全相同的接口，但是从不同的包中进行的。在Akka中，我们仅在需要时暴露新类型 -- 已经支持JDK9类型，从JDK9发布之日起。
+
+隐藏Reactive Streams接口的另一个可能是更重要的原因，可以追溯到该解释的第一点：Reactive Streams是SPI的事实，因此在专门实现中很难"正确"。因此，Akka Streams不鼓励使用底层基础设施中难以实现的部分，并为用户提供了更简单，更类型安全但功能更强大的抽象供用户使用：GraphStages和运算符。当然，仍然可以(或轻松地)接受或获取流操作符的Reactive Streams(或JDK+ Flow)表示形式，通过使用类似`asPublisher`或`fromSubscriber`的方法。
+
+## streaming库用户应该期待什么？
+
+我们期望库将基于Akka Streams构建，实际上Akka HTTP就是这样一个示例，它存在于Akka项目本身中。为了让用户从上述Akka Streams的原则中获益，我们制定了以下规则:
+
+ * 库应向用户提供可重复使用的部件，即公开返回操作符的工厂，允许完全的组合性
+ * 库能够可选并额外地提供消耗和物化操作符的设施
+
+第一条规则背后的理由是，如果不同的库只接受运算符并期望将其物化，则组合性将被破坏：同时使用这两种方法是不可能的，因为物化只能发生一次。因此，库的功能必须表示为用户可以在库的控制之外完成物化。
+
+第二个规则允许库为常见情况额外提供良好的支持，例如Akka HTTP API，它提供了一个方便物化的`handleWith`方法。
 
 @@@ note
 
-A source that emits a stream of streams is still a normal Source, the kind of elements that are produced does not play a role in the static stream topology that is being expressed.
+这样做的一个重要后果是，可重用的flow描述不能绑定到"实时"资源，任何连接或分配此类资源必须延迟，直到物化时间。"实时"资源的例子是已经存在的TCP连接，多点广播发布者等。一个TickSource不会属于此类别，如果它的计时器仅在物化时创建(例如我们的实现)。
+
+对此的例外情况需要进行充分的论证并仔细记录。
 
 @@@
 
-## The difference between Error and Failure
+### 最终实现的约束
 
-The starting point for this discussion is the [definition given by the Reactive Manifesto](http://www.reactivemanifesto.org/glossary#Failure). Translated to streams this means that an error is accessible within the stream as a normal data element, while a failure means that the stream itself has failed and is collapsing. In concrete terms, on the Reactive Streams interface level data elements (including errors) are signaled via `onNext` while failures raise the `onError` signal.
+Akka Streams必须使库能够根据不变的蓝图表达任何流处理实用程序。最常见的构建基块是
+
+ * Source: 只有一个输出流的东西
+ * Sink: 只有一个输入流的东西
+ * Flow: 恰好只有一个输入和一个输出流的东西
+ * BidiFlow: 恰好有两个输入流和两个输出流的东西，它们在概念上表现为两个相反方向的流
+ * Graph: 一种封装的流处理拓扑，它公开一组输入和输出端口，表示为一个`Shape`类型的对象。
 
 @@@ note
 
-Unfortunately the method name for signaling *failure* to a Subscriber is called `onError` for historical reasons. Always keep in mind that the Reactive Streams interfaces (Publisher/Subscription/Subscriber) are modeling the low-level infrastructure for passing streams between execution units, and errors on this level are precisely the failures that we are talking about on the higher level that is modeled by Akka Streams.
+一个发出流中的流(a stream of streams)的源仍然是普通源，所生成的元素种类在要表达的静态流拓扑中不起作用。
 
 @@@
 
-There is only limited support for treating `onError` in Akka Streams compared to the operators that are available for the transformation of data elements, which is intentional in the spirit of the previous paragraph. Since `onError` signals that the stream is collapsing, its ordering semantics are not the same as for stream completion: transformation operators of any kind will collapse with the stream, possibly still holding elements in implicit or explicit buffers. This means that data elements emitted before a failure can still be lost if the `onError` overtakes them.
+## 错误和失败之间的区别
 
-The ability for failures to propagate faster than data elements is essential for tearing down streams that are back-pressured—especially since back-pressure can be the failure mode (e.g. by tripping upstream buffers which then abort because they cannot do anything else; or if a dead-lock occurred).
+本次讨论的起点是[反应式宣言给出的定义](http://www.reactivemanifesto.org/glossary#Failure)。转换为流意味着在流中错误可以作为普通数据元素来访问，而故障意味着流本身已经失败并且正在崩溃。具体而言，在Reactive Streams接口级数据元素(包括错误)是通过`onNext`发出信号，而故障则抛出`onError`信号。
 
-### The semantics of stream recovery
+@@@ note
 
-A recovery element (i.e. any transformation that absorbs an `onError` signal and turns that into possibly more data elements followed normal stream completion) acts as a bulkhead that confines a stream collapse to a given region of the stream topology. Within the collapsed region buffered elements may be lost, but the outside is not affected by the failure.
+不幸的是，由于历史原因，向订阅者发送*失败*信号的方法名为`onError`。始终牢记，Reactive Streams接口(Publisher/Subscription/Subscriber)正在为在执行单元之间传递流的低级基础结构建模，而此级别的错误恰恰是我们在更高级别上谈论的失败，其由Akka Streams建模。
 
-This works in the same fashion as a `try`–`catch` expression: it marks a region in which exceptions are caught, but the exact amount of code that was skipped within this region in case of a failure might not be known precisely—the placement of statements matters.
+@@@
+
+与用于数据元素转换的运算符相比，对Akka Streams中`onError`的处理仅提供了有限的支持，这是根据前面段落的精神而有意为之的。由于`onError`发出流崩溃的信号，它的排序语义与流完成不一样：任何类型的转换操作符都将跟随流崩溃，可能仍将元素保留在隐式或显式缓冲区中。这意味着，在失败之前发出的数据元素仍然可能丢失，如果`onError`赶上它们。
+
+故障的传播能力要比数据元素快，这对于拆除背压的流至关重要，尤其是因为背压可能是故障模式(例如，通过开启上游缓冲区，然后由于它们无法执行其他操作而中止；或者发生死锁)。
+
+### 流恢复的语义
+
+恢复元素(也就是说，任何吸收`onError`信号并将其转换为可能更多的数据元素的转换都遵循正常的流完成)充当将流崩溃限制到流拓扑的给定区域的隔板。在崩溃区域内，缓冲的元素可能会丢失，但外部不受故障影响。
+
+这与`try`–`catch`表达式的工作方式相同：它标记一个捕获异常的区域，但是在发生故障的情况下在该区域中跳过的确切代码量可能无法精确知道-语句的位置很重要。
