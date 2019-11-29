@@ -4,14 +4,14 @@ Fan-out the stream to several streams.
 
 @ref[Fan-out operators](index.md#fan-out-operators)
 
-## Signature
+## 签名
 
-## Description
+## 描述
 
 Fan-out the stream to several streams. Each upstream element is emitted to one downstream consumer according to the
 partitioner function applied to the element.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -1,22 +1,22 @@
 # dropWithin
 
-Drop elements until a timeout has fired
+到了已触发超时的时候，就删除元素
 
 @ref[Timer driven operators](../index.md#timer-driven-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #dropWithin }
 
 @@@
 
-## Description
+## 描述
 
 Drop elements until a timeout has fired
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

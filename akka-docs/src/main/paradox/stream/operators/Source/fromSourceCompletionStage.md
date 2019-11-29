@@ -1,19 +1,19 @@
 # fromSourceCompletionStage
 
-`fromSourceCompletionStage` has been deprecated in 2.6.0, use `Source.completionStageSource` instead.
+`fromSourceCompletionStage` 在2.6.0中已弃用，请用 `Source.completionStageSource` 代替.
 
 @ref[Source operators](../index.md#source-operators)
 
-## Signature
+## 签名
 
-## Description
+## 描述
 
 `fromSourceCompletionStage` has been deprecated in 2.6.0, use @ref:[completionStageSource](completionStageSource.md) instead.
 
 Streams the elements of an asynchronous source once its given *completion* operator completes.
 If the *completion* fails the stream is failed with that exception.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

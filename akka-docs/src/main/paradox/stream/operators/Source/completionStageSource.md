@@ -1,17 +1,17 @@
 # completionStageSource
 
-Streams the elements of an asynchronous source once its given *completion* operator completes.
+流动一个异步源的元素，一旦它给定的 *completion* 运算符完成
 
 @ref[Source operators](../index.md#source-operators)
 
-## Signature
+## 签名
 
-## Description
+## 描述
 
 Streams the elements of an asynchronous source once its given *completion* operator completes.
 If the *completion* fails the stream is failed with that exception.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

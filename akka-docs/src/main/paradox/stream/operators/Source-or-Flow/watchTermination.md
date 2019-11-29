@@ -6,18 +6,18 @@ Materializes to a @scala[`Future`] @java[`CompletionStage`] that will be complet
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #watchTermination }
 
 @@@
 
-## Description
+## 描述
 
 Materializes to a @scala[`Future`] @java[`CompletionStage`] that will be completed with Done or failed depending whether the upstream of the operators has been completed or failed.
 The operators otherwise passes through elements unchanged.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

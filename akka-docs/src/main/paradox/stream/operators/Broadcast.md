@@ -4,15 +4,15 @@ Emit each incoming element each of `n` outputs.
 
 @ref[Fan-out operators](index.md#fan-out-operators)
 
-## Signature
+## 签名
 
 @apidoc[akka.stream.*.Broadcast]
 
-## Description
+## 描述
 
 Emit each incoming element each of `n` outputs.
 
-## Example
+## 示例
 
 Here is an example that is using `Broadcast` to aggregate different values from a `Source` of integers.
 
@@ -32,7 +32,7 @@ Java
 
  
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

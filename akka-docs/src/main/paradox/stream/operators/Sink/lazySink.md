@@ -1,18 +1,18 @@
 # Sink.lazySink
 
-Defers creation and materialization of a `Sink` until there is a first element.
+延迟一个`Sink`的创建和物化直到第一个元素。
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #lazySink }
 
 @@@
 
-## Description
+## 描述
 
 When the first element comes from upstream the actual `Sink` is created and materialized.
 The internal `Sink` will not be created if the stream completes of fails before any element got through.
@@ -24,7 +24,7 @@ Can be combined with @ref[prefixAndTail](../Source-or-Flow/prefixAndTail.md) to 
 
 See also @ref:[lazyFutureSink](lazyFutureSink.md) and @ref:[lazyCompletionStageSink](lazyCompletionStageSink.md).
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -1,28 +1,28 @@
 # Sink.onComplete
 
-Invoke a callback when the stream has completed or failed.
+当流已经完成或失败时调用一个回调。
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #onComplete }
 
 @@@
 
-## Description
+## 描述
 
-Invoke a callback when the stream has completed or failed.
+当流已经完成或失败时调用一个回调。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
-**cancels** never
+**cancels** 从不
 
-**backpressures** never
+**backpressures** 从不
 
 @@@
 

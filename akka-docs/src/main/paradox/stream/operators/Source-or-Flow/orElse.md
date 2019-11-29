@@ -6,13 +6,13 @@ If the primary source completes without emitting any elements, the elements from
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #orElse }
 
 @@@
 
-## Description
+## 描述
 
 If the primary source completes without emitting any elements, the elements from the secondary source
 are emitted. If the primary source emits any elements the secondary source is cancelled.
@@ -22,7 +22,7 @@ the source of elements or is cancelled.
 
 Signal errors downstream, regardless which of the two sources emitted the error.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -37,7 +37,7 @@ without emitting and the secondary stream already has completed or when the seco
 @@@
 
 
-## Example
+## 示例
 Scala
 :   @@snip [FlowOrElseSpec.scala](/akka-stream-tests/src/test/scala/akka/stream/scaladsl/FlowOrElseSpec.scala) { #or-else }
 

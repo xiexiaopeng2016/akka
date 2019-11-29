@@ -1,22 +1,22 @@
 # Source.zipWithN
 
-Combine the elements of multiple streams into a stream of sequences using a combiner function.
+使用一个组合器函数将多个流的元素组合成一个序列流。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #zipWithN }
 
 @@@
 
-## Description
+## 描述
 
-Combine the elements of multiple streams into a stream of sequences using a combiner function.
+使用一个组合器函数将多个流的元素组合成一个序列流。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

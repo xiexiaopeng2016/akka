@@ -1,24 +1,24 @@
 # @scala[apply]@java[from]
 
-Stream the values of an @scala[`immutable.Seq`]@java[`Iterable`].
+流动 @scala[`immutable.Seq`]@java[`Iterable`] 的值。
 
 @ref[Source operators](../index.md#source-operators)
 
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #apply }
 
 @@@
 
-## Description
+## 描述
 
 Stream the values of an @scala[`immutable.Seq`]@java[`Iterable`]. @java[Make sure the `Iterable` is immutable or at least not modified after being used
 as a source. Otherwise the stream may fail with `ConcurrentModificationException` or other more subtle errors may occur.]
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -29,7 +29,7 @@ as a source. Otherwise the stream may fail with `ConcurrentModificationException
 @@@
 
 
-## Examples
+## 示例
 
 Java
 :  @@snip [from.java](/akka-docs/src/test/java/jdocs/stream/operators/SourceDocExamples.java) { #imports #source-from-example }

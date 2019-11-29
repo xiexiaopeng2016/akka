@@ -1,18 +1,18 @@
 # Flow.asFlowWithContext
 
-Turns a Flow into a FlowWithContext which can propagate a context per element along a stream.
+将一个`Flow`转换为一个`FlowWithContext`，它可以沿着流传播每个元素的上下文。
 
 @ref[Simple operators](../index.md#simple-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #asFlowWithContext }
 
 @@@
 
-## Description
+## 描述
 
 Turns a Flow into a FlowWithContext which can propagate a context per element along a stream.
 The first function passed into asFlowWithContext must turn each incoming pair of element and context value into an element of this Flow.

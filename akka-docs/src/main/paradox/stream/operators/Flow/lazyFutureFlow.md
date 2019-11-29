@@ -6,13 +6,13 @@ Defers creation and materialization of a `Flow` until there is a first element.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #lazyFlow }
 
 @@@
 
-## Description
+## 描述
 
 When the first element comes from upstream the actual `Future[Flow]` is created and when that completes it is materialized
 and inserted in the stream.
@@ -26,7 +26,7 @@ See also @ref:[lazyFlow](lazyFlow.md).
 Can be combined with `prefixAndTail(1)` to base the flow construction on the initial element triggering creation.
 See @ref:[lazyFlow](lazyFlow.md) for sample.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

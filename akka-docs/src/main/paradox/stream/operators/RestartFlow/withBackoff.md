@@ -6,13 +6,13 @@ Wrap the given @apidoc[Flow] with a @apidoc[Flow] that will restart it when it f
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [RestartFlow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/RestartFlow.scala) { #withBackoff }
 
 @@@
 
-## Description
+## 描述
 
 The resulting @apidoc[Flow] will not cancel, complete or emit a failure, until the opposite end of it has been cancelled or
 completed. Any termination by the @apidoc[Flow] before that time will be handled by restarting it. Any termination
@@ -25,7 +25,7 @@ and any in transit messages will be lost. During backoff, this @apidoc[Flow] wil
 
 This uses the same exponential backoff algorithm as @apidoc[Backoff].
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

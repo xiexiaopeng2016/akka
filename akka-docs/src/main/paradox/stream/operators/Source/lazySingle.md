@@ -1,18 +1,18 @@
 # lazySingle
 
-Defers creation of a single element source until there is demand.
+将一个单个元素的源的创建延迟到有需求时。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #lazySingle }
 
 @@@
 
-## Description
+## 描述
 
 Invokes the user supplied factory when the first downstream demand arrives, then emits the returned single value 
 downstream and completes the stream.
@@ -20,7 +20,7 @@ downstream and completes the stream.
 Note that asynchronous boundaries (and other operators) in the stream may do pre-fetching which counter acts
 the laziness and will trigger the factory immediately.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

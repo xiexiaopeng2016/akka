@@ -1,28 +1,28 @@
 # foreachParallel
 
-Like `foreach` but allows up to `parallellism` procedure calls to happen in parallel.
+类似于`foreach`，但允许通过`parallellism`过程调用来并行发生。
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #foreachParallel }
 
 @@@
 
-## Description
+## 描述
 
-Like `foreach` but allows up to `parallellism` procedure calls to happen in parallel.
+类似于`foreach`，但允许通过`parallellism`过程调用来并行发生。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
-**cancels** never
+**cancels** 从不
 
-**backpressures** when the previous parallel procedure invocations has not yet completed
+**backpressures** 当前面的并行过程调用尚未完成时
 
 @@@
 

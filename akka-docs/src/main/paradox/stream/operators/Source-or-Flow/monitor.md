@@ -6,19 +6,19 @@ Materializes to a `FlowMonitor` that monitors messages flowing through or comple
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #monitor }
 
 @@@
 
-## Description
+## 描述
 
 Materializes to a `FlowMonitor` that monitors messages flowing through or completion of the operators. The operators otherwise
 passes through elements unchanged. Note that the `FlowMonitor` inserts a memory barrier every time it processes an
 event, and may therefore affect performance.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

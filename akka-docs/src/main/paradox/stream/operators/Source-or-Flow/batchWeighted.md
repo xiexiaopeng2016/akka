@@ -5,13 +5,13 @@ Allow for a slower downstream by passing incoming elements and a summary into an
 @ref[Backpressure aware operators](../index.md#backpressure-aware-operators)
 
 @@@ div { .group-scala }
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #batchWeighted }
 @@@
 
 
-## Description
+## 描述
 
 Allow for a slower downstream by passing incoming elements and a summary into an aggregate function as long as there
 is backpressure and a maximum weight batched elements is not yet reached. The weight of each element is determined by
@@ -21,7 +21,7 @@ backpressure.
 Will eagerly pull elements, this behavior may result in a single pending (i.e. buffered) element which cannot be
 aggregated to the batched value.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

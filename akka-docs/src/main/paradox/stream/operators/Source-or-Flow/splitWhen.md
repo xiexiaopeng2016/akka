@@ -6,17 +6,17 @@ Split off elements into a new substream whenever a predicate function return `tr
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #splitWhen }
 
 @@@
 
-## Description
+## 描述
 
 Split off elements into a new substream whenever a predicate function return `true`.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

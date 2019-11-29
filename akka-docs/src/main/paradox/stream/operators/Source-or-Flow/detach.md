@@ -1,22 +1,22 @@
 # detach
 
-Detach upstream demand from downstream demand without detaching the stream rates.
+从下游需求分离上游需求，而不分离流比率。
 
 @ref[Simple operators](../index.md#simple-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #detach }
 
 @@@
 
-## Description
+## 描述
 
-Detach upstream demand from downstream demand without detaching the stream rates.
+从下游需求分离上游需求，而不分离流比率。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

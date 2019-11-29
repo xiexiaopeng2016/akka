@@ -6,18 +6,18 @@ Take up to *n* elements from the stream (less than *n* only if the upstream comp
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #prefixAndTail }
 
 @@@
 
-## Description
+## 描述
 
 Take up to *n* elements from the stream (less than *n* only if the upstream completes before emitting *n* elements)
 and returns a pair containing a strict sequence of the taken element and a stream representing the remaining elements.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

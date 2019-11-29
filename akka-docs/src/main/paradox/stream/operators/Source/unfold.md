@@ -1,18 +1,18 @@
 # Source.unfold
 
-Stream the result of a function as long as it returns a @scala[`Some`] @java[`Optional`].
+流动一个函数的结果，只要它返回一个 @scala[`Some`]@java[`Optional`]。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #unfold }
 
 @@@
 
-## Description
+## 描述
 
 Stream the result of a function as long as it returns a @scala[`Some`] @java[`Optional`]. The value inside the option
 consists of a @scala[tuple] @java[pair] where the first value is a state passed back into the next call to the function allowing
@@ -20,7 +20,7 @@ to pass a state. The first invocation of the provided fold function will receive
 
 Can be used to implement many stateful sources without having to touch the more low level @ref[`GraphStage`](../../stream-customize.md) API.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -6,17 +6,17 @@ Pass `n` incoming elements downstream and then complete
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #take }
 
 @@@
 
-## Description
+## 描述
 
 Pass `n` incoming elements downstream and then complete
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

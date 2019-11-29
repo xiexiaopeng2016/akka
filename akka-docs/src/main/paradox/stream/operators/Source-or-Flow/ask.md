@@ -1,16 +1,16 @@
 # Flow.ask
 
-Use the `ask` pattern to send a request-reply message to the target `ref` actor.
+使用`ask`模式发送请求-应答消息到目标`ref`actor。
 
 @ref[Asynchronous operators](../index.md#asynchronous-operators)
 
 @@@ div { .group-scala }
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #ask }
 @@@
 
-## Description
+## 描述
 
 Use the `ask` pattern to send a request-reply message to the target `ref` actor.
 If any of the asks times out it will fail the stream with a @apidoc[AskTimeoutException].
@@ -23,7 +23,7 @@ An `akka.util.Status#Failure` will cause the operator to fail with the cause car
 Adheres to the @scala[@scaladoc[`ActorAttributes.SupervisionStrategy`](akka.stream.ActorAttributes$$SupervisionStrategy)]
 @java[`ActorAttributes.SupervisionStrategy`] attribute.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -1,29 +1,28 @@
 # Sink.headOption
 
-Materializes into a @scala[`Future[Option[T]]`] @java[`CompletionStage<Optional<T>>`] which completes with the first value arriving wrapped in @scala[`Some`] @java[`Optional`], or @scala[a `None`] @java[an empty Optional] if the stream completes without any elements emitted.
+物化到一个 @scala[`Future[Option[T]]`] @java[`CompletionStage<Optional<T>>`] 里面，它将使用包裹在 @scala[`Some`]@java[`Optional`] 里面的第一个到达的值完成，或者 @scala[一个`None`]@java[一个空的可选]，如果流在没有发出任何元素的情况下完成。
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #headOption }
 
 @@@
 
-## Description
+## 描述
 
-Materializes into a @scala[`Future[Option[T]]`] @java[`CompletionStage<Optional<T>>`] which completes with the first value arriving wrapped in @scala[`Some`] @java[`Optional`],
-or @scala[a `None`] @java[an empty Optional] if the stream completes without any elements emitted.
+物化到一个 @scala[`Future[Option[T]]`] @java[`CompletionStage<Optional<T>>`] 里面，它将使用包裹在 @scala[`Some`]@java[`Optional`] 里面的第一个到达的值完成，或者 @scala[一个`None`]@java[一个空的可选]，如果流在没有发出任何元素的情况下完成。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
-**cancels** after receiving one element
+**cancels** 接收到一个元素之后
 
-**backpressures** never
+**backpressures** 从不
 
 @@@
 

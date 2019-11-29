@@ -6,12 +6,12 @@ Create a sink that wraps an `OutputStream`.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/StreamConverters.scala) { #fromOutputStream }
 
 @@@
 
-## Description
+## 描述
 
 TODO: We would welcome help on contributing descriptions and examples, see: https://github.com/akka/akka/issues/25646

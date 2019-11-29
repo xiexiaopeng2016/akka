@@ -1,22 +1,22 @@
 # drop
 
-Drop `n` elements and then pass any subsequent element downstream.
+删除`n`个元素，然后向下游传递任何后续元素。
 
 @ref[Simple operators](../index.md#simple-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #drop }
 
 @@@
 
-## Description
+## 描述
 
-Drop `n` elements and then pass any subsequent element downstream.
+删除`n`个元素，然后向下游传递任何后续元素。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

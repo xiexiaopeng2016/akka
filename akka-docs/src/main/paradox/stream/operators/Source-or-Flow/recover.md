@@ -6,19 +6,19 @@ Allow sending of one last element downstream when a failure has happened upstrea
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #recover }
 
 @@@
 
-## Description
+## 描述
 
 Allow sending of one last element downstream when a failure has happened upstream.
 
 Throwing an exception inside `recover` _will_ be logged on ERROR level automatically.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

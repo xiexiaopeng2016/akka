@@ -1,10 +1,10 @@
 # lazyCompletionStageSource
 
-Defers creation of a future source until there is demand.
+将一个future源的创建推迟到有需求的时候。
 
 @ref[Source operators](../index.md#source-operators)
 
-## Description
+## 描述
 
 Invokes the user supplied factory when the first downstream demand arrives. When the returned `CompletionStage` completes 
 successfully the source switches over to the new source and emits downstream just like if it had been created up front. If the future or the factory fails the 
@@ -15,7 +15,7 @@ the laziness and will trigger the factory immediately.
 
 See also @ref:[lazySource](lazySource.md).
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

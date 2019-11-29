@@ -1,18 +1,18 @@
 # combine
 
-Combine several sources, using a given strategy such as merge or concat, into one source.
+使用给定的策略，比如`merge`或`concat`，将多个源合并为一个源。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #combine }
 
 @@@
 
-## Description
+## 描述
 
 Provides a way to create a "fan-in" of multiple sources without having to use the more advanced @ref:[GraphDSL](../../stream-graphs.md#constructing-graphs).
 
@@ -35,7 +35,7 @@ Some of the built-in operators that can be used as strategy are:
  * @apidoc[ZipN]
  * @apidoc[ZipWithN]
 
-## Examples
+## 示例
 
 In this example we `Merge` three different 
 sources of integers. The three sources will immediately start contributing elements to the combined source. The individual 
@@ -58,7 +58,7 @@ Java
 :   @@snip [Combine.java](/akka-docs/src/test/java/jdocs/stream/operators/source/Combine.java) { #source-combine-concat }
 
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

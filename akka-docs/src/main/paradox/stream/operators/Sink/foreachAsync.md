@@ -1,25 +1,25 @@
 # foreachAsync
 
-Invoke a given procedure asynchronously for each element received.
+为接收到的每个元素异步调用一个给定的过程。
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #foreachAsync }
 
 @@@
 
-## Description
+## 描述
 
-Invoke a given procedure asynchronously for each element received. Note that if shared state is mutated from the procedure that must be done in a thread-safe way.
+为接收到的每个元素异步调用一个给定的过程。注意，如果共享状态从过程中发生了变化，这必须以线程安全的方式完成。
 
 The sink materializes into a  @scala[`Future[Done]`] @java[`CompletionStage<Done>`] which completes when the
 stream completes, or fails if the stream fails.
 
-## Example
+## 示例
 
 Scala
 :   @@snip [SinkRecipeDocSpec.scala](/akka-docs/src/test/scala/docs/stream/SinkRecipeDocSpec.scala) { #forseachAsync-processing }
@@ -27,7 +27,7 @@ Scala
 Java
 :   @@snip [SinkRecipeDocTest.java](/akka-docs/src/test/java/jdocs/stream/SinkRecipeDocTest.java) { #forseachAsync-processing }
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

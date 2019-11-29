@@ -1,25 +1,25 @@
 # Source.unfoldAsync
 
-Just like `unfold` but the fold function returns a @scala[`Future`] @java[`CompletionStage`].
+与`unfold`类似，但是fold函数返回一个 @scala[`Future`]@java[`CompletionStage`]。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #unfoldAsync }
 
 @@@
 
-## Description
+## 描述
 
 Just like `unfold` but the fold function returns a @scala[`Future`] @java[`CompletionStage`] which will cause the source to
 complete or emit when it completes.
 
 Can be used to implement many stateful sources without having to touch the more low level @ref[`GraphStage`](../../stream-customize.md) API.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -1,24 +1,22 @@
 # conflate
 
-Allow for a slower downstream by passing incoming elements and a summary into an aggregate function as long as there is backpressure.
+只要存在背压，就可以通过将传入元素和一个摘要传递到一个聚合函数中，来允许一个较慢的下行速度。
 
 @ref[Backpressure aware operators](../index.md#backpressure-aware-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #conflate }
 
 @@@
 
-## Description
+## 描述
 
-Allow for a slower downstream by passing incoming elements and a summary into an aggregate function as long as
-there is backpressure. The summary value must be of the same type as the incoming elements, for example the sum or
-average of incoming numbers, if aggregation should lead to a different type `conflateWithSeed` can be used:
+只要存在背压，就可以通过将传入元素和一个摘要传递到一个聚合函数中，来允许一个较慢的下行速度。汇总值必须与传入元素的类型相同，例如输入数字的总和或平均值，如果聚合应该导致一个不同的类型`conflateWithSeed`可以使用:
 
-## Example
+## 示例
 
 Scala
 :   @@snip [SourceOrFlow.scala](/akka-docs/src/test/scala/docs/stream/operators/sourceorflow/Conflate.scala) { #conflate }
@@ -28,7 +26,7 @@ Java
 
 If downstream is slower the elements is conflated by summing them. This means that upstream can continue producing elements while downstream is applying backpressure. For example: downstream is backpressuring while 1, 10 and 100 arrives from upstream, then backpressure stops and the conflated 111 is emitted downstream.
 
-## Reactive Streams semantics 
+## 响应流语义 
 
 @@@div { .callout }
 

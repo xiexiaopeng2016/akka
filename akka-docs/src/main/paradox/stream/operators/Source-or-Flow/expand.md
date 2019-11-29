@@ -1,26 +1,25 @@
 # expand
 
-Like `extrapolate`, but does not have the `initial` argument, and the `Iterator` is also used in lieu of the original element, allowing for it to be rewritten and/or filtered.
+类似于`extrapolate`，但没有`initial`参数，而且也使用`Iterator`代替原来的元素，允许它被重写和/或过滤。
 
 @ref[Backpressure aware operators](../index.md#backpressure-aware-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #expand }
 
 @@@
 
-## Description
+## 描述
 
-Like `extrapolate`, but does not have the `initial` argument, and the `Iterator` is also used in lieu of the original 
-element, allowing for it to be rewritten and/or filtered.
+类似于`extrapolate`，但没有`initial`参数，而且也使用`Iterator`代替原来的元素，允许它被重写和/或过滤。
 
 See @ref:[Understanding extrapolate and expand](../../stream-rate.md#understanding-extrapolate-and-expand) for more information
 and examples.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -1,22 +1,22 @@
 # collectType 
 
-Transform this stream by testing the type of each of the elements on which the element is an instance of the provided type as they pass through this processing step.
+通过测试每个元素的类型来转换这个流，当元素通过此处理步骤时，它们是所提供类型的实例。
 
 @ref[Simple operators](../index.md#simple-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #collectType }
 
 @@@
 
-## Description
+## 描述
 
 Filter elements that is of a given type.
 
-## Example
+## 示例
 
 Given stream element classes `Message`, `Ping`, and `Pong`, where `Ping` extends `Message` and `Pong` is an
 unrelated class.
@@ -37,7 +37,7 @@ Scala
 Java
 :   @@snip [SourceOrFlow.java](/akka-docs/src/test/java/jdocs/stream/operators/SourceOrFlow.java) { #collectType }
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -1,10 +1,10 @@
 # Source.range
 
-Emit each integer in a range, with an option to take bigger steps than 1.
+发出一个范围内的每个整数，具有一个可选项，用于采用大于1的步长。
 
 @ref[Source operators](../index.md#source-operators)
 
-## Dependency
+## 依赖
 
 @@dependency[sbt,Maven,Gradle] {
   group="com.typesafe.akka"
@@ -13,11 +13,11 @@ Emit each integer in a range, with an option to take bigger steps than 1.
 }
 
 
-## Description
+## 描述
 
 Emit each integer in a range, with an option to take bigger steps than 1. @scala[In Scala, use the `apply` method to generate a sequence of integers.]
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -27,7 +27,7 @@ Emit each integer in a range, with an option to take bigger steps than 1. @scala
 
 @@@
 
-## Examples
+## 示例
 
 Define the range of integers.
 

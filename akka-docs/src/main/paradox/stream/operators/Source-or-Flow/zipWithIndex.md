@@ -6,17 +6,17 @@ Zips elements of current flow with its indices.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #zipWithIndex }
 
 @@@
 
-## Description
+## 描述
 
 Zips elements of current flow with its indices.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -28,7 +28,7 @@ Zips elements of current flow with its indices.
 
 @@@
 
-## Example
+## 示例
 
 Scala
 :   @@snip [FlowZipWithIndexSpec.scala](/akka-stream-tests/src/test/scala/akka/stream/scaladsl/FlowZipWithIndexSpec.scala) { #zip-with-index }

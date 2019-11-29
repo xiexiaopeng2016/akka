@@ -4,7 +4,7 @@ Sends the elements of the stream to the given @java[`ActorRef<T>`]@scala[`ActorR
 
 @ref[Actor interop operators](../index.md#actor-interop-operators)
 
-## Dependency
+## 依赖
 
 This operator is included in:
 
@@ -16,17 +16,17 @@ This operator is included in:
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [ActorSink.scala](/akka-stream-typed/src/main/scala/akka/stream/typed/scaladsl/ActorSink.scala) { #actorRefWithBackpressure }
 
 @@@
 
-## Description
+## 描述
 
 Sends the elements of the stream to the given @java[`ActorRef<T>`]@scala[`ActorRef[T]`] with backpressure, to be able to signal demand when the actor is ready to receive more elements.
 
-## Examples
+## 示例
 
 Scala
 :  @@snip [ActorSourceSinkExample.scala](/akka-stream-typed/src/test/scala/docs/akka/stream/typed/ActorSourceSinkExample.scala) { #actor-sink-ref-with-backpressure }

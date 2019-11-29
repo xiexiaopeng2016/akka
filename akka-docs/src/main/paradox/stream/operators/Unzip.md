@@ -4,13 +4,13 @@ Takes a stream of two element tuples and unzips the two elements ino two differe
 
 @ref[Fan-out operators](index.md#fan-out-operators)
 
-## Signature
+## 签名
 
-## Description
+## 描述
 
 Takes a stream of two element tuples and unzips the two elements ino two different downstreams.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

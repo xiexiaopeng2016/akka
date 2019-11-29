@@ -6,19 +6,19 @@ Chunk up this stream into groups of elements received within a time window, or l
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #groupedWithin }
 
 @@@
 
-## Description
+## 描述
 
 Chunk up this stream into groups of elements received within a time window, or limited by the number of the elements,
 whatever happens first. Empty groups will not be emitted if no elements are received from upstream.
 The last group before end-of-stream will contain the buffered elements since the previously emitted group.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -1,18 +1,18 @@
 # lazyFutureSource
 
-Defers creation and materialization of a `Source` until there is demand.
+将一个`Source`的创造和物化推迟到有需求的时候。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #lazyFutureSource }
 
 @@@
 
-## Description
+## 描述
 
 Invokes the user supplied factory when the first downstream demand arrives. When the returned future completes 
 successfully the source switches over to the new source and emits downstream just like if it had been created up front.
@@ -22,7 +22,7 @@ the laziness and will trigger the factory immediately.
 
 See also @ref:[lazySource](lazySource.md).
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

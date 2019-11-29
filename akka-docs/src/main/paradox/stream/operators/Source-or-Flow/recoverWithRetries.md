@@ -6,13 +6,13 @@ RecoverWithRetries allows to switch to alternative Source on flow failure.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #recoverWithRetries }
 
 @@@
 
-## Description
+## 描述
 
 RecoverWithRetries allows to switch to alternative Source on flow failure. It will stay in effect after
 a failure has been recovered up to *attempts* number of times so that each time there is a failure
@@ -22,7 +22,7 @@ attempt to recover at all. A negative `attempts` number is interpreted as "infin
 Since the underlying failure signal onError arrives out-of-band, it might jump over existing elements.
 This operators can recover the failure signal, but not the skipped elements, which will be dropped.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

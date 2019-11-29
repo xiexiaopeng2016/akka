@@ -1,22 +1,22 @@
 # concat
 
-After completion of the original upstream the elements of the given source will be emitted.
+在原始上游完成后，给定源的元素将被发射。
 
 @ref[Fan-in operators](../index.md#fan-in-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #concat }
 
 @@@
 
-## Description
+## 描述
 
 After completion of the original upstream the elements of the given source will be emitted.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -29,7 +29,7 @@ After completion of the original upstream the elements of the given source will 
 @@@
 
 
-## Example
+## 示例
 Scala
 :   @@snip [FlowConcatSpec.scala](/akka-stream-tests/src/test/scala/akka/stream/scaladsl/FlowConcatSpec.scala) { #concat }
 

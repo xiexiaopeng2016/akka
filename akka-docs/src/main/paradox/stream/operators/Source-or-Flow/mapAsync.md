@@ -1,18 +1,18 @@
 # mapAsync
 
-Pass incoming elements to a function that return a @scala[`Future`] @java[`CompletionStage`] result.
+将传入的元素传递给一个函数，它返回一个 @scala[`Future`]@java[`CompletionStage`] 结果。
 
 @ref[Asynchronous operators](../index.md#asynchronous-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #mapAsync }
 
 @@@
 
-## Description
+## 描述
 
 Pass incoming elements to a function that return a @scala[`Future`] @java[`CompletionStage`] result. When the @scala[`Future`] @java[`CompletionStage`] arrives the result is passed
 downstream. Up to `n` elements can be processed concurrently, but regardless of their completion time the incoming
@@ -21,7 +21,7 @@ order will be kept when results complete. For use cases where order does not mat
 If a @scala[`Future`] @java[`CompletionStage`] completes with `null`, element is not passed downstream.
 If a @scala[`Future`] @java[`CompletionStage`] fails, the stream also fails (unless a different supervision strategy is applied)
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

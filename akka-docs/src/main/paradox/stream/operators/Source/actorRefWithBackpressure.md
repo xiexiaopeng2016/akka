@@ -1,21 +1,21 @@
 # actorRefWithBackpressure
 
-Materialize an `ActorRef`; sending messages to it will emit them on the stream. The source acknowledges reception after emitting a message, to provide back pressure from the source.
+物化一个`ActorRef`；发送消息给它将在流上发射这些消息。发送消息后，源确认接收，以提供来自源的背压。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@ div { .group-scala }
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #actorRefWithBackpressure }
 @@@
 
-## Description
+## 描述
 
 Materialize an `ActorRef`, sending messages to it will emit them on the stream. The actor responds with the provided ack message
 once the element could be emitted allowing for backpressure from the source. Sending another message before the previous one has been acknowledged will fail the stream.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -25,7 +25,7 @@ once the element could be emitted allowing for backpressure from the source. Sen
 
 @@@
 
-## Examples
+## 示例
 
 
 Scala

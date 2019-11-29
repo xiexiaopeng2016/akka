@@ -1,17 +1,17 @@
 # fromPublisher
 
-Integration with Reactive Streams, subscribes to a `org.reactivestreams.Publisher`.
+与Reactive Streams集成，订阅了一个`org.reactivestreams.Publisher`。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #fromPublisher }
 
 @@@
 
-## Description
+## 描述
 
 TODO: We would welcome help on contributing descriptions and examples, see: https://github.com/akka/akka/issues/25646

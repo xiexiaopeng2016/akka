@@ -6,17 +6,17 @@ Delays the initial element by the specified duration.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #initialDelay }
 
 @@@
 
-## Description
+## 描述
 
 Delays the initial element by the specified duration.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

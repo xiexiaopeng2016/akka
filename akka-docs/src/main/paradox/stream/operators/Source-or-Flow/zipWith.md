@@ -6,18 +6,18 @@ Combines elements from multiple sources through a `combine` function and passes 
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #zipWith }
 
 @@@
 
-## Description
+## 描述
 
 Combines elements from multiple sources through a `combine` function and passes the
 returned value downstream.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -30,7 +30,7 @@ returned value downstream.
 @@@
 
 
-## Example
+## 示例
 Scala
 :   @@snip [FlowZipWithSpec.scala](/akka-stream-tests/src/test/scala/akka/stream/scaladsl/FlowZipWithSpec.scala) { #zip-with }
 

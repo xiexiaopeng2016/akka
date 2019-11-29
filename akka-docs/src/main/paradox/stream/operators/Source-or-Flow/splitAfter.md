@@ -6,17 +6,17 @@ End the current substream whenever a predicate returns `true`, starting a new su
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #splitAfter }
 
 @@@
 
-## Description
+## 描述
 
 End the current substream whenever a predicate returns `true`, starting a new substream for the next element.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -6,19 +6,19 @@ Watch a specific `ActorRef` and signal a failure downstream once the actor termi
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #watch }
 
 @@@
 
-## Description
+## 描述
 
 Watch a specific `ActorRef` and signal a failure downstream once the actor terminates.
 The signaled failure will be an @java[@javadoc:[WatchedActorTerminatedException](akka.stream.WatchedActorTerminatedException)]
 @scala[@scaladoc[WatchedActorTerminatedException](akka.stream.WatchedActorTerminatedException)].
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

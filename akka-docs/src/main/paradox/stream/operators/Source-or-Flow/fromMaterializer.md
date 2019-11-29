@@ -6,14 +6,14 @@ Defer the creation of a `Source/Flow` until materialization and access `Material
 
 @@@ div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #fromMaterializer }
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #fromMaterializer }
 
 @@@
 
-## Description
+## 描述
 
 Typically used when access to materializer is needed to run a different stream during the construction of a source/flow.
 Can also be used to access the underlying `ActorSystem` from `Materializer`.

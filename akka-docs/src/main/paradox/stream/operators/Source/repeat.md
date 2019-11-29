@@ -1,22 +1,22 @@
 # Source.repeat
 
-Stream a single object repeatedly
+重复流动一个对象
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #repeat }
 
 @@@
 
-## Description
+## 描述
 
-Stream a single object repeatedly
+重复流动一个对象
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

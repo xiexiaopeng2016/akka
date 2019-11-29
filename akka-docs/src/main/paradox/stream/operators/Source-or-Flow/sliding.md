@@ -6,19 +6,19 @@ Provide a sliding window over the incoming stream and pass the windows as groups
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #sliding }
 
 @@@
 
-## Description
+## 描述
 
 Provide a sliding window over the incoming stream and pass the windows as groups of elements downstream.
 
 Note: the last window might be smaller than the requested size due to end of stream.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

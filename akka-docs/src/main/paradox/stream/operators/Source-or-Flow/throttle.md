@@ -6,18 +6,18 @@ Limit the throughput to a specific number of elements per time unit, or a specif
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #throttle }
 
 @@@
 
-## Description
+## 描述
 
 Limit the throughput to a specific number of elements per time unit, or a specific total cost per time unit, where
 a function has to be provided to calculate the individual cost of each element.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

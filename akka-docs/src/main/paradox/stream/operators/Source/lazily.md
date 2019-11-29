@@ -1,24 +1,24 @@
 # lazily
 
-`lazily` has been deprecated in 2.6.0, use `Source.lazySource` instead.
+`lazily` 在2.6.0中已弃用，请用 `Source.lazySource` 代替。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #lazily }
 
 @@@
 
-## Description
+## 描述
 
 `lazily` has been deprecated in 2.6.0, use @ref:[lazySource](lazySource.md) instead.
 
 Defers creation and materialization of a `Source` until there is demand.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

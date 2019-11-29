@@ -1,22 +1,22 @@
 # dropWhile
 
-Drop elements as long as a predicate function return true for the element
+删除元素，只要一个谓词函数对元素返回true
 
 @ref[Simple operators](../index.md#simple-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #dropWhile }
 
 @@@
 
-## Description
+## 描述
 
-Drop elements as long as a predicate function return true for the element
+删除元素，只要一个谓词函数对元素返回true
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

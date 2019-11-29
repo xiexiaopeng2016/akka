@@ -6,13 +6,13 @@ Demultiplex the incoming stream into separate output streams.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #groupBy }
 
 @@@
 
-## Description
+## 描述
 
 This operation demultiplexes the incoming stream into separate output streams, one for each element key. The
 key is computed for each element using the given function. When a new key is encountered for the first time
@@ -30,7 +30,7 @@ memory issues. Elements belonging to those keys are drained directly and not sen
 
 @@@
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

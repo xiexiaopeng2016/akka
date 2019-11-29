@@ -6,19 +6,19 @@ Just like `scan` but receives a function that results in a @scala[`Future`] @jav
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #scanAsync }
 
 @@@
 
-## Description
+## 描述
 
 Just like `scan` but receives a function that results in a @scala[`Future`] @java[`CompletionStage`] to the next value.
 
 Note that the `zero` value must be immutable.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

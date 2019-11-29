@@ -4,14 +4,14 @@ Merge multiple sources.
 
 @ref[Fan-in operators](../index.md#fan-in-operators)
 
-## Signature
+## 签名
 
-## Description
+## 描述
 
 Merge multiple sources. Prefer sources depending on priorities if all sources has elements ready. If a subset of all
 sources has elements ready the relative priorities for those sources are used to prioritise.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

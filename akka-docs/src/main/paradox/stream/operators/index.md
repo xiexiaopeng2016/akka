@@ -7,45 +7,45 @@ These built-in sources are available from @scala[`akka.stream.scaladsl.Source`] 
 
 | |Operator|Description|
 |--|--|--|
-|Source|<a name="actorref"></a>@ref[actorRef](Source/actorRef.md)|Materialize an `ActorRef`; sending messages to it will emit them on the stream.|
-|Source|<a name="actorrefwithbackpressure"></a>@ref[actorRefWithBackpressure](Source/actorRefWithBackpressure.md)|Materialize an `ActorRef`; sending messages to it will emit them on the stream. The source acknowledges reception after emitting a message, to provide back pressure from the source.|
-|Source|<a name="assourcewithcontext"></a>@ref[asSourceWithContext](Source/asSourceWithContext.md)|Turns a Source into a SourceWithContext which can propagate a context per element along a stream.|
-|Source|<a name="assubscriber"></a>@ref[asSubscriber](Source/asSubscriber.md)|Integration with Reactive Streams, materializes into a `org.reactivestreams.Subscriber`.|
-|Source|<a name="combine"></a>@ref[combine](Source/combine.md)|Combine several sources, using a given strategy such as merge or concat, into one source.|
-|Source|<a name="completionstage"></a>@ref[completionStage](Source/completionStage.md)|Send the single value of the `CompletionStage` when it completes and there is demand.|
-|Source|<a name="completionstagesource"></a>@ref[completionStageSource](Source/completionStageSource.md)|Streams the elements of an asynchronous source once its given *completion* operator completes.|
+|Source|<a name="actorref"></a>@ref[actorRef](Source/actorRef.md)|物化一个`ActorRef`; 发送消息给它，它将在流上发射这些消息。|
+|Source|<a name="actorrefwithbackpressure"></a>@ref[actorRefWithBackpressure](Source/actorRefWithBackpressure.md)|物化一个`ActorRef`；发送消息给它将在流上发射这些消息。发送消息后，源确认接收，以提供来自源的背压。|
+|Source|<a name="assourcewithcontext"></a>@ref[asSourceWithContext](Source/asSourceWithContext.md)|将一个`Source`转换为一个`SourceWithContext`，这可以在整个流中传播一个上下文每伴随每个元素。|
+|Source|<a name="assubscriber"></a>@ref[asSubscriber](Source/asSubscriber.md)|与Reactive Streams集成，物化到一个`org.reactivestreams.Subscriber`里面。|
+|Source|<a name="combine"></a>@ref[combine](Source/combine.md)|使用给定的策略，比如`merge`或`concat`，将多个源合并为一个源。|
+|Source|<a name="completionstage"></a>@ref[completionStage](Source/completionStage.md)|当`CompletionStage`完成并且有需求时，发送它的单个值。|
+|Source|<a name="completionstagesource"></a>@ref[completionStageSource](Source/completionStageSource.md)|流动一个异步源的元素，一旦它给定的 *completion* 运算符完成|
 |Source|<a name="cycle"></a>@ref[cycle](Source/cycle.md)|Stream iterator in cycled manner.|
-|Source|<a name="empty"></a>@ref[empty](Source/empty.md)|Complete right away without ever emitting any elements.|
-|Source|<a name="failed"></a>@ref[failed](Source/failed.md)|Fail directly with a user specified exception.|
-|Source|<a name="from"></a>@ref[@scala[apply]@java[from]](Source/from.md)|Stream the values of an @scala[`immutable.Seq`]@java[`Iterable`].|
-|Source|<a name="fromcompletionstage"></a>@ref[fromCompletionStage](Source/fromCompletionStage.md)|`fromCompletionStage` has been deprecated in 2.6.0, use `Source.completionStage`|
-|Source|<a name="fromfuture"></a>@ref[fromFuture](Source/fromFuture.md)|`fromFuture` has been deprecated in 2.6.0, use `Source.future` instead.|
-|Source|<a name="fromfuturesource"></a>@ref[fromFutureSource](Source/fromFutureSource.md)|`fromFutureSource` has been deprecated in 2.6.0, use `Source.futureSource` instead.|
-|Source|<a name="fromiterator"></a>@ref[fromIterator](Source/fromIterator.md)|Stream the values from an `Iterator`, requesting the next value when there is demand.|
-|Source|<a name="frompublisher"></a>@ref[fromPublisher](Source/fromPublisher.md)|Integration with Reactive Streams, subscribes to a `org.reactivestreams.Publisher`.|
-|Source|<a name="fromsourcecompletionstage"></a>@ref[fromSourceCompletionStage](Source/fromSourceCompletionStage.md)|`fromSourceCompletionStage` has been deprecated in 2.6.0, use `Source.completionStageSource` instead.|
-|Source|<a name="future"></a>@ref[future](Source/future.md)|Send the single value of the `Future` when it completes and there is demand.|
-|Source|<a name="futuresource"></a>@ref[futureSource](Source/futureSource.md)|Streams the elements of the given future source once it successfully completes.|
-|Source|<a name="lazily"></a>@ref[lazily](Source/lazily.md)|`lazily` has been deprecated in 2.6.0, use `Source.lazySource` instead.|
-|Source|<a name="lazilyasync"></a>@ref[lazilyAsync](Source/lazilyAsync.md)|`lazilyAsync` has been deprecated in 2.6.0, use `Source.lazyFutureSource` instead.|
-|Source|<a name="lazycompletionstage"></a>@ref[lazyCompletionStage](Source/lazyCompletionStage.md)|Defers creation of a future of a single element source until there is demand.|
-|Source|<a name="lazycompletionstagesource"></a>@ref[lazyCompletionStageSource](Source/lazyCompletionStageSource.md)|Defers creation of a future source until there is demand.|
-|Source|<a name="lazyfuture"></a>@ref[lazyFuture](Source/lazyFuture.md)|Defers creation of a future of a single element source until there is demand.|
-|Source|<a name="lazyfuturesource"></a>@ref[lazyFutureSource](Source/lazyFutureSource.md)|Defers creation and materialization of a `Source` until there is demand.|
-|Source|<a name="lazysingle"></a>@ref[lazySingle](Source/lazySingle.md)|Defers creation of a single element source until there is demand.|
-|Source|<a name="lazysource"></a>@ref[lazySource](Source/lazySource.md)|Defers creation and materialization of a `Source` until there is demand.|
-|Source|<a name="maybe"></a>@ref[maybe](Source/maybe.md)|Create a source that emits once the materialized @scala[`Promise`] @java[`CompletableFuture`] is completed with a value.|
-|Source|<a name="queue"></a>@ref[queue](Source/queue.md)|Materialize a `SourceQueue` onto which elements can be pushed for emitting from the source. |
-|Source|<a name="range"></a>@ref[range](Source/range.md)|Emit each integer in a range, with an option to take bigger steps than 1.|
-|Source|<a name="repeat"></a>@ref[repeat](Source/repeat.md)|Stream a single object repeatedly|
-|Source|<a name="single"></a>@ref[single](Source/single.md)|Stream a single object|
-|Source|<a name="tick"></a>@ref[tick](Source/tick.md)|A periodical repetition of an arbitrary object.|
-|Source|<a name="unfold"></a>@ref[unfold](Source/unfold.md)|Stream the result of a function as long as it returns a @scala[`Some`] @java[`Optional`].|
-|Source|<a name="unfoldasync"></a>@ref[unfoldAsync](Source/unfoldAsync.md)|Just like `unfold` but the fold function returns a @scala[`Future`] @java[`CompletionStage`].|
-|Source|<a name="unfoldresource"></a>@ref[unfoldResource](Source/unfoldResource.md)|Wrap any resource that can be opened, queried for next element (in a blocking way) and closed using three distinct functions into a source.|
-|Source|<a name="unfoldresourceasync"></a>@ref[unfoldResourceAsync](Source/unfoldResourceAsync.md)|Wrap any resource that can be opened, queried for next element (in a blocking way) and closed using three distinct functions into a source.|
-|Source|<a name="zipn"></a>@ref[zipN](Source/zipN.md)|Combine the elements of multiple streams into a stream of sequences.|
-|Source|<a name="zipwithn"></a>@ref[zipWithN](Source/zipWithN.md)|Combine the elements of multiple streams into a stream of sequences using a combiner function.|
+|Source|<a name="empty"></a>@ref[empty](Source/empty.md)|立即完成，而不发出任何元素。|
+|Source|<a name="failed"></a>@ref[failed](Source/failed.md)|使用用户指定的异常直接失败。|
+|Source|<a name="from"></a>@ref[@scala[apply]@java[from]](Source/from.md)|流动 @scala[`immutable.Seq`]@java[`Iterable`] 的值。|
+|Source|<a name="fromcompletionstage"></a>@ref[fromCompletionStage](Source/fromCompletionStage.md)|`fromCompletionStage` 在2.6.0中已弃用，请使用 `Source.completionStage`|
+|Source|<a name="fromfuture"></a>@ref[fromFuture](Source/fromFuture.md)|`fromFuture` 在2.6.0中已弃用，请用 `Source.future` 代替。|
+|Source|<a name="fromfuturesource"></a>@ref[fromFutureSource](Source/fromFutureSource.md)|`fromFutureSource` 在2.6.0中已弃用，请用 `Source.futureSource` 代替。|
+|Source|<a name="fromiterator"></a>@ref[fromIterator](Source/fromIterator.md)|从一个`Iterator`中流动值，当有需求时请求下一个值。|
+|Source|<a name="frompublisher"></a>@ref[fromPublisher](Source/fromPublisher.md)|与Reactive Streams集成，订阅了一个`org.reactivestreams.Publisher`。|
+|Source|<a name="fromsourcecompletionstage"></a>@ref[fromSourceCompletionStage](Source/fromSourceCompletionStage.md)|`fromSourceCompletionStage` 在2.6.0中已弃用，请用 `Source.completionStageSource` 代替.|
+|Source|<a name="future"></a>@ref[future](Source/future.md)|当`Future`完成并且有需求时，发送它的单个值。|
+|Source|<a name="futuresource"></a>@ref[futureSource](Source/futureSource.md)|流动给定的future源的元素，一旦它成功完成。|
+|Source|<a name="lazily"></a>@ref[lazily](Source/lazily.md)|`lazily` 在2.6.0中已弃用，请用 `Source.lazySource` 代替。|
+|Source|<a name="lazilyasync"></a>@ref[lazilyAsync](Source/lazilyAsync.md)|`lazilyAsync` 在2.6.0中已弃用，请用 `Source.lazyFutureSource` 代替。|
+|Source|<a name="lazycompletionstage"></a>@ref[lazyCompletionStage](Source/lazyCompletionStage.md)|将一个单个元素的源的future的创建推迟到有需求的时候。|
+|Source|<a name="lazycompletionstagesource"></a>@ref[lazyCompletionStageSource](Source/lazyCompletionStageSource.md)|将一个future源的创建推迟到有需求的时候。|
+|Source|<a name="lazyfuture"></a>@ref[lazyFuture](Source/lazyFuture.md)|将一个单个元素源的future的创建推迟到有需求时。|
+|Source|<a name="lazyfuturesource"></a>@ref[lazyFutureSource](Source/lazyFutureSource.md)|将一个`Source`的创造和物化推迟到有需求的时候。|
+|Source|<a name="lazysingle"></a>@ref[lazySingle](Source/lazySingle.md)|将一个单个元素的源的创建延迟到有需求时。|
+|Source|<a name="lazysource"></a>@ref[lazySource](Source/lazySource.md)|将一个`Source`的创建和物化推迟到有需求的时候。|
+|Source|<a name="maybe"></a>@ref[maybe](Source/maybe.md)|创建一个源，它一旦已物化的 @scala[`Promise`]@java[`CompletableFuture`] 带有一个值完成，就发出。|
+|Source|<a name="queue"></a>@ref[queue](Source/queue.md)|物化一个`SourceQueue`，那些元素可被推到其上，用于从源发出。|
+|Source|<a name="range"></a>@ref[range](Source/range.md)|发出一个范围内的每个整数，具有一个可选项，用于采用大于1的步长。|
+|Source|<a name="repeat"></a>@ref[repeat](Source/repeat.md)|重复流动一个对象|
+|Source|<a name="single"></a>@ref[single](Source/single.md)|流动一个单个对象|
+|Source|<a name="tick"></a>@ref[tick](Source/tick.md)|一个任意对象的一个定期的重复。|
+|Source|<a name="unfold"></a>@ref[unfold](Source/unfold.md)|流动一个函数的结果，只要它返回一个 @scala[`Some`]@java[`Optional`]。|
+|Source|<a name="unfoldasync"></a>@ref[unfoldAsync](Source/unfoldAsync.md)|与`unfold`类似，但是fold函数返回一个 @scala[`Future`]@java[`CompletionStage`]。|
+|Source|<a name="unfoldresource"></a>@ref[unfoldResource](Source/unfoldResource.md)|将任何可以打开、查询下一个元素(以阻塞方式)和使用三个不同的函数关闭的资源包装到一个源中。|
+|Source|<a name="unfoldresourceasync"></a>@ref[unfoldResourceAsync](Source/unfoldResourceAsync.md)|将任何可以打开、查询下一个元素(以阻塞方式)和使用三个不同的函数关闭的资源包装到一个源中。|
+|Source|<a name="zipn"></a>@ref[zipN](Source/zipN.md)|将多个流的元素组合成一个序列流。|
+|Source|<a name="zipwithn"></a>@ref[zipWithN](Source/zipWithN.md)|使用一个组合器函数将多个流的元素组合成一个序列流。|
 
 ## Sink operators
 
@@ -54,36 +54,36 @@ These built-in sinks are available from @scala[`akka.stream.scaladsl.Sink`] @jav
 
 | |Operator|Description|
 |--|--|--|
-|Sink|<a name="actorref"></a>@ref[actorRef](Sink/actorRef.md)|Send the elements from the stream to an `ActorRef`.|
-|Sink|<a name="actorrefwithbackpressure"></a>@ref[actorRefWithBackpressure](Sink/actorRefWithBackpressure.md)|Send the elements from the stream to an `ActorRef` which must then acknowledge reception after completing a message, to provide back pressure onto the sink.|
-|Sink|<a name="aspublisher"></a>@ref[asPublisher](Sink/asPublisher.md)|Integration with Reactive Streams, materializes into a `org.reactivestreams.Publisher`.|
-|Sink|<a name="cancelled"></a>@ref[cancelled](Sink/cancelled.md)|Immediately cancel the stream|
-|Sink|<a name="collection"></a>@ref[collection](Sink/collection.md)|@scala[Collect all values emitted from the stream into a collection.]@java[Operator only available in the Scala API. The closest operator in the Java API is @ref[`Sink.seq`](Sink/seq.md)].|
-|Sink|<a name="combine"></a>@ref[combine](Sink/combine.md)|Combine several sinks into one using a user specified strategy|
-|Sink|<a name="completionstagesink"></a>@ref[completionStageSink](Sink/completionStageSink.md)|Streams the elements to the given future sink once it successfully completes. |
-|Sink|<a name="fold"></a>@ref[fold](Sink/fold.md)|Fold over emitted element with a function, where each invocation will get the new element and the result from the previous fold invocation.|
-|Sink|<a name="foreach"></a>@ref[foreach](Sink/foreach.md)|Invoke a given procedure for each element received.|
-|Sink|<a name="foreachasync"></a>@ref[foreachAsync](Sink/foreachAsync.md)|Invoke a given procedure asynchronously for each element received.|
-|Sink|<a name="foreachparallel"></a>@ref[foreachParallel](Sink/foreachParallel.md)|Like `foreach` but allows up to `parallellism` procedure calls to happen in parallel.|
-|Sink|<a name="frommaterializer"></a>@ref[fromMaterializer](Sink/fromMaterializer.md)|Defer the creation of a `Sink` until materialization and access `Materializer` and `Attributes`|
-|Sink|<a name="fromsubscriber"></a>@ref[fromSubscriber](Sink/fromSubscriber.md)|Integration with Reactive Streams, wraps a `org.reactivestreams.Subscriber` as a sink.|
-|Sink|<a name="futuresink"></a>@ref[futureSink](Sink/futureSink.md)|Streams the elements to the given future sink once it successfully completes. |
-|Sink|<a name="head"></a>@ref[head](Sink/head.md)|Materializes into a @scala[`Future`] @java[`CompletionStage`] which completes with the first value arriving, after this the stream is canceled.|
-|Sink|<a name="headoption"></a>@ref[headOption](Sink/headOption.md)|Materializes into a @scala[`Future[Option[T]]`] @java[`CompletionStage<Optional<T>>`] which completes with the first value arriving wrapped in @scala[`Some`] @java[`Optional`], or @scala[a `None`] @java[an empty Optional] if the stream completes without any elements emitted.|
-|Sink|<a name="ignore"></a>@ref[ignore](Sink/ignore.md)|Consume all elements but discards them.|
-|Sink|<a name="last"></a>@ref[last](Sink/last.md)|Materializes into a @scala[`Future`] @java[`CompletionStage`] which will complete with the last value emitted when the stream completes.|
-|Sink|<a name="lastoption"></a>@ref[lastOption](Sink/lastOption.md)|Materialize a @scala[`Future[Option[T]]`] @java[`CompletionStage<Optional<T>>`] which completes with the last value emitted wrapped in an @scala[`Some`] @java[`Optional`] when the stream completes.|
-|Sink|<a name="lazycompletionstagesink"></a>@ref[lazyCompletionStageSink](Sink/lazyCompletionStageSink.md)|Defers creation and materialization of a `Sink` until there is a first element.|
-|Sink|<a name="lazyfuturesink"></a>@ref[lazyFutureSink](Sink/lazyFutureSink.md)|Defers creation and materialization of a `Sink` until there is a first element.|
-|Sink|<a name="lazyinitasync"></a>@ref[lazyInitAsync](Sink/lazyInitAsync.md)|`lazyInitAsync` has been deprecated in 2.6.0, use `Sink.lazyFutureSink` |
-|Sink|<a name="lazysink"></a>@ref[lazySink](Sink/lazySink.md)|Defers creation and materialization of a `Sink` until there is a first element.|
-|Sink|<a name="oncomplete"></a>@ref[onComplete](Sink/onComplete.md)|Invoke a callback when the stream has completed or failed.|
-|Sink|<a name="prematerialize"></a>@ref[preMaterialize](Sink/preMaterialize.md)|Materializes this Sink, immediately returning (1) its materialized value, and (2) a new Sink that can be consume elements 'into' the pre-materialized one.|
-|Sink|<a name="queue"></a>@ref[queue](Sink/queue.md)|Materialize a `SinkQueue` that can be pulled to trigger demand through the sink.|
-|Sink|<a name="reduce"></a>@ref[reduce](Sink/reduce.md)|Apply a reduction function on the incoming elements and pass the result to the next invocation.|
-|Sink|<a name="seq"></a>@ref[seq](Sink/seq.md)|Collect values emitted from the stream into a collection.|
-|Sink|<a name="setup"></a>@ref[setup](Sink/setup.md)|Defer the creation of a `Sink` until materialization and access `ActorMaterializer` and `Attributes`|
-|Sink|<a name="takelast"></a>@ref[takeLast](Sink/takeLast.md)|Collect the last `n` values emitted from the stream into a collection.|
+|Sink|<a name="actorref"></a>@ref[actorRef](Sink/actorRef.md)|将元素从流发送到一个`ActorRef`。|
+|Sink|<a name="actorrefwithbackpressure"></a>@ref[actorRefWithBackpressure](Sink/actorRefWithBackpressure.md)|将元素从流发送到一个`ActorRef`，它必须在完成一个消息后确认接收，以向接收器提供背压。|
+|Sink|<a name="aspublisher"></a>@ref[asPublisher](Sink/asPublisher.md)|与响应流集成，物化到一个`org.reactivestreams.Publisher`里面。|
+|Sink|<a name="cancelled"></a>@ref[cancelled](Sink/cancelled.md)|直接取消流|
+|Sink|<a name="collection"></a>@ref[collection](Sink/collection.md)|将从流中发出的所有值收集到一个集合中。|
+|Sink|<a name="combine"></a>@ref[combine](Sink/combine.md)|使用用户指定的一个策略将多个接收器组合成一个接收器|
+|Sink|<a name="completionstagesink"></a>@ref[completionStageSink](Sink/completionStageSink.md)|将元素流动到指定的future接收器，一旦它成功完成。|
+|Sink|<a name="fold"></a>@ref[fold](Sink/fold.md)|使用一个函数折叠已发出的元素，每次调用都将获得新元素和前一次折叠调用的结果。|
+|Sink|<a name="foreach"></a>@ref[foreach](Sink/foreach.md)|为接收到的每个元素调用一个给定的过程。|
+|Sink|<a name="foreachasync"></a>@ref[foreachAsync](Sink/foreachAsync.md)|为接收到的每个元素异步调用一个给定的过程。|
+|Sink|<a name="foreachparallel"></a>@ref[foreachParallel](Sink/foreachParallel.md)|类似于`foreach`，但允许通过`parallellism`过程调用来并行发生。|
+|Sink|<a name="frommaterializer"></a>@ref[fromMaterializer](Sink/fromMaterializer.md)|将一个`Sink`的创建推迟，直到物化和访问`Materializer`和`Attributes`|
+|Sink|<a name="fromsubscriber"></a>@ref[fromSubscriber](Sink/fromSubscriber.md)|与响应流集成，包装一个`org.reactivestreams.Subscriber`作为一个接收器。|
+|Sink|<a name="futuresink"></a>@ref[futureSink](Sink/futureSink.md)|将元素流动到指定的future接收器，一旦它成功完成后。|
+|Sink|<a name="head"></a>@ref[head](Sink/head.md)|物化到一个 @scala[`Future`]@java[`CompletionStage`] 里面，它将使用第一个到达的值完成，在此之后，流被取消。|
+|Sink|<a name="headoption"></a>@ref[headOption](Sink/headOption.md)|物化到一个 @scala[`Future[Option[T]]`] @java[`CompletionStage<Optional<T>>`] 里面，它将使用包裹在 @scala[`Some`]@java[`Optional`] 里面的第一个到达的值完成，或者 @scala[一个`None`]@java[一个空的可选]，如果流在没有发出任何元素的情况下完成。|
+|Sink|<a name="ignore"></a>@ref[ignore](Sink/ignore.md)|消耗所有元素但丢弃它们。|
+|Sink|<a name="last"></a>@ref[last](Sink/last.md)|物化到一个 @scala[`Future`]@java[`CompletionStage`] 里面，它将在流完成时，使用最后发出的值来完成。|
+|Sink|<a name="lastoption"></a>@ref[lastOption](Sink/lastOption.md)|物化一个 @scala[`Future[Option[T]]`]@java[`CompletionStage<Optional<T>>`]，当流完成时，它将使用包裹在一个 @scala[`Some`]@java[`Optional`] 里面的最后一个值完成。|
+|Sink|<a name="lazycompletionstagesink"></a>@ref[lazyCompletionStageSink](Sink/lazyCompletionStageSink.md)|延迟一个`Sink`的创建和物化直到第一个元素。|
+|Sink|<a name="lazyfuturesink"></a>@ref[lazyFutureSink](Sink/lazyFutureSink.md)|延迟一个`Sink`的创建和物化直到第一个元素。|
+|Sink|<a name="lazyinitasync"></a>@ref[lazyInitAsync](Sink/lazyInitAsync.md)|`lazyInitAsync` 在2.6.0中已弃用，请用 `Sink.lazyFutureSink` |
+|Sink|<a name="lazysink"></a>@ref[lazySink](Sink/lazySink.md)|延迟一个`Sink`的创建和物化直到第一个元素。|
+|Sink|<a name="oncomplete"></a>@ref[onComplete](Sink/onComplete.md)|当流已经完成或失败时调用一个回调。|
+|Sink|<a name="prematerialize"></a>@ref[preMaterialize](Sink/preMaterialize.md)|物化这个接收器，立即返回 (1) 它的物化值，(2) 一个新的Sink，它可以消费元素'到'的一个预物化SinK。|
+|Sink|<a name="queue"></a>@ref[queue](Sink/queue.md)|物化一个`SinkQueue`，它可以通过接收器'拉'来触发需求。|
+|Sink|<a name="reduce"></a>@ref[reduce](Sink/reduce.md)|对传入元素应用归约(reduction)函数，并将结果传递给下一次调用。|
+|Sink|<a name="seq"></a>@ref[seq](Sink/seq.md)|收集从流发出的值到集合中。|
+|Sink|<a name="setup"></a>@ref[setup](Sink/setup.md)|延迟一个`Sink`的创建，直到物化和访问`ActorMaterializer`和`Attributes`|
+|Sink|<a name="takelast"></a>@ref[takeLast](Sink/takeLast.md)|收集从流中发出的最后一个`n`值到集合中。|
 
 ## Additional Sink and Source converters
 
@@ -127,10 +127,10 @@ Sources and sinks for reading and writing files can be found on `FileIO`.
 
 | |Operator|Description|
 |--|--|--|
-|FileIO|<a name="fromfile"></a>@ref[fromFile](FileIO/fromFile.md)|Emits the contents of a file.|
-|FileIO|<a name="frompath"></a>@ref[fromPath](FileIO/fromPath.md)|Emits the contents of a file from the given path.|
-|FileIO|<a name="tofile"></a>@ref[toFile](FileIO/toFile.md)|Create a sink which will write incoming `ByteString` s to a given file.|
-|FileIO|<a name="topath"></a>@ref[toPath](FileIO/toPath.md)|Create a sink which will write incoming `ByteString` s to a given file path.|
+|FileIO|<a name="fromfile"></a>@ref[fromFile](FileIO/fromFile.md)|发出一个文件的内容。|
+|FileIO|<a name="frompath"></a>@ref[fromPath](FileIO/fromPath.md)|从给定路径发出一个文件的内容。|
+|FileIO|<a name="tofile"></a>@ref[toFile](FileIO/toFile.md)|创建一个接收器，它将把传入的`ByteString`写到一个给定的文件中。|
+|FileIO|<a name="topath"></a>@ref[toPath](FileIO/toPath.md)|创建一个接收器，它将把传入的`ByteString`写入给定的文件路径。|
 
 ## Simple operators
 
@@ -142,30 +142,30 @@ depending on being backpressured by downstream or not.
 
 | |Operator|Description|
 |--|--|--|
-|Flow|<a name="asflowwithcontext"></a>@ref[asFlowWithContext](Flow/asFlowWithContext.md)|Turns a Flow into a FlowWithContext which can propagate a context per element along a stream.|
-|Source/Flow|<a name="collect"></a>@ref[collect](Source-or-Flow/collect.md)|Apply a partial function to each incoming element, if the partial function is defined for a value the returned value is passed downstream.|
-|Source/Flow|<a name="collecttype"></a>@ref[collectType](Source-or-Flow/collectType.md)|Transform this stream by testing the type of each of the elements on which the element is an instance of the provided type as they pass through this processing step.|
-|Flow|<a name="completionstageflow"></a>@ref[completionStageFlow](Flow/completionStageFlow.md)|Streams the elements through the given future flow once it successfully completes.|
-|Source/Flow|<a name="detach"></a>@ref[detach](Source-or-Flow/detach.md)|Detach upstream demand from downstream demand without detaching the stream rates.|
-|Source/Flow|<a name="drop"></a>@ref[drop](Source-or-Flow/drop.md)|Drop `n` elements and then pass any subsequent element downstream.|
-|Source/Flow|<a name="dropwhile"></a>@ref[dropWhile](Source-or-Flow/dropWhile.md)|Drop elements as long as a predicate function return true for the element|
-|Source/Flow|<a name="filter"></a>@ref[filter](Source-or-Flow/filter.md)|Filter the incoming elements using a predicate.|
-|Source/Flow|<a name="filternot"></a>@ref[filterNot](Source-or-Flow/filterNot.md)|Filter the incoming elements using a predicate.|
+|Flow|<a name="asflowwithcontext"></a>@ref[asFlowWithContext](Flow/asFlowWithContext.md)|将一个`Flow`转换为一个`FlowWithContext`，它可以沿着流传播每个元素的上下文。|
+|Source/Flow|<a name="collect"></a>@ref[collect](Source-or-Flow/collect.md)|对每个传入元素应用一个偏(partial)函数，如果偏函数是为一个值定义的，则返回的值将向下传递。|
+|Source/Flow|<a name="collecttype"></a>@ref[collectType](Source-or-Flow/collectType.md)|通过测试每个元素的类型来转换这个流，当元素通过此处理步骤时，它们是所提供类型的实例。|
+|Flow|<a name="completionstageflow"></a>@ref[completionStageFlow](Flow/completionStageFlow.md)|流动元素通过给定的future flow，一旦它成功完成。|
+|Source/Flow|<a name="detach"></a>@ref[detach](Source-or-Flow/detach.md)|从下游需求分离上游需求，而不分离流比率。|
+|Source/Flow|<a name="drop"></a>@ref[drop](Source-or-Flow/drop.md)|删除`n`个元素，然后向下游传递任何后续元素。|
+|Source/Flow|<a name="dropwhile"></a>@ref[dropWhile](Source-or-Flow/dropWhile.md)|删除元素，只要一个谓词函数对元素返回true|
+|Source/Flow|<a name="filter"></a>@ref[filter](Source-or-Flow/filter.md)|使用一个谓词过滤传入元素。|
+|Source/Flow|<a name="filternot"></a>@ref[filterNot](Source-or-Flow/filterNot.md)|使用一个谓词过滤传入元素。|
 |Source/Flow|<a name="fold"></a>@ref[fold](Source-or-Flow/fold.md)|Start with current value `zero` and then apply the current and next value to the given function. When upstream completes, the current value is emitted downstream.|
 |Source/Flow|<a name="foldasync"></a>@ref[foldAsync](Source-or-Flow/foldAsync.md)|Just like `fold` but receives a function that results in a @scala[`Future`] @java[`CompletionStage`] to the next value.|
 |Source/Flow|<a name="frommaterializer"></a>@ref[fromMaterializer](Source-or-Flow/fromMaterializer.md)|Defer the creation of a `Source/Flow` until materialization and access `Materializer` and `Attributes`|
-|Flow|<a name="futureflow"></a>@ref[futureFlow](Flow/futureFlow.md)|Streams the elements through the given future flow once it successfully completes.|
+|Flow|<a name="futureflow"></a>@ref[futureFlow](Flow/futureFlow.md)|将元素流过给定的future flow，一旦它成功完成。|
 |Source/Flow|<a name="grouped"></a>@ref[grouped](Source-or-Flow/grouped.md)|Accumulate incoming events until the specified number of elements have been accumulated and then pass the collection of elements downstream.|
 |Source/Flow|<a name="intersperse"></a>@ref[intersperse](Source-or-Flow/intersperse.md)|Intersperse stream with provided element similar to `List.mkString`.|
-|Flow|<a name="lazycompletionstageflow"></a>@ref[lazyCompletionStageFlow](Flow/lazyCompletionStageFlow.md)|Defers creation and materialization of a `Flow` until there is a first element.|
+|Flow|<a name="lazycompletionstageflow"></a>@ref[lazyCompletionStageFlow](Flow/lazyCompletionStageFlow.md)|将一个`Flow`的创建和物化延迟到第一个元素。|
 |Flow|<a name="lazyflow"></a>@ref[lazyFlow](Flow/lazyFlow.md)|Defers creation and materialization of a `Flow` until there is a first element.|
 |Flow|<a name="lazyfutureflow"></a>@ref[lazyFutureFlow](Flow/lazyFutureFlow.md)|Defers creation and materialization of a `Flow` until there is a first element.|
 |Flow|<a name="lazyinitasync"></a>@ref[lazyInitAsync](Flow/lazyInitAsync.md)|`lazyInitAsync` has been deprecated in 2.6.0 use `Flow.lazyFutureFlow` in combination with `prefixAndTail` instead.|
 |Source/Flow|<a name="limit"></a>@ref[limit](Source-or-Flow/limit.md)|Limit number of element from upstream to given `max` number.|
 |Source/Flow|<a name="limitweighted"></a>@ref[limitWeighted](Source-or-Flow/limitWeighted.md)|Ensure stream boundedness by evaluating the cost of incoming elements using a cost function.|
-|Source/Flow|<a name="log"></a>@ref[log](Source-or-Flow/log.md)|Log elements flowing through the stream as well as completion and erroring.|
-|Source/Flow|<a name="map"></a>@ref[map](Source-or-Flow/map.md)|Transform each element in the stream by calling a mapping function with it and passing the returned value downstream.|
-|Source/Flow|<a name="mapconcat"></a>@ref[mapConcat](Source-or-Flow/mapConcat.md)|Transform each element into zero or more elements that are individually passed downstream.|
+|Source/Flow|<a name="log"></a>@ref[log](Source-or-Flow/log.md)|日志记录通过流的元素以及完成和错误。|
+|Source/Flow|<a name="map"></a>@ref[map](Source-or-Flow/map.md)|转换流中的每个元素，通过对它调用流中的一个映射函数，并将返回的值传递到下游。|
+|Source/Flow|<a name="mapconcat"></a>@ref[mapConcat](Source-or-Flow/mapConcat.md)|将每个元素转换为零个或多个元素，它们会被逐个地传递给下游。|
 |Source/Flow|<a name="maperror"></a>@ref[mapError](Source-or-Flow/mapError.md)|While similar to `recover` this operators can be used to transform an error signal to a different one *without* logging it as an error in the process.|
 |Source/Flow|<a name="recover"></a>@ref[recover](Source-or-Flow/recover.md)|Allow sending of one last element downstream when a failure has happened upstream.|
 |Source/Flow|<a name="recoverwith"></a>@ref[recoverWith](Source-or-Flow/recoverWith.md)|Allow switching to alternative Source when a failure has happened upstream.|
@@ -187,8 +187,8 @@ depending on being backpressured by downstream or not.
 
 | |Operator|Description|
 |--|--|--|
-|Flow|<a name="fromsinkandsource"></a>@ref[fromSinkAndSource](Flow/fromSinkAndSource.md)|Creates a `Flow` from a `Sink` and a `Source` where the Flow's input will be sent to the `Sink` and the `Flow` 's output will come from the Source.|
-|Flow|<a name="fromsinkandsourcecoupled"></a>@ref[fromSinkAndSourceCoupled](Flow/fromSinkAndSourceCoupled.md)|Allows coupling termination (cancellation, completion, erroring) of Sinks and Sources while creating a Flow between them.|
+|Flow|<a name="fromsinkandsource"></a>@ref[fromSinkAndSource](Flow/fromSinkAndSource.md)|从一个`Sink`和一个`Source`创建一个`Flow`，其中Flow的输入将被发送到`Sink`，而`Flow`的输出将来自`Source`。|
+|Flow|<a name="fromsinkandsourcecoupled"></a>@ref[fromSinkAndSourceCoupled](Flow/fromSinkAndSourceCoupled.md)|允许在汇点和源之间创建流时耦合终止(取消、完成和错误)。Allows coupling termination (cancellation, completion, erroring) of Sinks and Sources while creating a Flow between them.|
 
 ## Asynchronous operators
 
@@ -197,9 +197,9 @@ operation at the same time (usually handling the completion of a @scala[`Future`
 
 | |Operator|Description|
 |--|--|--|
-|Source/Flow|<a name="ask"></a>@ref[ask](Source-or-Flow/ask.md)|Use the `ask` pattern to send a request-reply message to the target `ref` actor.|
-|Source/Flow|<a name="mapasync"></a>@ref[mapAsync](Source-or-Flow/mapAsync.md)|Pass incoming elements to a function that return a @scala[`Future`] @java[`CompletionStage`] result.|
-|Source/Flow|<a name="mapasyncunordered"></a>@ref[mapAsyncUnordered](Source-or-Flow/mapAsyncUnordered.md)|Like `mapAsync` but @scala[`Future`] @java[`CompletionStage`] results are passed downstream as they arrive regardless of the order of the elements that triggered them.|
+|Source/Flow|<a name="ask"></a>@ref[ask](Source-or-Flow/ask.md)|使用`ask`模式发送请求-应答消息到目标`ref`actor。|
+|Source/Flow|<a name="mapasync"></a>@ref[mapAsync](Source-or-Flow/mapAsync.md)|将传入的元素传递给一个函数，它返回一个 @scala[`Future`]@java[`CompletionStage`] 结果。|
+|Source/Flow|<a name="mapasyncunordered"></a>@ref[mapAsyncUnordered](Source-or-Flow/mapAsyncUnordered.md)|与`mapAsync`类似，但是 @scala[`Future`]@java[`CompletionStage`] 的结果在到达时向下游传递，而不考虑触发元素的顺序。|
 
 ## Timer driven operators
 
@@ -207,8 +207,8 @@ These operators process elements using timers, delaying, dropping or grouping el
 
 | |Operator|Description|
 |--|--|--|
-|Source/Flow|<a name="delay"></a>@ref[delay](Source-or-Flow/delay.md)|Delay every element passed through with a specific duration.|
-|Source/Flow|<a name="dropwithin"></a>@ref[dropWithin](Source-or-Flow/dropWithin.md)|Drop elements until a timeout has fired|
+|Source/Flow|<a name="delay"></a>@ref[delay](Source-or-Flow/delay.md)|使用特定的时长，延迟通过的每个元素。|
+|Source/Flow|<a name="dropwithin"></a>@ref[dropWithin](Source-or-Flow/dropWithin.md)|到了已触发超时的时候，就删除元素|
 |Source/Flow|<a name="groupedweightedwithin"></a>@ref[groupedWeightedWithin](Source-or-Flow/groupedWeightedWithin.md)|Chunk up this stream into groups of elements received within a time window, or limited by the weight of the elements, whatever happens first.|
 |Source/Flow|<a name="groupedwithin"></a>@ref[groupedWithin](Source-or-Flow/groupedWithin.md)|Chunk up this stream into groups of elements received within a time window, or limited by the number of the elements, whatever happens first.|
 |Source/Flow|<a name="initialdelay"></a>@ref[initialDelay](Source-or-Flow/initialDelay.md)|Delays the initial element by the specified duration.|
@@ -222,11 +222,11 @@ These operators are aware of the backpressure provided by their downstreams and 
 |--|--|--|
 |Source/Flow|<a name="batch"></a>@ref[batch](Source-or-Flow/batch.md)|Allow for a slower downstream by passing incoming elements and a summary into an aggregate function as long as there is backpressure and a maximum number of batched elements is not yet reached.|
 |Source/Flow|<a name="batchweighted"></a>@ref[batchWeighted](Source-or-Flow/batchWeighted.md)|Allow for a slower downstream by passing incoming elements and a summary into an aggregate function as long as there is backpressure and a maximum weight batched elements is not yet reached.|
-|Source/Flow|<a name="buffer"></a>@ref[buffer](Source-or-Flow/buffer.md)|Allow for a temporarily faster upstream events by buffering `size` elements.|
-|Source/Flow|<a name="conflate"></a>@ref[conflate](Source-or-Flow/conflate.md)|Allow for a slower downstream by passing incoming elements and a summary into an aggregate function as long as there is backpressure.|
-|Source/Flow|<a name="conflatewithseed"></a>@ref[conflateWithSeed](Source-or-Flow/conflateWithSeed.md)|Allow for a slower downstream by passing incoming elements and a summary into an aggregate function as long as there is backpressure.|
-|Source/Flow|<a name="expand"></a>@ref[expand](Source-or-Flow/expand.md)|Like `extrapolate`, but does not have the `initial` argument, and the `Iterator` is also used in lieu of the original element, allowing for it to be rewritten and/or filtered.|
-|Source/Flow|<a name="extrapolate"></a>@ref[extrapolate](Source-or-Flow/extrapolate.md)|Allow for a faster downstream by expanding the last emitted element to an `Iterator`.|
+|Source/Flow|<a name="buffer"></a>@ref[buffer](Source-or-Flow/buffer.md)|通过缓冲`size`个元素来允许一个暂时更快的上游事件。|
+|Source/Flow|<a name="conflate"></a>@ref[conflate](Source-or-Flow/conflate.md)|只要存在背压，就可以通过将传入元素和一个摘要传递到一个聚合函数中，来允许一个较慢的下行速度。|
+|Source/Flow|<a name="conflatewithseed"></a>@ref[conflateWithSeed](Source-or-Flow/conflateWithSeed.md)|只要存在背压，就可以通过将传入元素和一个摘要传递到一个聚合函数中，来允许一个较慢的下行速度。|
+|Source/Flow|<a name="expand"></a>@ref[expand](Source-or-Flow/expand.md)|类似于`extrapolate`，但没有`initial`参数，而且也使用`Iterator`代替原来的元素，允许它被重写和/或过滤。|
+|Source/Flow|<a name="extrapolate"></a>@ref[extrapolate](Source-or-Flow/extrapolate.md)|通过将最后发出的元素扩展为一个`Iterator`，允许一个更快的下游。|
 
 ## Nesting and flattening operators
 
@@ -251,8 +251,8 @@ Those operators operate taking time into consideration.
 
 | |Operator|Description|
 |--|--|--|
-|Source/Flow|<a name="backpressuretimeout"></a>@ref[backpressureTimeout](Source-or-Flow/backpressureTimeout.md)|If the time between the emission of an element and the following downstream demand exceeds the provided timeout, the stream is failed with a `TimeoutException`.|
-|Source/Flow|<a name="completiontimeout"></a>@ref[completionTimeout](Source-or-Flow/completionTimeout.md)|If the completion of the stream does not happen until the provided timeout, the stream is failed with a `TimeoutException`.|
+|Source/Flow|<a name="backpressuretimeout"></a>@ref[backpressureTimeout](Source-or-Flow/backpressureTimeout.md)|如果元素的发射与后续下游需求之间的时间超过了提供的timeout，则流将失败，并包括一个`TimeoutException`。|
+|Source/Flow|<a name="completiontimeout"></a>@ref[completionTimeout](Source-or-Flow/completionTimeout.md)|如果流的完成直到提供的timeout还没有发生，则流将失败，并包含一个`TimeoutException`。|
 |Source/Flow|<a name="idletimeout"></a>@ref[idleTimeout](Source-or-Flow/idleTimeout.md)|If the time between two processed elements exceeds the provided timeout, the stream is failed with a `TimeoutException`.|
 |Source/Flow|<a name="initialtimeout"></a>@ref[initialTimeout](Source-or-Flow/initialTimeout.md)|If the first element has not passed through this operators before the provided timeout, the stream is failed with a `TimeoutException`.|
 |Source/Flow|<a name="keepalive"></a>@ref[keepAlive](Source-or-Flow/keepAlive.md)|Injects additional (configured) elements if upstream does not emit for a configured amount of time.|
@@ -264,7 +264,7 @@ the inputs in different ways.
 
 | |Operator|Description|
 |--|--|--|
-|Source/Flow|<a name="concat"></a>@ref[concat](Source-or-Flow/concat.md)|After completion of the original upstream the elements of the given source will be emitted.|
+|Source/Flow|<a name="concat"></a>@ref[concat](Source-or-Flow/concat.md)|在原始上游完成后，给定源的元素将被发射。|
 |Source/Flow|<a name="interleave"></a>@ref[interleave](Source-or-Flow/interleave.md)|Emits a specifiable number of elements from the original source, then from the provided source and repeats.|
 |Source/Flow|<a name="merge"></a>@ref[merge](Source-or-Flow/merge.md)|Merge multiple sources.|
 |Source/Flow|<a name="mergelatest"></a>@ref[mergeLatest](Source-or-Flow/mergeLatest.md)|Merge multiple sources.|
@@ -295,8 +295,8 @@ There is a number of fan-out operators for which currently no 'fluent' is API av
 | |<a name="partition"></a>@ref[Partition](Partition.md)|Fan-out the stream to several streams.|
 | |<a name="unzip"></a>@ref[Unzip](Unzip.md)|Takes a stream of two element tuples and unzips the two elements ino two different downstreams.|
 | |<a name="unzipwith"></a>@ref[UnzipWith](UnzipWith.md)|Splits each element of input into multiple downstreams using a function|
-|Source/Flow|<a name="alsoto"></a>@ref[alsoTo](Source-or-Flow/alsoTo.md)|Attaches the given `Sink` to this `Flow`, meaning that elements that pass through this `Flow` will also be sent to the `Sink`.|
-|Source/Flow|<a name="divertto"></a>@ref[divertTo](Source-or-Flow/divertTo.md)|Each upstream element will either be diverted to the given sink, or the downstream consumer according to the predicate function applied to the element.|
+|Source/Flow|<a name="alsoto"></a>@ref[alsoTo](Source-or-Flow/alsoTo.md)|将给定的`Sink`附加到这个`Flow`，这意味着通过这个`Flow`的元素也将被发送到`Sink`。|
+|Source/Flow|<a name="divertto"></a>@ref[divertTo](Source-or-Flow/divertTo.md)|根据应用于元素的谓词函数，每个上游元素要么被转移到给定的接收器，要么被转移到下游消费者。|
 |Source/Flow|<a name="wiretap"></a>@ref[wireTap](Source-or-Flow/wireTap.md)|Attaches the given `Sink` to this `Flow` as a wire tap, meaning that elements that pass through will also be sent to the wire-tap `Sink`, without the latter affecting the mainline flow.|
 
 ## Watching status operators

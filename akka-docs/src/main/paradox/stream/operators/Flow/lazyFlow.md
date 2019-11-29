@@ -6,13 +6,13 @@ Defers creation and materialization of a `Flow` until there is a first element.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #lazyFlow }
 
 @@@
 
-## Description
+## 描述
 
 When the first element comes from upstream the actual `Flow` is created and materialized.
 The internal `Flow` will not be created if there are no elements on completion or failure of up or downstream.
@@ -20,7 +20,7 @@ The internal `Flow` will not be created if there are no elements on completion o
 The materialized value of the `Flow` will be the materialized value of the created internal flow if it is materialized
 and failed with a `akka.stream.NeverMaterializedException` if the stream fails or completes without the flow being materialized.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

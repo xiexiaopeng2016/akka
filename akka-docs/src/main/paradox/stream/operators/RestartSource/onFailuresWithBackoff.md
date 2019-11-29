@@ -6,13 +6,13 @@ Wrap the given @apidoc[Source] with a @apidoc[Source] that will restart it when 
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [RestartSource.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/RestartSource.scala) { #onFailuresWithBackoff }
 
 @@@
 
-## Description
+## 描述
 
  This @apidoc[Source] will never emit a failure, since the failure of the wrapped @apidoc[Source] is always handled by
  restarting. The wrapped @apidoc[Source] can be cancelled by cancelling this @apidoc[Source].
@@ -20,7 +20,7 @@ Wrap the given @apidoc[Source] with a @apidoc[Source] that will restart it when 
  This can be triggered simply by the downstream cancelling, or externally by introducing a @apidoc[KillSwitch] right
  after this @apidoc[Source] in the graph.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

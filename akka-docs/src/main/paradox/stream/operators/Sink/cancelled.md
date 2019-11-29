@@ -1,22 +1,22 @@
 # cancelled
 
-Immediately cancel the stream
+直接取消流
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #cancelled }
 
 @@@
 
-## Description
+## 描述
 
-Immediately cancel the stream
+直接取消流
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

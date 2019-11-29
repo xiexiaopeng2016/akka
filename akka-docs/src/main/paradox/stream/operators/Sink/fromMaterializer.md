@@ -1,17 +1,16 @@
 # Sink.fromMaterializer
 
-Defer the creation of a `Sink` until materialization and access `Materializer` and `Attributes`
+将一个`Sink`的创建推迟，直到物化和访问`Materializer`和`Attributes`
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@ div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #fromMaterializer }
 @@@
 
-## Description
+## 描述
 
-Typically used when access to materializer is needed to run a different stream during the construction of a sink.
-Can also be used to access the underlying `ActorSystem` from `Materializer`.
+通常用在构建接收器期间需要访问一个物化器来运行不同的流时。也可以用来从`Materializer`访问底层的`ActorSystem`。

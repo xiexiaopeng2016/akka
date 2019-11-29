@@ -4,7 +4,7 @@ Wrap the given @apidoc[FlowWithContext] and retry individual elements in that st
 
 @ref[Error handling](../index.md#error-handling)
 
-## Signature
+## 签名
 
 Scala
 :   @@signature [RetryFlow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/RetryFlow.scala) { #withBackoffAndContext }
@@ -13,7 +13,7 @@ Java
 :   @@snip [RetryFlowTest.java](/akka-stream-tests/src/test/java/akka/stream/javadsl/RetryFlowTest.java) { #signature }
 
 
-## Description
+## 描述
 
 When an element is emitted by the wrapped `flow` it is passed to the `decideRetry` function, which may return an element to retry in the `flow`. 
 
@@ -39,7 +39,7 @@ Scala
 Java
 :   @@snip [RetryFlowTest.java](/akka-stream-tests/src/test/java/akka/stream/javadsl/RetryFlowTest.java) { #retry-success }
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

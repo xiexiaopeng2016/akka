@@ -6,18 +6,18 @@ If the first element has not passed through this operators before the provided t
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #initialTimeout }
 
 @@@
 
-## Description
+## 描述
 
 If the first element has not passed through this operators before the provided timeout, the stream is failed
 with a `TimeoutException`.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

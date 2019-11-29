@@ -1,22 +1,22 @@
 # mapConcat
 
-Transform each element into zero or more elements that are individually passed downstream.
+将每个元素转换为零个或多个元素，它们会被逐个地传递给下游。
 
 @ref[Simple operators](../index.md#simple-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #mapConcat }
 
 @@@
 
-## Description
+## 描述
 
-Transform each element into zero or more elements that are individually passed downstream.
+将每个元素转换为零个或多个元素，它们会被逐个地传递给下游。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

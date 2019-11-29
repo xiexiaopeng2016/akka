@@ -6,13 +6,13 @@ While similar to `recover` this operators can be used to transform an error sign
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #mapError }
 
 @@@
 
-## Description
+## 描述
 
 While similar to `recover` this operators can be used to transform an error signal to a different one *without* logging
 it as an error in the process. So in that sense it is NOT exactly equivalent to `recover(t => throw t2)` since recover
@@ -23,7 +23,7 @@ This operators can recover the failure signal, but not the skipped elements, whi
 
 Similarly to `recover` throwing an exception inside `mapError` _will_ be logged on ERROR level automatically.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

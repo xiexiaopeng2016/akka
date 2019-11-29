@@ -6,19 +6,19 @@ If the time between two processed elements exceeds the provided timeout, the str
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #idleTimeout }
 
 @@@
 
-## Description
+## 描述
 
 If the time between two processed elements exceeds the provided timeout, the stream is failed
 with a `TimeoutException`. The timeout is checked periodically, so the resolution of the
 check is one period (equals to timeout value).
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

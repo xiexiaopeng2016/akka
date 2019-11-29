@@ -1,22 +1,22 @@
 # Source.single
 
-Stream a single object
+流动一个单个对象
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #single }
 
 @@@
 
-## Description
+## 描述
 
-Stream a single object
+流动一个单个对象
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -26,7 +26,7 @@ Stream a single object
 
 @@@
 
-## Examples
+## 示例
 
 Scala
 :  @@snip [source.scala](/akka-stream-tests/src/test/scala/akka/stream/scaladsl/SourceSpec.scala) { #imports #source-single }

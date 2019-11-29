@@ -6,19 +6,19 @@
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #lazyInitAsync }
 
 @@@
 
-## Description
+## 描述
 
 `fromCompletionStage` has been deprecated in 2.6.0 use @ref:[lazyFutureFlow](lazyFutureFlow.md) in combination with `prefixAndTail` instead.
 
 Defers creation until a first element arrives.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

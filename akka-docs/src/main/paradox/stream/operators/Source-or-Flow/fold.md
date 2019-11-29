@@ -6,13 +6,13 @@ Start with current value `zero` and then apply the current and next value to the
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #fold }
 
 @@@
 
-## Description
+## 描述
 
 Start with current value `zero` and then apply the current and next value to the given function. When upstream
 completes, the current value is emitted downstream.
@@ -25,7 +25,7 @@ when running the stream more than once.
 
 @@@
 
-## Example
+## 示例
 
 `fold` is typically used to 'fold up' the incoming values into an aggregate. For example, you might want to summarize the incoming values into a histogram:
 
@@ -35,7 +35,7 @@ Scala
 Java
 :   @@snip [Fold.java](/akka-docs/src/test/java/jdocs/stream/operators/SourceOrFlow.java) { #fold }
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -5,12 +5,12 @@ Create a sink which materializes into an `InputStream` that can be read to trigg
 @ref[Additional Sink and Source converters](../index.md#additional-sink-and-source-converters)
 
 @@@ div { .group-scala }
-## Signature
+## 签名
 
 @@signature [StreamConverters.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/StreamConverters.scala) { #asInputStream }
 @@@
 
-## Description
+## 描述
 
 Create a sink which materializes into an `InputStream` that can be read to trigger demand through the sink.
 Bytes emitted through the stream will be available for reading through the `InputStream`
@@ -18,7 +18,7 @@ Bytes emitted through the stream will be available for reading through the `Inpu
 The `InputStream` will be ended when the stream flowing into this `Sink` completes, and the closing the
 `InputStream` will cancel the inflow of this `Sink`.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 **cancels** when the `InputStream` is closed

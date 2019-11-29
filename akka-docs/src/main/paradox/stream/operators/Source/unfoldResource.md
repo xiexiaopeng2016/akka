@@ -1,18 +1,18 @@
 # Source.unfoldResource
 
-Wrap any resource that can be opened, queried for next element (in a blocking way) and closed using three distinct functions into a source.
+将任何可以打开、查询下一个元素(以阻塞方式)和使用三个不同的函数关闭的资源包装到一个源中。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #unfoldResource }
 
 @@@
 
-## Description
+## 描述
 
 `Source.unfoldResource` allows us to safely extract stream elements from blocking resources by providing it with three functions: 
 
@@ -28,7 +28,7 @@ Note that there are pre-built `unfoldResource`-like operators to wrap `java.io.I
 `Iterator` in @ref:[fromIterator](fromIterator.md) and File IO in @ref:[File IO Sinks and Sources](../index.md#file-io-sinks-and-sources).
 Additional prebuilt technology specific connectors can also be found in the [Alpakka project](https://doc.akka.io/docs/alpakka/current/).
 
-## Examples
+## 示例
 
 Imagine we have a database API which may potentially block both when we initially perform a query and 
 on retrieving each result from the query. It also gives us an iterator like way to determine if we have reached
@@ -52,7 +52,7 @@ If the resource produces more than one element at a time, combining `unfoldResou
 @scala[`mapConcat(identity)`]@java[`mapConcat(elems -> elems)`] will give you a stream of individual elements.
 See @ref:[mapConcat](../Source-or-Flow/mapConcat.md)) for details.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

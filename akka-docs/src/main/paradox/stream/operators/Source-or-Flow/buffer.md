@@ -1,37 +1,36 @@
 # buffer
 
-Allow for a temporarily faster upstream events by buffering `size` elements.
+通过缓冲`size`个元素来允许一个暂时更快的上游事件。
 
 @ref[Backpressure aware operators](../index.md#backpressure-aware-operators)
 
 @@@ div { .group-scala }
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #buffer }
 @@@
 
 
-## Description
+## 描述
 
-Allow for a temporarily faster upstream events by buffering `size` elements. When the buffer is full, a new element is
-handled according to the specified `OverflowStrategy`:
+通过缓冲`size`个元素来允许一个暂时更快的上游事件。当缓冲区已满时，一个新元素将根据指定的`OverflowStrategy`进行处理：
 
- * `backpressure` backpressure is applied upstream
- * `dropHead` drops the oldest element in the buffer to make space for the new element
- * `dropTail` drops the youngest element in the buffer to make space for the new element
- * `dropBuffer` drops the entire buffer and buffers the new element
- * `dropNew` drops the new element
- * `fail` fails the flow with a `BufferOverflowException`
+ * `backpressure` 在上游施加背压
+ * `dropHead` 删除缓冲区中最老的元素，为新元素腾出空间
+ * `dropTail` 删除缓冲区中最新的元素，为新元素腾出空间
+ * `dropBuffer` 删除整个缓冲区并缓冲新元素
+ * `dropNew` 删除新元素
+ * `fail` 用一个`BufferOverflowException`使流失败
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
-**emits** when downstream stops backpressuring and there is a pending element in the buffer
+**emits** 当下游停止背压且缓冲区中有挂起的元素
 
-**backpressures** when `OverflowStrategy` is `backpressure` and buffer is full
+**backpressures** 当`OverflowStrategy`是`backpressure`且缓冲区已满
 
-**completes** when upstream completes and buffered elements has been drained, or when `OverflowStrategy` is `fail`, the buffer is full and a new element arrives
+**completes** 当上游完成，缓冲元素已被耗尽，或当`OverflowStrategy`是`fail`，缓冲区已满，一个新元素到达
 
 @@@
 

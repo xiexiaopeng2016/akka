@@ -1,10 +1,10 @@
 # maybe
 
-Create a source that emits once the materialized @scala[`Promise`] @java[`CompletableFuture`] is completed with a value.
+创建一个源，它一旦已物化的 @scala[`Promise`]@java[`CompletableFuture`] 带有一个值完成，就发出。
 
 @ref[Source operators](../index.md#source-operators)
 
-## Signature
+## 签名
 
 Scala
  :   @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #maybe }
@@ -12,7 +12,7 @@ Scala
 Java
 :   @@snip [SourceDocExamples.java](/akka-docs/src/test/java/jdocs/stream/operators/SourceDocExamples.java) { #maybe-signature }
 
-## Description
+## 描述
 
 Create a source with a materialized @scala[`Promise[Option[T]]`] @java[`CompletableFuture<Optional<T>>`] which
 controls what element will be emitted by the Source. This makes it possible to inject a value into a stream
@@ -33,7 +33,7 @@ the stream is run while the @scala[`Future`]@java[`CompletionStage`] given to
 
 @ref:[`Source.queue`](queue.md) is an alternative for emitting more than one element. 
 
-## Example
+## 示例
 
 Scala
 :   @@snip [SourceOperators.scala](/akka-docs/src/test/scala/docs/stream/operators/SourceOperators.scala) { #maybe }
@@ -45,7 +45,7 @@ The `Source.maybe[Int]` will return a @scala[`Promise[Option[Int]]`]@java[`Compl
 materialized value. That @scala[`Promise`]@java[`CompletableFuture`] can be completed later. Each time the stream
 is run a new @scala[`Promise`]@java[`CompletableFuture`] is returned. 
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

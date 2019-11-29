@@ -6,18 +6,18 @@ Accumulate incoming events until the specified number of elements have been accu
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #grouped }
 
 @@@
 
-## Description
+## 描述
 
 Accumulate incoming events until the specified number of elements have been accumulated and then pass the collection of
 elements downstream.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -29,7 +29,7 @@ elements downstream.
 
 @@@
 
-## Examples
+## 示例
 
 Below example demonstrates how `grouped` groups the accumulated elements into @scala[`Seq`] @java[`List`]
 and maps with other operation.

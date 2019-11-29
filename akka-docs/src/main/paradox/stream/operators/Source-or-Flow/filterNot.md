@@ -1,23 +1,22 @@
 # filterNot
 
-Filter the incoming elements using a predicate.
+使用一个谓词过滤传入元素。
 
 @ref[Simple operators](../index.md#simple-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #filterNot }
 
 @@@
 
-## Description
+## 描述
 
-Filter the incoming elements using a predicate. If the predicate returns false the element is passed downstream, if
-it returns true the element is discarded.
+使用一个谓词过滤传入元素。如果谓词返回false，则将元素传递给下游，如果返回true，则丢弃该元素。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

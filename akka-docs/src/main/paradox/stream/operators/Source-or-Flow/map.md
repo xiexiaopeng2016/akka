@@ -1,22 +1,22 @@
 # map
 
-Transform each element in the stream by calling a mapping function with it and passing the returned value downstream.
+转换流中的每个元素，通过对它调用流中的一个映射函数，并将返回的值传递到下游。
 
 @ref[Simple operators](../index.md#simple-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #map }
 
 @@@
 
-## Description
+## 描述
 
-Transform each element in the stream by calling a mapping function with it and passing the returned value downstream.
+转换流中的每个元素，通过对它调用流中的一个映射函数，并将返回的值传递到下游。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -28,7 +28,7 @@ Transform each element in the stream by calling a mapping function with it and p
 
 @@@
 
-## Examples
+## 示例
 
 
 Scala

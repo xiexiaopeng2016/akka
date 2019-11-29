@@ -1,23 +1,22 @@
 # futureSource
 
-Streams the elements of the given future source once it successfully completes.
+流动给定的future源的元素，一旦它成功完成。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #futureSource }
 
 @@@
 
-## Description
+## 描述
 
-Streams the elements of the given future source once it successfully completes. 
-If the future fails the stream is failed.
+流动给定的future源的元素，一旦它成功完成。如果future失败了，流也就失败了。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

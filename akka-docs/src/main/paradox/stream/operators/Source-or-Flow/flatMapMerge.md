@@ -6,18 +6,18 @@ Transform each input element into a `Source` whose elements are then flattened i
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #flatMapMerge }
 
 @@@
 
-## Description
+## 描述
 
 Transform each input element into a `Source` whose elements are then flattened into the output stream through
 merging. The maximum number of merged sources has to be specified.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

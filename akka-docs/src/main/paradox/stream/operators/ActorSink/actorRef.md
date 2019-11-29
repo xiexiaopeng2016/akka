@@ -4,7 +4,7 @@ Sends the elements of the stream to the given @java[`ActorRef<T>`]@scala[`ActorR
 
 @ref[Actor interop operators](../index.md#actor-interop-operators)
 
-## Dependency
+## 依赖
 
 This operator is included in:
 
@@ -16,13 +16,13 @@ This operator is included in:
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [ActorSink.scala](/akka-stream-typed/src/main/scala/akka/stream/typed/scaladsl/ActorSink.scala) { #actorRef }
 
 @@@
 
-## Description
+## 描述
 
 Sends the elements of the stream to the given `ActorRef`.
 If the target actor terminates the stream will be canceled.
@@ -39,6 +39,6 @@ of the actor will grow. For potentially slow consumer actors it is recommended
 to use a bounded mailbox with zero `mailbox-push-timeout-time` or use a rate
 limiting operator in front of this `Sink`.
 
-## Examples
+## 示例
 
 TODO (in progress)

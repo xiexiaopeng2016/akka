@@ -1,16 +1,16 @@
 # actorRef
 
-Materialize an `ActorRef`; sending messages to it will emit them on the stream.
+物化一个`ActorRef`; 发送消息给它，它将在流上发射这些消息。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@ div { .group-scala }
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #actorRef }
 @@@
 
-## Description
+## 描述
 
 Materialize an `ActorRef`, sending messages to it will emit them on the stream. The actor contains
 a buffer but since communication is one way, there is no back pressure. Handling overflow is done by either dropping
@@ -23,7 +23,7 @@ already buffered elements will be sent out before signaling completion.
 Sending `akka.actor.PoisonPill` will signal completion immediately but this behavior is deprecated and scheduled to be removed.
 Using `akka.actor.ActorSystem.stop` to stop the actor and complete the stream is *not supported*.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -33,7 +33,7 @@ Using `akka.actor.ActorSystem.stop` to stop the actor and complete the stream is
 
 @@@
 
-## Examples
+## 示例
 
 
 Scala

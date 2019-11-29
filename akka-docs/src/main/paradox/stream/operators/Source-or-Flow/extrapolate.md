@@ -1,18 +1,18 @@
 # extrapolate
 
-Allow for a faster downstream by expanding the last emitted element to an `Iterator`.
+通过将最后发出的元素扩展为一个`Iterator`，允许一个更快的下游。
 
 @ref[Backpressure aware operators](../index.md#backpressure-aware-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #extrapolate }
 
 @@@
 
-## Description
+## 描述
 
 Allow for a faster downstream by expanding the last emitted element to an `Iterator`. For example, an
 `Iterator.continually(element)` will cause `extrapolate` to keep repeating the last emitted element. 
@@ -25,7 +25,7 @@ Includes an optional `initial` argument to prevent blocking the entire stream wh
 See @ref:[Understanding extrapolate and expand](../../stream-rate.md#understanding-extrapolate-and-expand) for more information
 and examples.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

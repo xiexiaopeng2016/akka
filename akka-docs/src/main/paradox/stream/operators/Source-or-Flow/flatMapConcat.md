@@ -6,18 +6,18 @@ Transform each input element into a `Source` whose elements are then flattened i
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #flatMapConcat }
 
 @@@
 
-## Description
+## 描述
 
 Transform each input element into a `Source` whose elements are then flattened into the output stream through
 concatenation. This means each source is fully consumed before consumption of the next source starts.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

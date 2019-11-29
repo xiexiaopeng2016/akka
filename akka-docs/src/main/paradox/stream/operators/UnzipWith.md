@@ -4,13 +4,13 @@ Splits each element of input into multiple downstreams using a function
 
 @ref[Fan-out operators](index.md#fan-out-operators)
 
-## Signature
+## 签名
 
-## Description
+## 描述
 
 Splits each element of input into multiple downstreams using a function
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

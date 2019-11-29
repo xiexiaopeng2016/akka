@@ -1,18 +1,18 @@
 # mapAsyncUnordered
 
-Like `mapAsync` but @scala[`Future`] @java[`CompletionStage`] results are passed downstream as they arrive regardless of the order of the elements that triggered them.
+与`mapAsync`类似，但是 @scala[`Future`]@java[`CompletionStage`] 的结果在到达时向下游传递，而不考虑触发元素的顺序。
 
 @ref[Asynchronous operators](../index.md#asynchronous-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #mapAsyncUnordered }
 
 @@@
 
-## Description
+## 描述
 
 Like `mapAsync` but @scala[`Future`] @java[`CompletionStage`] results are passed downstream as they arrive regardless of the order of the elements
 that triggered them.
@@ -20,7 +20,7 @@ that triggered them.
 If a @scala[`Future`] @java[`CompletionStage`] completes with `null`, element is not passed downstream.
 If a @scala[`Future`] @java[`CompletionStage`] fails, the stream also fails (unless a different supervision strategy is applied)
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

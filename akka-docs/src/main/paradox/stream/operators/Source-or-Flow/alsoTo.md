@@ -1,20 +1,20 @@
 # alsoTo
 
-Attaches the given `Sink` to this `Flow`, meaning that elements that pass through this `Flow` will also be sent to the `Sink`.
+将给定的`Sink`附加到这个`Flow`，这意味着通过这个`Flow`的元素也将被发送到`Sink`。
 
 @ref[Fan-out operators](../index.md#fan-out-operators)
 
 @@@ div { .group-scala }
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #alsoTo }
 @@@
 
-## Description
+## 描述
 
 Attaches the given `Sink` to this `Flow`, meaning that elements that pass through this `Flow` will also be sent to the `Sink`.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

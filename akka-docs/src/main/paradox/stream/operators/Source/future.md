@@ -1,25 +1,25 @@
 # fromFuture
 
-Send the single value of the `Future` when it completes and there is demand.
+当`Future`完成并且有需求时，发送它的单个值。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #future }
 
 @@@
 
-## Description
+## 描述
 
 Send the single value of the `Future` when it completes and there is demand.
 If the future fails the stream is failed with that exception.
 
 For the corresponding operator for the Java standard library `CompletionStage` see @ref:[completionStage](completionStage.md).
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -29,7 +29,7 @@ For the corresponding operator for the Java standard library `CompletionStage` s
 
 @@@
 
-## Example
+## 示例
 Scala
 :  @@snip [SourceFromFuture.scala](/akka-docs/src/test/scala/docs/stream/operators/SourceOperators.scala) { #sourceFromFuture }
 

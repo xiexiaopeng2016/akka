@@ -1,20 +1,20 @@
 # Sink.lazyInitAsync
 
-`lazyInitAsync` has been deprecated in 2.6.0, use `Sink.lazyFutureSink` 
+`lazyInitAsync` 在2.6.0中已弃用，请用 `Sink.lazyFutureSink` 
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #lazyInitAsync }
 
 @@@
 
-## Description
+## 描述
 
-`lazyInitAsync` has been deprecated in 2.6.0, use @ref:[lazyFutureSink](lazyFutureSink.md) instead.
+`lazyInitAsync` 在2.6.0中已弃用，请用 @ref:[lazyFutureSink](lazyFutureSink.md) 代替。
 
 Creates a real `Sink` upon receiving the first element. Internal `Sink` will not be created if there are no elements,
 because of completion or error.
@@ -24,7 +24,7 @@ because of completion or error.
   sink fails then the @scala[`Future`]@java[`CompletionStage`] is completed with the exception.
 - Otherwise the @scala[`Future`]@java[`CompletionStage`] is completed with the materialized value of the internal sink.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

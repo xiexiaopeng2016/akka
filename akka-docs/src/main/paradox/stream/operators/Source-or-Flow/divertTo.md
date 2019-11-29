@@ -1,22 +1,22 @@
 # divertTo
 
-Each upstream element will either be diverted to the given sink, or the downstream consumer according to the predicate function applied to the element.
+根据应用于元素的谓词函数，每个上游元素要么被转移到给定的接收器，要么被转移到下游消费者。
 
 @ref[Fan-out operators](../index.md#fan-out-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #divertTo }
 
 @@@
 
-## Description
+## 描述
 
-Each upstream element will either be diverted to the given sink, or the downstream consumer according to the predicate function applied to the element.
+根据应用于元素的谓词函数，每个上游元素要么被转移到给定的接收器，要么被转移到下游消费者。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

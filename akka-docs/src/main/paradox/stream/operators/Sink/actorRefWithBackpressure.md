@@ -1,15 +1,15 @@
 # Sink.actorRefWithBackpressure
 
-Send the elements from the stream to an `ActorRef` which must then acknowledge reception after completing a message, to provide back pressure onto the sink.
+将元素从流发送到一个`ActorRef`，它必须在完成一个消息后确认接收，以向接收器提供背压。
 
 @ref[Sink operators](../index.md#sink-operators)
 
-## Description
+## 描述
 
 Send the elements from the stream to an `ActorRef` which must then acknowledge reception after completing a message,
 to provide back pressure onto the sink.
 
-## Example
+## 示例
 
 Actor to be interacted with: 
 
@@ -27,7 +27,7 @@ Scala
 Java
 :   @@snip [IntegrationDocTest.java](/akka-docs/src/test/java/jdocs/stream/IntegrationDocTest.java) { #actorRefWithBackpressure }
 
-## Reactive Streams semantics 
+## 响应流语义 
 
 @@@div { .callout }
 

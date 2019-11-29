@@ -1,24 +1,23 @@
 # Sink.queue
 
-Materialize a `SinkQueue` that can be pulled to trigger demand through the sink.
+物化一个`SinkQueue`，它可以通过接收器'拉'来触发需求。
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #queue }
 
 @@@
 
-## Description
+## 描述
 
-Materialize a `SinkQueue` that can be pulled to trigger demand through the sink. The queue contains
-a buffer in case stream emitting elements faster than queue pulling them.
+Materialize a `SinkQueue` that can be pulled to trigger demand through the sink. The queue contains a buffer in case stream emitting elements faster than queue pulling them.
 
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

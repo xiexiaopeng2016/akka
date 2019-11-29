@@ -6,17 +6,17 @@ Injects additional (configured) elements if upstream does not emit for a configu
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #keepAlive }
 
 @@@
 
-## Description
+## 描述
 
 Injects additional (configured) elements if upstream does not emit for a configured amount of time.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

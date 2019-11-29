@@ -1,22 +1,21 @@
 # Sink.completionStageSink
 
-Streams the elements to the given future sink once it successfully completes. 
+将元素流动到指定的future接收器，一旦它成功完成。
 
 @ref[Sink operators](../index.md#sink-operators)
 
 
-## Description
+## 描述
 
-Streams the elements through the given future flow once it successfully completes. 
-If the future fails the stream is failed.
+将元素流经给定的future flow，一旦它成功完成。如果future失败了，流也就失败了。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
-**cancels** if the future fails or if the created sink cancels 
+**cancels** 如果future失败或创建的接收器取消
 
-**backpressures** when initialized and when created sink backpressures
+**backpressures** 在已初始化时和在已创建时汇背压
 
 @@@
 

@@ -4,11 +4,11 @@ Fan-out the stream to several streams.
 
 @ref[Fan-out operators](index.md#fan-out-operators)
 
-## Description
+## 描述
 
 Fan-out the stream to several streams. Each upstream element is emitted to the first available downstream consumer.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

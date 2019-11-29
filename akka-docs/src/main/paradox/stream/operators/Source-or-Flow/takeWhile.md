@@ -6,18 +6,18 @@ Pass elements downstream as long as a predicate function return true for the ele
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #takeWhile }
 
 @@@
 
-## Description
+## 描述
 
 Pass elements downstream as long as a predicate function return true for the element include the element
 when the predicate first return false and then complete.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

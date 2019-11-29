@@ -1,24 +1,22 @@
 # Sink.lastOption
 
-Materialize a @scala[`Future[Option[T]]`] @java[`CompletionStage<Optional<T>>`] which completes with the last value emitted wrapped in an @scala[`Some`] @java[`Optional`] when the stream completes.
+物化一个 @scala[`Future[Option[T]]`]@java[`CompletionStage<Optional<T>>`]，当流完成时，它将使用包裹在一个 @scala[`Some`]@java[`Optional`] 里面的最后一个值完成。
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #lastOption }
 
 @@@
 
-## Description
+## 描述
 
-Materialize a @scala[`Future[Option[T]]`] @java[`CompletionStage<Optional<T>>`] which completes with the last value
-emitted wrapped in an @scala[`Some`] @java[`Optional`] when the stream completes. if the stream completes with no elements the `CompletionStage` is
-completed with @scala[`None`] @java[an empty `Optional`].
+物化一个 @scala[`Future[Option[T]]`]@java[`CompletionStage<Optional<T>>`]，当流完成时，它将使用包裹在一个 @scala[`Some`]@java[`Optional`] 里面的最后一个值完成。如果流不包含元素就完成，则使用 @scala[`None`]@java[一个空的`Optional`] 完成`CompletionStage`。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -28,7 +26,7 @@ completed with @scala[`None`] @java[an empty `Optional`].
 
 @@@
 
-## Example
+## 示例
 
 Scala
 :   @@snip [LastSinkSpec.scala](/akka-stream-tests/src/test/scala/akka/stream/scaladsl/LastSinkSpec.scala) { #lastOption-operator-example }

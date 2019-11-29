@@ -1,18 +1,18 @@
 # lazilyAsync
 
-`lazilyAsync` has been deprecated in 2.6.0, use `Source.lazyFutureSource` instead.
+`lazilyAsync` 在2.6.0中已弃用，请用 `Source.lazyFutureSource` 代替。
 
 @ref[Source operators](../index.md#source-operators)
 
-## Signature
+## 签名
 
-## Description
+## 描述
 
 `lazilyAsync` has been deprecated in 2.6.0, use @ref:[lazyFutureSource](lazyFutureSource.md) instead.
 
 Defers creation and materialization of a `CompletionStage` until there is demand.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

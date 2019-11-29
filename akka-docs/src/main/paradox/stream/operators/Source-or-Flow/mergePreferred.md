@@ -4,13 +4,13 @@ Merge multiple sources.
 
 @ref[Fan-in operators](../index.md#fan-in-operators)
 
-## Signature
+## 签名
 
-## Description
+## 描述
 
 Merge multiple sources. Prefer one source if all sources have elements ready.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

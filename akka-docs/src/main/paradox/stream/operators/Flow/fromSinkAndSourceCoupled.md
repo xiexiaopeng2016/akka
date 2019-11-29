@@ -1,18 +1,18 @@
 # Flow.fromSinkAndSourceCoupled
 
-Allows coupling termination (cancellation, completion, erroring) of Sinks and Sources while creating a Flow between them.
+允许在汇点和源之间创建流时耦合终止(取消、完成和错误)。Allows coupling termination (cancellation, completion, erroring) of Sinks and Sources while creating a Flow between them.
 
 @ref[Flow operators composed of Sinks and Sources](../index.md#flow-operators-composed-of-sinks-and-sources)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #fromSinkAndSourceCoupled }
 
 @@@
 
-## Description
+## 描述
 
 Allows coupling termination (cancellation, completion, erroring) of Sinks and Sources while creating a Flow between them.
 Similar to `Flow.fromSinkAndSource` however couples the termination of these two operators.

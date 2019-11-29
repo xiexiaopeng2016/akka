@@ -1,23 +1,23 @@
 # completionTimeout
 
-If the completion of the stream does not happen until the provided timeout, the stream is failed with a `TimeoutException`.
+如果流的完成直到提供的timeout还没有发生，则流将失败，并包含一个`TimeoutException`。
 
 @ref[Time aware operators](../index.md#time-aware-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #completionTimeout }
 
 @@@
 
-## Description
+## 描述
 
 If the completion of the stream does not happen until the provided timeout, the stream is failed
 with a `TimeoutException`.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -1,18 +1,17 @@
 # Source.asSourceWithContext
 
-Turns a Source into a SourceWithContext which can propagate a context per element along a stream.
+将一个`Source`转换为一个`SourceWithContext`，这可以在整个流中传播一个上下文每伴随每个元素。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #asSourceWithContext }
 
 @@@
 
-## Description
+## 描述
 
-Turns a Source into a SourceWithContext which can propagate a context per element along a stream.
-The function passed into asSourceWithContext must turn elements into contexts, one context for every element. 
+将一个`Source`转换为一个`SourceWithContext`，这可以在整个流中传播一个上下文每伴随每个元素。传递给`asSourceWithContext`的函数必须将元素转换为上下文，每个元素一个上下文。

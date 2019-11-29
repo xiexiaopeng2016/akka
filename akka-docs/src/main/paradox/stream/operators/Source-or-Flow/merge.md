@@ -6,17 +6,17 @@ Merge multiple sources.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #merge }
 
 @@@
 
-## Description
+## 描述
 
 Merge multiple sources. Picks elements randomly if all sources has elements ready.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -29,7 +29,7 @@ Merge multiple sources. Picks elements randomly if all sources has elements read
 @@@
 
 
-## Example
+## 示例
 Scala
 :   @@snip [FlowMergeSpec.scala](/akka-stream-tests/src/test/scala/akka/stream/scaladsl/FlowMergeSpec.scala) { #merge }
 

@@ -1,22 +1,22 @@
 # combine
 
-Combine several sinks into one using a user specified strategy
+使用用户指定的一个策略将多个接收器组合成一个接收器
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #combine }
 
 @@@
 
-## Description
+## 描述
 
-Combine several sinks into one using a user specified strategy
+使用用户指定的一个策略将多个接收器组合成一个接收器
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

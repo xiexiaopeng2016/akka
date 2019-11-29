@@ -6,19 +6,19 @@ Attaches the given `Sink` to this `Flow` as a wire tap, meaning that elements th
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #wireTap }
 
 @@@
 
-## Description
+## 描述
 
 Attaches the given `Sink` to this `Flow` as a wire tap, meaning that elements that pass
 through will also be sent to the wire-tap `Sink`, without the latter affecting the mainline flow.
 If the wire-tap `Sink` backpressures, elements that would've been sent to it will be dropped instead.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

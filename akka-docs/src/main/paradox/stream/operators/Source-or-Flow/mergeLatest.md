@@ -6,20 +6,20 @@ Merge multiple sources.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #mergeLatest }
 
 @@@
 
-## Description
+## 描述
 
 MergeLatest joins elements from N input streams into stream of lists of size N.
 i-th element in list is the latest emitted element from i-th input stream.
 MergeLatest emits list for each element emitted from some input stream,
 but only after each input stream emitted at least one element
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

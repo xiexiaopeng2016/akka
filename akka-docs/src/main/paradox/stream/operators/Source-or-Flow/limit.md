@@ -6,17 +6,17 @@ Limit number of element from upstream to given `max` number.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #limit }
 
 @@@
 
-## Description
+## 描述
 
 Limit number of element from upstream to given `max` number.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

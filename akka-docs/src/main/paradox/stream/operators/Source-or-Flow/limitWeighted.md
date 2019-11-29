@@ -6,18 +6,18 @@ Ensure stream boundedness by evaluating the cost of incoming elements using a co
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #limitWeighted }
 
 @@@
 
-## Description
+## 描述
 
 Ensure stream boundedness by evaluating the cost of incoming elements using a cost function.
 Evaluated cost of each element defines how many elements will be allowed to travel downstream.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

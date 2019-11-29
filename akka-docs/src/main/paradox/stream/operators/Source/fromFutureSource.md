@@ -1,25 +1,25 @@
 # fromFutureSource
 
-`fromFutureSource` has been deprecated in 2.6.0, use `Source.futureSource` instead.
+`fromFutureSource` 在2.6.0中已弃用，请用 `Source.futureSource` 代替。
 
 @ref[Source operators](../index.md#source-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Source.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Source.scala) { #fromFutureSource }
 
 @@@
 
-## Description
+## 描述
 
 `fromFutureSource` has been deprecated in 2.6.0, use @ref:[futureSource](futureSource.md) instead.
 
 Streams the elements of the given future source once it successfully completes. 
 If the future fails the stream is failed.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

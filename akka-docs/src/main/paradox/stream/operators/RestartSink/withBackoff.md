@@ -6,13 +6,13 @@ Wrap the given @apidoc[Sink] with a @apidoc[Sink] that will restart it when it f
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [RestartSink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/RestartSink.scala) { #withBackoff }
 
 @@@
 
-## Description
+## 描述
 
 This @apidoc[Sink] will never cancel, since cancellation by the wrapped @apidoc[Sink] is always handled by restarting it.
 The wrapped @apidoc[Sink] can however be completed by feeding a completion or error into this @apidoc[Sink]. When that

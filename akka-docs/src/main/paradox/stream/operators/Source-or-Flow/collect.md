@@ -1,18 +1,18 @@
 # collect
 
-Apply a partial function to each incoming element, if the partial function is defined for a value the returned value is passed downstream.
+对每个传入元素应用一个偏(partial)函数，如果偏函数是为一个值定义的，则返回的值将向下传递。
 
 @ref[Simple operators](../index.md#simple-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #collect }
 
 @@@
 
-## Description
+## 描述
 
 Apply a partial function to each incoming element, if the partial function is defined for a value the returned
 value is passed downstream. This can often replace `filter` followed by `map` to achieve the same in one single operator.
@@ -21,7 +21,7 @@ value is passed downstream. This can often replace `filter` followed by `map` to
 There is also a @ref:[collectType](collectType.md) that often can be easier to use than the `PFBuilder` and
 then combine with ordinary `filter` and `map` operators.]
 
-## Example
+## 示例
 
 Given stream element classes `Message`, `Ping`, and `Pong`, where `Ping` extends `Message` and `Pong` is an
 unrelated class.
@@ -50,7 +50,7 @@ Java
 
 @@@
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

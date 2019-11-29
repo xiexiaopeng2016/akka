@@ -2,7 +2,7 @@
 
 ## 依赖
 
-要使用Akka Streams，请将模块添加到您的项目中：
+要使用Akka流，请将模块添加到您的项目中：
 
 @@dependency[sbt,Maven,Gradle] {
   group="com.typesafe.akka"
@@ -21,7 +21,7 @@
 
 图是由简单的Flow构建的，这些简单的流充当图中的线性连接，和交叉点充当Flow的扇入和扇出点一样。得益于交叉点具有基于其行为的有意义的类型，并使它们成为显式元素，所以这些元素的使用非常容易。
 
-Akka流当前提供这些交叉点(有关详细列表，请参见@ref[运算符索引](operators/index.md))：
+Akka流当前提供这些交叉点(有关详细列表，请参见 @ref[运算符索引](operators/index.md))：
 
  * **扇出**
 
@@ -44,7 +44,7 @@ GraphDSL DSL的目标之一是使其看起来就像在白板上画图形一样�
 
 ![simple-graph-example.png](../images/simple-graph-example.png)
 
-这种图很容易转换为图DSL，因为每个线性元素都对应到一个`Flow`，并且每个圆都要么对应到一个`Junction`，要么对应到一个`Source`或`Sink`，假如它是在一个`Flow`的开头或结尾。@scala[交叉点必须始终使用定义的类型参数创建，否则将推断成`Nothing`类型。]
+这种图很容易转换为图DSL，因为每个线性元素都对应到一个`Flow`，并且每个圆都要么对应到一个`Junction`，要么对应到一个`Source`或`Sink`，假如它是在一个`Flow`的开头或结尾。交叉点必须始终使用定义的类型参数创建，否则将推断成`Nothing`类型。
 
 Scala
 :   @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #simple-graph-dsl }
@@ -54,13 +54,13 @@ Java
 
 @@@ note
 
-交叉点*引用相等性*定义*图节点相等性*(例如，在一个GraphDSL中使用的同一个merge *实例*指的是结果图中相同的位置)。
+交叉点 *引用相等性* 定义 *图节点相等性* (例如，在一个GraphDSL中使用的同一个merge *实例* 指的是结果图中相同的位置)。
 
 @@@
 
 @scala[请注意`import GraphDSL.Implicits._`，它将`~>`运算符(读作"edge"，"via"或"to")及其反向的对应项`<~`(for noting down flows in the opposite direction where appropriate)纳入作用域内。]
 
-通过查看上面的代码片段，很明显 @scala[`GraphDSL.Builder`]@java[`builder`]对象是*可变的*。@scala[它由`~>`运算符(隐式)使用，也使它成为一个可变的操作。]选择这种设计的原因是为了能够更简单地创建复杂的图，这些图甚至可能包含循环。一旦GraphDSL构建完成，@scala[`GraphDSL`]@java[`RunnableGraph`]实例将*是不可变的，线程安全的和可自由共享的*。所有操作符 —sources，sinks和flows— 在构建之后都是如此。这意味着您可以在处理图中的多个位置安全地重用一个给定的Flow或交叉点。
+通过查看上面的代码片段，很明显 @scala[`GraphDSL.Builder`]@java[`builder`]对象是 *可变的* 。 @scala[它由`~>`运算符(隐式)使用，也使它成为一个可变的操作。]选择这种设计的原因是为了能够更简单地创建复杂的图，这些图甚至可能包含循环。一旦GraphDSL构建完成， @scala[`GraphDSL`]@java[`RunnableGraph`]实例将 *是不可变的，线程安全的和可自由共享的* 。所有操作符 —sources，sinks和flows— 在构建之后都是如此。这意味着您可以在处理图中的多个位置安全地重用一个给定的Flow或交叉点。
 
 我们已经在上面看到了这种重用的例子：合并和广播交叉点是使用`builder.add(...)`导入到图中的，一个运算将传递给它的蓝图复制一份，并返回结果副本的入口和出口，因此他们可以连接起来。另一种选择是传递现有的图 - 任何形状的 - 到生成新图形的工厂方法中。这两种方法之间的区别在于，使用`builder.add(...)`导入会忽略已导入图的物化值，而通过工厂方法导入则允许包含它; 有关更多详细信息，请参见 @ref[流物化](stream-flows-and-basics.md#stream-materialization)。
 
@@ -87,7 +87,7 @@ Java
 
 有时不可能(或需要)在一个地方构造整个计算图，而是在不同地方构造它的所有不同阶段，最后将它们全部连接成一个完整的图并运行它。
 
-这可以通过以下方式实现，@scala[从给`GraphDSL.create`的函数中返回一个不同于`ClosedShape`的`Shape`，例如`FlowShape(in, out)`。有关此类预定义形状的列表，请参见 @ref:[预定义形状](#predefined-shapes)。将一个`Graph`变成`RunnableGraph`]@java[using the returned `Graph` from `GraphDSL.create()` rather than passing it to `RunnableGraph.fromGraph()` to wrap it in a `RunnableGraph`.The reason of representing it as a different type is that a `RunnableGraph`]需要连接所有端口，如果没有连接，则会在构建时抛出异常，这有助于避免在使用图时出现简单的连接错误。然而，局部图允许您从执行内部连接的代码块返回尚未连接的端口集。
+这可以通过以下方式实现， @scala[从给`GraphDSL.create`的函数中返回一个不同于`ClosedShape`的`Shape`，例如`FlowShape(in, out)`。有关此类预定义形状的列表，请参见 @ref:[预定义形状](#predefined-shapes)。将一个`Graph`变成`RunnableGraph`]@java[using the returned `Graph` from `GraphDSL.create()` rather than passing it to `RunnableGraph.fromGraph()` to wrap it in a `RunnableGraph`.The reason of representing it as a different type is that a `RunnableGraph`]需要连接所有端口，如果没有连接，则会在构建时抛出异常，这有助于避免在使用图时出现简单的连接错误。然而，局部图允许您从执行内部连接的代码块返回尚未连接的端口集。
 
 让我们想象一下，我们想为用户提供一个特殊的元素，给定3个输入，为每个压缩后的三元组选择最大的int值。我们将要公开3个输入端口(未连接的源)和1个输出端口(未连接的接收器)。
 
@@ -99,7 +99,7 @@ Java
 
 @@@ note
 
-虽然上面的例子展示了如何组合两个2个输入的`ZipWith`，但实际上ZipWith已经提供了大量的重载，包括一个3个(以及更多)参数版本。因此，这可以使用一个使用3参数版本的ZipWith来实现，像这样：@scala[`ZipWith((a, b, c) => out)`]@java[`ZipWith.create((a, b, c) -> out)`]。(带有N输入的ZipWith具有N + 1类型参数；最后一个类型参数是输出类型。)
+虽然上面的例子展示了如何组合两个2个输入的`ZipWith`，但实际上ZipWith已经提供了大量的重载，包括一个3个(以及更多)参数版本。因此，这可以使用一个使用3参数版本的ZipWith来实现，像这样: @scala[`ZipWith((a, b, c) => out)`]@java[`ZipWith.create((a, b, c) -> out)`]。(带有N输入的ZipWith具有N + 1类型参数；最后一个类型参数是输出类型。)
 
 @@@
 
@@ -124,9 +124,9 @@ Source是仅具有一个输出的部分图形，即返回a SourceShape。
 Sink是仅具有一个输入的部分图形，即返回一个SinkShape。
 Flow是具有正好一个输入和正好一个输出的部分图形，即返回a FlowShape。
 
- * `Source` 是一个*仅有一个*输出的局部图，它会返回一个`SourceShape`。
- * `Sink` 是一个*仅有一个*输入的局部图，它会返回一个`SinkShape`。
- * `Flow` 是一个*仅有一个*输入和*仅有一个*输出的局部图，它会返回一个`FlowShape`。
+ * `Source` 是一个 *仅有一个* 输出的局部图，它会返回一个`SourceShape`。
+ * `Sink` 是一个 *仅有一个* 输入的局部图，它会返回一个`SinkShape`。
+ * `Flow` 是一个 *仅有一个* 输入和 *仅有一个* 输出的局部图，它会返回一个`FlowShape`。
 
 能够在诸如Sink/Source/Flow之类的简单元素中隐藏复杂图，使您能够创建一个复杂元素，在此基础上，将其视为用于线性计算的简单复合运算符。
 
@@ -200,7 +200,7 @@ Scala
 Scala
 :   @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #graph-dsl-components-create }  
 
-我们现在要做的就是在图中使用我们的自定义交叉点。以下代码使用纯字符串模拟一些简单的工人和作业，并打印出结果。实际上，我们使用了*2*个工人池交叉点的实例，使用`add()`两次。
+我们现在要做的就是在图中使用我们的自定义交叉点。以下代码使用纯字符串模拟一些简单的工人和作业，并打印出结果。实际上，我们使用了 *2* 个工人池交叉点的实例，使用`add()`两次。
 
 Scala
 :   @@snip [GraphDSLDocSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphDSLDocSpec.scala) { #graph-dsl-components-use }
@@ -326,7 +326,7 @@ Java
 
 这个例子强调了一个解决方案，它可以避免当潜在的不平衡循环(循环的元素的数量是无限的)存在时出现的死锁，这个方案是丢弃元素。一种替代方法是使用`OverflowStrategy.fail`定义一个较大的缓冲区，它将使流失败，而不是在消耗完所有缓冲区空间后将其死锁。
 
-正如我们在前面的例子中发现的那样，核心问题是反馈循环的不平衡性质。我们通过添加一个丢弃元素来避开这个问题，但现在我们想建立一个从一开始就平衡的循环。为了实现这一点，我们通过用一个`ZipWith`替换`Merge`交叉点来修改我们的第一个图。由于`ZipWith`从`source`取走一个元素，*并*从反馈弧注入一个元素到循环中，我们保持了元素的平衡。
+正如我们在前面的例子中发现的那样，核心问题是反馈循环的不平衡性质。我们通过添加一个丢弃元素来避开这个问题，但现在我们想建立一个从一开始就平衡的循环。为了实现这一点，我们通过用一个`ZipWith`替换`Merge`交叉点来修改我们的第一个图。由于`ZipWith`从`source`取走一个元素， *并* 从反馈弧注入一个元素到循环中，我们保持了元素的平衡。
 
 Scala
 :   @@snip [GraphCyclesSpec.scala](/akka-docs/src/test/scala/docs/stream/GraphCyclesSpec.scala) { #zipping-dead }    

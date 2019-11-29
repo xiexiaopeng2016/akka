@@ -1,20 +1,20 @@
 # actorRef
 
-Send the elements from the stream to an `ActorRef`.
+将元素从流发送到一个`ActorRef`。
 
 @ref[Sink operators](../index.md#sink-operators)
 
 @@@ div { .group-scala }
-## Signature
+## 签名
 
 @@signature [Sink.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Sink.scala) { #actorRef }
 @@@
 
-## Description
+## 描述
 
-Send the elements from the stream to an `ActorRef`. No backpressure so care must be taken to not overflow the inbox.
+将元素从流发送到一个`ActorRef`。没有背压，所以必须小心不要溢出收件箱。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

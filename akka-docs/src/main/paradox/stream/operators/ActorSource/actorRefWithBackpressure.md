@@ -4,7 +4,7 @@ Materialize an @java[`ActorRef<T>`]@scala[`ActorRef[T]`]; sending messages to it
 
 @ref[Actor interop operators](../index.md#actor-interop-operators)
 
-## Dependency
+## 依赖
 
 This operator is included in:
 
@@ -16,17 +16,17 @@ This operator is included in:
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [ActorSource.scala](/akka-stream-typed/src/main/scala/akka/stream/typed/scaladsl/ActorSource.scala) { #actorRefWithBackpressure }
 @@@
 
-## Description
+## 描述
 
 Materialize an @java[`ActorRef<T>`]@scala[`ActorRef[T]`], sending messages to it will emit them on the stream. The actor responds with the provided ack message
 once the element could be emitted allowing for backpressure from the source. Sending another message before the previous one has been acknowledged will fail the stream.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

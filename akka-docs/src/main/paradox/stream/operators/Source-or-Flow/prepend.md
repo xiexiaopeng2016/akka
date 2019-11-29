@@ -6,19 +6,19 @@ Prepends the given source to the flow, consuming it until completion before the 
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #prepend }
 
 @@@
 
-## Description
+## 描述
 
 Prepends the given source to the flow, consuming it until completion before the original source is consumed.
 
 If materialized values needs to be collected `prependMat` is available.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -31,7 +31,7 @@ If materialized values needs to be collected `prependMat` is available.
 @@@
 
 
-## Example
+## 示例
 Scala
 :   @@snip [FlowOrElseSpec.scala](/akka-stream-tests/src/test/scala/akka/stream/scaladsl/FlowPrependSpec.scala) { #prepend }
 

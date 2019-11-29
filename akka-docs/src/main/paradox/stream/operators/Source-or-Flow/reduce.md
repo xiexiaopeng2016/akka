@@ -6,18 +6,18 @@ Start with first element and then apply the current and next value to the given 
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #reduce }
 
 @@@
 
-## Description
+## 描述
 
 Start with first element and then apply the current and next value to the given function, when upstream
 complete the current value is emitted downstream. Similar to `fold`.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

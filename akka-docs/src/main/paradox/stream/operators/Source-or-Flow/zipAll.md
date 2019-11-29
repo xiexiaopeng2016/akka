@@ -6,17 +6,17 @@ Combines all elements from each of multiple sources into @scala[tuples] @java[*P
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #zipAll }
 
 @@@
 
-## Description
+## 描述
 
 Combines all elements from each of multiple sources into @scala[tuples] @java[*Pair*] and passes the @scala[tuples] @java[pairs] downstream.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -28,7 +28,7 @@ Combines all elements from each of multiple sources into @scala[tuples] @java[*P
 
 @@@
 
-## Example
+## 示例
 Scala
 :   @@snip [FlowZipSpec.scala](/akka-stream-tests/src/test/scala/akka/stream/scaladsl/FlowZipSpec.scala) { #zip }
 

@@ -1,23 +1,23 @@
 # backpressureTimeout
 
-If the time between the emission of an element and the following downstream demand exceeds the provided timeout, the stream is failed with a `TimeoutException`.
+如果元素的发射与后续下游需求之间的时间超过了提供的timeout，则流将失败，并包括一个`TimeoutException`。
 
 @ref[Time aware operators](../index.md#time-aware-operators)
 
 @@@ div { .group-scala }
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #backpressureTimeout }
 @@@
 
 
-## Description
+## 描述
 
 If the time between the emission of an element and the following downstream demand exceeds the provided timeout,
 the stream is failed with a `TimeoutException`. The timeout is checked periodically, so the resolution of the
 check is one period (equals to timeout value).
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

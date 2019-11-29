@@ -6,17 +6,17 @@ Intersperse stream with provided element similar to `List.mkString`.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #intersperse }
 
 @@@
 
-## Description
+## 描述
 
 Intersperse stream with provided element similar to `List.mkString`. It can inject start and end marker elements to stream.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

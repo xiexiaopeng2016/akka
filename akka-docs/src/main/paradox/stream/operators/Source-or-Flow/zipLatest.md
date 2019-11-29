@@ -6,19 +6,19 @@ Combines elements from each of multiple sources into @scala[tuples] @java[*Pair*
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #zipLatest }
 
 @@@
 
-## Description
+## 描述
 
 Combines elements from each of multiple sources into @scala[tuples] @java[*Pair*] and passes the @scala[tuples] @java[pairs] downstream, picking always the latest element of each.
 
 No element is emitted until at least one element from each Source becomes available.
  
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

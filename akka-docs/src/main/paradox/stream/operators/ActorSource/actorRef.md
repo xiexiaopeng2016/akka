@@ -4,7 +4,7 @@ Materialize an @java[`ActorRef<T>`]@scala[`ActorRef[T]`]; sending messages to it
 
 @ref[Actor interop operators](../index.md#actor-interop-operators)
 
-## Dependency
+## 依赖
 
 This operator is included in:
 
@@ -16,17 +16,17 @@ This operator is included in:
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [ActorSource.scala](/akka-stream-typed/src/main/scala/akka/stream/typed/scaladsl/ActorSource.scala) { #actorRef }
 
 @@@
 
-## Description
+## 描述
 
 Materialize an @java[`ActorRef<T>`]@scala[`ActorRef[T]`] which only accepts messages that are of the same type as the stream.
 
-## Examples
+## 示例
 
 Scala
 :  @@snip [ActorSourceSinkExample.scala](/akka-stream-typed/src/test/scala/docs/akka/stream/typed/ActorSourceSinkExample.scala) { #actor-source-ref }

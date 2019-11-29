@@ -6,18 +6,18 @@ Transform each element into zero or more elements that are individually passed d
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #statefulMapConcat }
 
 @@@
 
-## Description
+## 描述
 
 Transform each element into zero or more elements that are individually passed downstream. The difference to `mapConcat` is that
 the transformation function is created from a factory for every materialization of the flow.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

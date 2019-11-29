@@ -6,18 +6,18 @@ Merge multiple sources.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #mergeSorted }
 
 @@@
 
-## Description
+## 描述
 
 Merge multiple sources. Waits for one element to be ready from each input stream and emits the
 smallest element.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -30,7 +30,7 @@ smallest element.
 @@@
 
 
-## Example
+## 示例
 Scala
 :   @@snip [FlowMergeSpec.scala](/akka-stream-tests/src/test/scala/akka/stream/scaladsl/FlowMergeSpec.scala) { #merge-sorted }
 

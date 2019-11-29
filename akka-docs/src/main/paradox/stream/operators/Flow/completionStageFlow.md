@@ -1,23 +1,23 @@
 # Flow.completionStageFlow
 
-Streams the elements through the given future flow once it successfully completes.
+流动元素通过给定的future flow，一旦它成功完成。
 
 @ref[Simple operators](../index.md#simple-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #futureFlow }
 
 @@@
 
-## Description
+## 描述
 
 Streams the elements through the given flow once the `CompletionStage` successfully completes. 
 If the future fails the stream is failed.
 
-## Examples
+## 示例
 
 A deferred creation of the stream based on the initial element by combining `completionStageFlow`
 with `prefixAndTail` like so:
@@ -26,7 +26,7 @@ Scala
 :   @@snip [FutureFlow.java](/akka-docs/src/test/java/jdocs/stream/operators/flow/FutureFlow.java) { #base-on-first-element }
 
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

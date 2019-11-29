@@ -1,24 +1,22 @@
 # conflateWithSeed
 
-Allow for a slower downstream by passing incoming elements and a summary into an aggregate function as long as there is backpressure.
+只要存在背压，就可以通过将传入元素和一个摘要传递到一个聚合函数中，来允许一个较慢的下行速度。
 
 @ref[Backpressure aware operators](../index.md#backpressure-aware-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #conflateWithSeed }
 
 @@@
 
-## Description
+## 描述
 
-Allow for a slower downstream by passing incoming elements and a summary into an aggregate function as long as there
-is backpressure. When backpressure starts or there is no backpressure element is passed into a `seed` function to
-transform it to the summary type.
+只要存在背压，就可以通过将传入元素和一个摘要传递到一个聚合函数中，来允许一个较慢的下行速度。当背压启动或没有背压元素被传递到`seed`函数中以将其转换为摘要类型。
 
-## Example
+## 示例
 
 Scala
 :   @@snip [SourceOrFlow.scala](/akka-docs/src/test/scala/docs/stream/operators/sourceorflow/Conflate.scala) { #conflateWithSeed }
@@ -36,7 +34,7 @@ You may want to use this operation for example to apply an average operation on 
 while the downstream backpressures. This allows us to keep processing upstream elements, and give an average
 number to the downstream once it is ready to process the next one.
 
-## Reactive Streams semantics 
+## 响应流语义 
 
 @@@div { .callout }
 

@@ -4,7 +4,7 @@ Use the `AskPattern` to send each element as an `ask` to the target actor, and e
 
 @ref[Actor interop operators](../index.md#actor-interop-operators)
 
-## Dependency
+## 依赖
 
 This operator is included in:
 
@@ -16,18 +16,18 @@ This operator is included in:
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [ActorFlow.scala](/akka-stream-typed/src/main/scala/akka/stream/typed/scaladsl/ActorFlow.scala) { #ask }
 
 @@@
 
-## Description
+## 描述
 
 Emit the contents of a file, as `ByteString`s, materializes into a @scala[`Future`] @java[`CompletionStage`] which will be completed with
 a `IOResult` upon reaching the end of the file or if there is a failure.
 
-## Examples
+## 示例
 
 
 Scala

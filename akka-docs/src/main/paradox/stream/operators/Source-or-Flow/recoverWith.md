@@ -6,19 +6,19 @@ Allow switching to alternative Source when a failure has happened upstream.
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #recoverWith }
 
 @@@
 
-## Description
+## 描述
 
 Allow switching to alternative Source when a failure has happened upstream.
 
 Throwing an exception inside `recoverWith` _will_ be logged on ERROR level automatically.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

@@ -1,22 +1,22 @@
 # delay
 
-Delay every element passed through with a specific duration.
+使用特定的时长，延迟通过的每个元素。
 
 @ref[Timer driven operators](../index.md#timer-driven-operators)
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #delay }
 
 @@@
 
-## Description
+## 描述
 
-Delay every element passed through with a specific duration.
+使用特定的时长，延迟通过的每个元素。
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 

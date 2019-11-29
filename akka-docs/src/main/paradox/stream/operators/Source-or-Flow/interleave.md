@@ -6,18 +6,18 @@ Emits a specifiable number of elements from the original source, then from the p
 
 @@@div { .group-scala }
 
-## Signature
+## 签名
 
 @@signature [Flow.scala](/akka-stream/src/main/scala/akka/stream/scaladsl/Flow.scala) { #interleave }
 
 @@@
 
-## Description
+## 描述
 
 Emits a specifiable number of elements from the original source, then from the provided source and repeats. If one
 source completes the rest of the other stream will be emitted.
 
-## Reactive Streams semantics
+## 响应流语义
 
 @@@div { .callout }
 
@@ -30,7 +30,7 @@ source completes the rest of the other stream will be emitted.
 @@@
 
 
-## Example
+## 示例
 Scala
 :   @@snip [FlowInterleaveSpec.scala](/akka-stream-tests/src/test/scala/akka/stream/scaladsl/FlowInterleaveSpec.scala) { #interleave }
 
