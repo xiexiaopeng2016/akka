@@ -2,7 +2,7 @@
 
 @@include[includes.md](includes.md) { #actor-api }
 
-## Dependency
+## 依赖
 
 To use Classic Akka Actors, you must add the following dependency in your project:
 

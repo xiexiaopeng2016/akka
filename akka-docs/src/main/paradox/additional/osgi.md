@@ -1,6 +1,6 @@
 # Akka in OSGi
 
-## Dependency
+## 依赖
 
 To use Akka in OSGi, you must add the following dependency in your project:
 

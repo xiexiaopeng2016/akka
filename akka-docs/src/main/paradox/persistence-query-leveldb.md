@@ -1,6 +1,6 @@
 # Persistence Query for LevelDB
 
-## Dependency
+## 依赖
 
 To use Persistence Query, you must add the following dependency in your project:
 

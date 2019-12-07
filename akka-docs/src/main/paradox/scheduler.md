@@ -6,7 +6,7 @@ project.description: How to schedule processes in Akka with the Scheduler.
 @@include[includes.md](includes.md) { #actor-api }
 For the new API see @ref:[typed scheduling](typed/interaction-patterns.md#typed-scheduling).
 
-## Dependency
+## 依赖
 
 To use Scheduler, you must add the following dependency in your project:
 

@@ -16,7 +16,7 @@ such as [HTTP](https://doc.akka.io/docs/akka-http/current/),
 
 @@@
 
-## Dependency
+## 依赖
 
 To use Artery Remoting, you must add the following dependency in your project:
 

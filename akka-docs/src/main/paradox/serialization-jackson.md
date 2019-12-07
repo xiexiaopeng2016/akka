@@ -3,7 +3,7 @@ project.description: Serialization with Jackson for Akka.
 ---
 # Serialization with Jackson
 
-## Dependency
+## 依赖
 
 To use Jackson Serialization, you must add the following dependency in your project:
 

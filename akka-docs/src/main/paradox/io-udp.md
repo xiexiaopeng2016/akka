@@ -3,7 +3,7 @@ project.description: Low level API for using UDP with classic actors.
 ---
 # Using UDP
 
-## Dependency
+## 依赖
 
 To use UDP, you must add the following dependency in your project:
 

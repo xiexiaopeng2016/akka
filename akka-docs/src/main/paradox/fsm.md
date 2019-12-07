@@ -3,7 +3,7 @@
 @@include[includes.md](includes.md) { #actor-api }
 For the documentation of the new API of this feature and for new projects see @ref:[fsm](typed/fsm.md).
 
-## Dependency
+## 依赖
 
 To use Finite State Machine actors, you must add the following dependency in your project:
 
@@ -196,7 +196,7 @@ internal state explicit in a few well-known places.
 A state is defined by one or more invocations of the method
 
 ```
-when(<name>[, stateTimeout = <timeout>])(stateFunction)
+when(<name>[, stateTimeout = <timeout>])(stateFunction)
 ```
 
 The given name must be an object which is type-compatible with the first type
@@ -210,10 +210,10 @@ state, including staying, receive this timeout by default. Initiating the
 transition with an explicit timeout may be used to override this default, see
 [Initiating Transitions](#initiating-transitions) for more information. The state timeout of any state
 may be changed during action processing with
-`setStateTimeout(state, duration)`. This enables runtime configuration
+`setStateTimeout(state, duration)`. This enables runtime configuration
 e.g. via external message.
 
-The `stateFunction` argument is a `PartialFunction[Event, State]`,
+The `stateFunction` argument is a `PartialFunction[Event, State]`,
 which is conveniently given using the @scala[partial function literal]@java[state function builder] syntax as
 demonstrated below:
 
@@ -225,7 +225,7 @@ Java
 
 @@@ div { .group-scala }
 
-The `Event(msg: Any, data: D)` case class is parameterized with the data
+The `Event(msg: Any, data: D)` case class is parameterized with the data
 type held by the FSM for convenient pattern matching.
 
 @@@
@@ -253,7 +253,7 @@ Java
 Each FSM needs a starting point, which is declared using
 
 ```
-startWith(state, data[, timeout])
+startWith(state, data[, timeout])
 ```
 
 The optionally given timeout argument overrides any specification given for the
@@ -323,7 +323,7 @@ even more pleasant to read.
 
 Please note that the `return` statement may not be used in `when`
 blocks or similar; this is a Scala restriction. Either refactor your code
-using `if () ... else ...` or move it into a method definition.
+using `if () ... else ...` or move it into a method definition.
 
 @@@
 
@@ -397,8 +397,8 @@ a certain state cannot be forgot when adding new target states.
 
 External actors may be registered to be notified of state transitions by
 sending a message `SubscribeTransitionCallBack(actorRef)`. The named
-actor will be sent a `CurrentState(self, stateName)` message immediately
-and will receive `Transition(actorRef, oldState, newState)` messages
+actor will be sent a `CurrentState(self, stateName)` message immediately
+and will receive `Transition(actorRef, oldState, newState)` messages
 whenever a state change is triggered.
 
 @@@ div { .group-scala }
@@ -443,8 +443,8 @@ Besides state timeouts, FSM manages timers identified by `String` names.
 You may set a timer using
 
 ```
-startSingleTimer(name, msg, interval)
-startTimerWithFixedDelay(name, msg, interval)
+startSingleTimer(name, msg, interval)
+startTimerWithFixedDelay(name, msg, interval)
 ```
 
 where `msg` is the message object which will be sent after the duration
@@ -479,7 +479,7 @@ intervening reception of other messages.
 The FSM is stopped by specifying the result state as
 
 ```
-stop([reason[, data]])
+stop([reason[, data]])
 ```
 
 The reason must be one of `Normal` (which is the default), `Shutdown`
@@ -503,7 +503,7 @@ Java
 
 You can use `onTermination(handler)` to specify custom code that is
 executed when the FSM is stopped. The handler is a partial function which takes
-a `StopEvent(reason, stateName, stateData)` as argument:
+a `StopEvent(reason, stateName, stateData)` as argument:
 
 Scala
 :  @@snip [FSMDocSpec.scala](/akka-docs/src/test/scala/docs/actor/FSMDocSpec.scala) { #termination-syntax }
@@ -520,7 +520,7 @@ When an `ActorRef` associated to a FSM is stopped using the
 `stop()` method, its `postStop` hook will be executed. The default
 implementation by the @scala[`FSM` trait]@java[`AbstractFSM` class] is to execute the
 `onTermination` handler if that is prepared to handle a
-`StopEvent(Shutdown, ...)`.
+`StopEvent(Shutdown, ...)`.
 
 @@@ warning
 

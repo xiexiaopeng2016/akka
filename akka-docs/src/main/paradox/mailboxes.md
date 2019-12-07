@@ -3,7 +3,7 @@
 @@include[includes.md](includes.md) { #actor-api }
 For the full documentation of this feature and for new projects see @ref:[mailboxes](typed/mailboxes.md).
 
-## Dependency
+## 依赖
 
 To use Mailboxes, you must add the following dependency in your project:
 

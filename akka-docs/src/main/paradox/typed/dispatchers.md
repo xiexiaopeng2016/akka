@@ -5,7 +5,7 @@ project.description: Akka dispatchers and how to choose the right ones.
 
 For the Akka Classic documentation of this feature see @ref:[Classic Dispatchers](../dispatchers.md).
 
-## Dependency
+## 依赖
 
 Dispatchers are part of core Akka, which means that they are part of the `akka-actor` dependency. This
 page describes how to use mailboxes with `akka-actor-typed`, which has dependency:

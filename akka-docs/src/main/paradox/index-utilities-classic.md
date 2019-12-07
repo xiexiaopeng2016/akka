@@ -1,6 +1,6 @@
 # Classic Utilities
 
-## Dependency
+## 依赖
 
 To use Utilities, you must add the following dependency in your project:
 

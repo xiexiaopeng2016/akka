@@ -1,4 +1,4 @@
-# Other Akka modules
+# 其他Akka模块
 
 ## [Akka HTTP](https://doc.akka.io/docs/akka-http/current/)
 

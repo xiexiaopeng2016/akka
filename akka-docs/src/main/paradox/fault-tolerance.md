@@ -3,7 +3,7 @@
 @@include[includes.md](includes.md) { #actor-api }
 For the full documentation of this feature and for new projects see @ref:[fault tolerance](typed/fault-tolerance.md).
 
-## Dependency
+## 依赖
 
 The concept of fault tolerance relates to actors, so in order to use these make sure to depend on actors:
 

@@ -1,6 +1,6 @@
 # Coexistence
 
-## Dependency
+## 依赖
 
 To use Akka Actor Typed, you must add the following dependency in your project:
 

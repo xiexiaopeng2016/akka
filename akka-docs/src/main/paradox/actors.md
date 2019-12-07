@@ -146,7 +146,7 @@ is completely fine.
 
 There were two use-cases for these methods: passing constructor arguments to
 the actor—which is solved by the newly introduced
-@scala[`Props.apply(clazz, args)`] @java[`Props.create(clazz, args)`] method above or the recommended practice
+@scala[`Props.apply(clazz, args)`] @java[`Props.create(clazz, args)`] method above or the recommended practice
 below—and creating actors “on the spot” as anonymous classes. The latter should
 be solved by making these actors named classes instead (if they are not
 declared within a top-level `object` then the enclosing instance’s `this`
@@ -267,7 +267,7 @@ calling the constructor manually:
 
 @@@
 
-### Dependency Injection
+### 依赖 Injection
 
 If your `Actor` has a constructor that takes parameters then those need to
 be part of the `Props` as well, as described @ref:[above](#props). But there

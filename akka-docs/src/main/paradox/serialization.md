@@ -3,7 +3,7 @@ project.description: Serialization APIs built into Akka.
 ---
 # Serialization
 
-## Dependency
+## 依赖
 
 To use Serialization, you must add the following dependency in your project:
 

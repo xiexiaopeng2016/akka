@@ -1,6 +1,6 @@
-# Buffers and working with rate
+# 缓冲区和速率
 
-## Dependency
+## 依赖
 
 To use Akka Streams, add the module to your project:
 

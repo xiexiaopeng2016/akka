@@ -1,4 +1,4 @@
-# Getting Started Guide
+# 入门指南
 
 @@toc { depth=2 }
 

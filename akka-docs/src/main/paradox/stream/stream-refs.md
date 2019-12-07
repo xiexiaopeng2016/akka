@@ -1,6 +1,6 @@
-# StreamRefs - Reactive Streams over the network
+# StreamRefs - 网络上的响应流
 
-## Dependency
+## 依赖
 
 To use Akka Streams, add the module to your project:
 

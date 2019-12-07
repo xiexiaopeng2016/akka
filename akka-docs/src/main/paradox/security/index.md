@@ -1,4 +1,4 @@
-# Security Announcements
+# 安全公告
 
 ## Receiving Security Advisories
 

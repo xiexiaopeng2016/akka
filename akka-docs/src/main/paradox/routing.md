@@ -3,7 +3,7 @@
 @@include[includes.md](includes.md) { #actor-api }
 新项目中有关此功能的完整文档，请参阅 @ref:[路由器](typed/routers.md) 。
 
-## Dependency
+## 依赖
 
 要使用路由，您必须在您的项目中添加以下依赖项:
 
@@ -675,7 +675,7 @@ Java
 :  @@snip [RouterDocTest.java](/akka-docs/src/test/java/jdocs/routing/RouterDocTest.java) { #broadcastDavyJonesWarning }
 
 In this example the router receives the `Broadcast` message, extracts its payload
-(`"Watch out for Davy Jones' locker"`), and then sends the payload on to all of the router's
+(`"Watch out for Davy Jones' locker"`), and then sends the payload on to all of the router's
 routees. It is up to each routee actor to handle the received payload message.
 
 @@@ note

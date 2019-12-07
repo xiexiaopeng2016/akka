@@ -1,6 +1,6 @@
 # throttle
 
-Limit the throughput to a specific number of elements per time unit, or a specific total cost per time unit, where a function has to be provided to calculate the individual cost of each element.
+将吞吐量限制为每个时间单位特定数量的元素，或每个时间单位特定总成本，这时必须提供一个函数来计算每个元素的单个成本。
 
 @ref[Simple operators](../index.md#simple-operators)
 
@@ -14,18 +14,17 @@ Limit the throughput to a specific number of elements per time unit, or a specif
 
 ## 描述
 
-Limit the throughput to a specific number of elements per time unit, or a specific total cost per time unit, where
-a function has to be provided to calculate the individual cost of each element.
+将吞吐量限制为每个时间单位特定数量的元素，或每个时间单位特定总成本，这时必须提供一个函数来计算每个元素的单个成本。
 
 ## 响应流语义
 
 @@@div { .callout }
 
-**emits** when upstream emits an element and configured time per each element elapsed
+**emits** 上游发出一个元素并为每个元素配置消耗时间
 
-**backpressures** when downstream backpressures
+**backpressures** 当下游背压
 
-**completes** when upstream completes
+**completes** 当上游完成
 
 @@@
 

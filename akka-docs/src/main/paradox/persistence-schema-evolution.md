@@ -1,6 +1,6 @@
 # Schema Evolution for Event Sourced Actors
 
-## Dependency
+## 依赖
 
 This documentation page touches upon @ref[Akka Persistence](persistence.md), so to follow those examples you will want to depend on:
 

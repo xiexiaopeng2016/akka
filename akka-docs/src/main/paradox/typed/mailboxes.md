@@ -2,7 +2,7 @@
 
 For the Akka Classic documentation of this feature see @ref:[Classic Mailboxes](../mailboxes.md).
 
-## Dependency
+## 依赖
 
 Mailboxes are part of core Akka, which means that they are part of the `akka-actor` dependency. This
 page describes how to use mailboxes with `akka-actor-typed`, which has dependency:

@@ -27,7 +27,7 @@ will not be shared among the routers. One example of a use case for this type of
 is a single master that coordinates jobs and delegates the actual work to routees running
 on other nodes in the cluster.
 
-## Dependency
+## 依赖
 
 To use Cluster aware routers, you must add the following dependency in your project:
 

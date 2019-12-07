@@ -14,7 +14,7 @@ even though that is the primary use case. It could also be used as a logical gro
 for other reasons, such as isolation of certain nodes to improve stability or splitting
 up a large cluster into smaller groups of nodes for better scalability.
 
-## Dependency
+## 依赖
 
 To use Akka Cluster add the following dependency in your project:
 

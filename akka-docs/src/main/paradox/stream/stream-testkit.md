@@ -1,6 +1,6 @@
-# Testing streams
+# 测试流
 
-## Dependency
+## 依赖
 
 To use Akka Stream TestKit, add the module to your project:
 

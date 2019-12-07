@@ -1,6 +1,6 @@
-# Integration
+# 集成
 
-## Dependency
+## 依赖
 
 To use Akka Streams, add the module to your project:
 

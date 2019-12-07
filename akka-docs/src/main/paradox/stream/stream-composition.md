@@ -1,6 +1,7 @@
-# Modularity, Composition and Hierarchy
+<a href="stream-composition"></a>
+# 模块化，组成和层次结构
 
-## Dependency
+## 依赖
 
 To use Akka Streams, add the module to your project:
 

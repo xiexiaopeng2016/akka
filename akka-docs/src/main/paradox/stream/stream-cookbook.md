@@ -1,8 +1,8 @@
-# Streams Cookbook
+# 流Cookbook
 
-## Dependency
+## 依赖
 
-To use Akka Streams, add the module to your project:
+要使用Akka流，请将模块添加到您的项目中：
 
 @@dependency[sbt,Maven,Gradle] {
   group="com.typesafe.akka"
@@ -10,12 +10,13 @@ To use Akka Streams, add the module to your project:
   version="$akka.version$"
 }
 
-## Introduction
+## 介绍
 
-This is a collection of patterns to demonstrate various usage of the Akka Streams API by solving small targeted
-problems in the format of "recipes". The purpose of this page is to give inspiration and ideas how to approach
-various small tasks involving streams. The recipes in this page can be used directly as-is, but they are most powerful as
-starting points: customization of the code snippets is warmly encouraged.
+这是一个模式集合，通过解决"食谱"格式的针对性的小问题来演示Akka Streams API的各种用法。该页面的目的是为如何处理涉及流的各种小任务提供灵感和想法。此页面中的食谱可直接使用，但作为起点，它们功能很强大：我们鼓励对代码段进行自定义。
+
+这部分还作为文档主体的补充材料。在阅读手册时打开此页面是一个好主意，并查找示例，这些示例演示了文档主体中出现的各种流概念。
+
+如果需要快速参考配方中可用的运算符，请参阅运算符索引。
 
 This part also serves as supplementary material for the main body of documentation. It is a good idea to have this page
 open while reading the manual and look for examples demonstrating various streaming concepts
@@ -162,7 +163,7 @@ Java
 elements.
 
 The "hello world" of reduce-by-key style operations is *wordcount* which we demonstrate below. Given a stream of words
-we first create a new stream that groups the words according to the @scala[`identity`] @java[`i -> i`] function, i.e. now
+we first create a new stream that groups the words according to the @scala[`identity`] @java[`i -> i`] function, i.e. now
 we have a stream of streams, where every substream will serve identical words.
 
 To count the words, we need to process the stream of streams (the actual groups

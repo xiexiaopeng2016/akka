@@ -3,7 +3,7 @@ project.description: Query side to Akka Persistence allowing for building CQRS a
 ---
 # Persistence Query
 
-## Dependency
+## 依赖
 
 To use Persistence Query, you must add the following dependency in your project:
 

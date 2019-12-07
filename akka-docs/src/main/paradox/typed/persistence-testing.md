@@ -1,6 +1,6 @@
 # Testing
 
-## Dependency
+## 依赖
 
 To use Akka Persistence and Actor TestKit, add the module to your project:
 

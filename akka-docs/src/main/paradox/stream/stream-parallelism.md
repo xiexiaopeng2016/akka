@@ -1,6 +1,6 @@
-# Pipelining and Parallelism
+# 管道和并行
 
-## Dependency
+## 依赖
 
 To use Akka Streams, add the module to your project:
 

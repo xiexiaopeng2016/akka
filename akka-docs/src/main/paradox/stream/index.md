@@ -1,9 +1,9 @@
 ---
 project.description: An intuitive and safe way to do asynchronous, non-blocking backpressured stream processing.
 ---
-# Streams
+# 流
 
-## Module info
+## 模块信息
 
 To use Akka Streams, add the module to your project:
 

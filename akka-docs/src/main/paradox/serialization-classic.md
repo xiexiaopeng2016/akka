@@ -5,7 +5,7 @@
 Serialization is the same for Classic and Typed actors. It is described in @ref:[Serialization](serialization.md),
 aside from serialization of `ActorRef` that is described @ref:[here](#serializing-actorrefs).
 
-## Dependency
+## 依赖
 
 To use Serialization, you must add the following dependency in your project:
 

@@ -1,6 +1,6 @@
 # zip
 
-Combines elements from each of multiple sources into @scala[tuples] @java[*Pair*] and passes the @scala[tuples] @java[pairs] downstream.
+将来自多个源的每个元素组合到 @scala[元组]@java[*Pair*] 中，并向下游传递 @scala[元组]@java[pairs]。
 
 @ref[Fan-in operators](../index.md#fan-in-operators)
 
@@ -14,17 +14,17 @@ Combines elements from each of multiple sources into @scala[tuples] @java[*Pair*
 
 ## 描述
 
-Combines elements from each of multiple sources into @scala[tuples] @java[*Pair*] and passes the @scala[tuples] @java[pairs] downstream.
+将来自多个源的每个元素组合到 @scala[元组]@java[*Pair*] 中，并向下游传递 @scala[元组]@java[pairs]。
 
 ## 响应流语义
 
 @@@div { .callout }
 
-**emits** when all of the inputs have an element available
+**emits** 当所有的输入都有一个元素可用时
 
-**backpressures** when downstream backpressures
+**backpressures** 当下游背压时
 
-**completes** when any upstream completes
+**completes** 当任何上游完成时
 
 @@@
 

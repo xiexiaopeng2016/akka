@@ -1,6 +1,6 @@
 # I/O
 
-## Dependency
+## 依赖
 
 To use I/O, you must add the following dependency in your project:
 

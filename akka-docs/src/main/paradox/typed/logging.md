@@ -5,7 +5,7 @@ project.description: Logging options with Akka.
 
 For the Akka Classic documentation of this feature see @ref:[Classic Logging](../logging.md).
 
-## Dependency
+## 依赖
 
 To use Logging, you must at least use the Akka actors dependency in your project, and configure logging
 via the SLF4J backend, such as Logback configuration.

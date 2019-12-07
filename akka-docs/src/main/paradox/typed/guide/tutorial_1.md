@@ -1,6 +1,6 @@
 # Part 1: Actor Architecture
 
-## Dependency
+## 依赖
 
 Add the following dependency in your project:
 

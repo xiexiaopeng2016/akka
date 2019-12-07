@@ -1,6 +1,6 @@
-# Working with streaming IO
+# 使用流式IO
 
-## Dependency
+## 依赖
 
 To use Akka Streams, add the module to your project:
 

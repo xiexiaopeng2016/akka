@@ -5,7 +5,7 @@ project.description: The Akka Actor lifecycle.
 
 For the Akka Classic documentation of this feature see @ref:[Classic Actors](../actors.md).
 
-## Dependency
+## 依赖
 
 To use Akka Actor Typed, you must add the following dependency in your project:
 

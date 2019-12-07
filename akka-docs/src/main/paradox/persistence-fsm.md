@@ -2,7 +2,7 @@
 
 @@include[includes.md](includes.md) { #actor-api }
 
-## Dependency
+## 依赖
 
 Persistent FSMs are part of Akka persistence, you must add the following dependency in your project:
 

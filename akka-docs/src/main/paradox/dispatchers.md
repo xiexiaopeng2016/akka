@@ -3,7 +3,7 @@
 @@include[includes.md](includes.md) { #actor-api }
 For the full documentation of this feature and for new projects see @ref:[Dispatchers](typed/dispatchers.md).
 
-## Dependency
+## 依赖
 
 Dispatchers are part of core Akka, which means that they are part of the akka-actor dependency:
 
