@@ -1,6 +1,6 @@
 # fold
 
-Start with current value `zero` and then apply the current and next value to the given function. When upstream completes, the current value is emitted downstream.
+从当前值`zero`开始，然后将当前值和下一个值应用于给定函数。当上游完成时，当前值向下游发出。
 
 @ref[Simple operators](../index.md#simple-operators)
 
@@ -14,8 +14,7 @@ Start with current value `zero` and then apply the current and next value to the
 
 ## 描述
 
-Start with current value `zero` and then apply the current and next value to the given function. When upstream
-completes, the current value is emitted downstream.
+从当前值`zero`开始，然后将当前值和下一个值应用于给定函数。当上游完成时，当前值向下游发出。
 
 @@@ warning
 

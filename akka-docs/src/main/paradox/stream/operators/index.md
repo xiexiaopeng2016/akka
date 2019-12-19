@@ -151,7 +151,7 @@ depending on being backpressured by downstream or not.
 |Source/Flow|<a name="dropwhile"></a>@ref[dropWhile](Source-or-Flow/dropWhile.md)|删除元素，只要一个谓词函数对元素返回true|
 |Source/Flow|<a name="filter"></a>@ref[filter](Source-or-Flow/filter.md)|使用一个谓词过滤传入元素。|
 |Source/Flow|<a name="filternot"></a>@ref[filterNot](Source-or-Flow/filterNot.md)|使用一个谓词过滤传入元素。|
-|Source/Flow|<a name="fold"></a>@ref[fold](Source-or-Flow/fold.md)|Start with current value `zero` and then apply the current and next value to the given function. When upstream completes, the current value is emitted downstream.|
+|Source/Flow|<a name="fold"></a>@ref[fold](Source-or-Flow/fold.md)|从当前值`zero`开始，然后将当前值和下一个值应用于给定函数。当上游完成时，当前值向下游发出。|
 |Source/Flow|<a name="foldasync"></a>@ref[foldAsync](Source-or-Flow/foldAsync.md)|Just like `fold` but receives a function that results in a @scala[`Future`] @java[`CompletionStage`] to the next value.|
 |Source/Flow|<a name="frommaterializer"></a>@ref[fromMaterializer](Source-or-Flow/fromMaterializer.md)|Defer the creation of a `Source/Flow` until materialization and access `Materializer` and `Attributes`|
 |Flow|<a name="futureflow"></a>@ref[futureFlow](Flow/futureFlow.md)|将元素流过给定的future flow，一旦它成功完成。|
@@ -170,7 +170,7 @@ depending on being backpressured by downstream or not.
 |Source/Flow|<a name="recover"></a>@ref[recover](Source-or-Flow/recover.md)|Allow sending of one last element downstream when a failure has happened upstream.|
 |Source/Flow|<a name="recoverwith"></a>@ref[recoverWith](Source-or-Flow/recoverWith.md)|Allow switching to alternative Source when a failure has happened upstream.|
 |Source/Flow|<a name="recoverwithretries"></a>@ref[recoverWithRetries](Source-or-Flow/recoverWithRetries.md)|RecoverWithRetries allows to switch to alternative Source on flow failure.|
-|Source/Flow|<a name="reduce"></a>@ref[reduce](Source-or-Flow/reduce.md)|Start with first element and then apply the current and next value to the given function, when upstream complete the current value is emitted downstream.|
+|Source/Flow|<a name="reduce"></a>@ref[reduce](Source-or-Flow/reduce.md)|开始第一个元素，然后将当前值和下一个值应用于给定函数，当上游完成时，当前值向下游发出。|
 |Source/Flow|<a name="scan"></a>@ref[scan](Source-or-Flow/scan.md)|发出它的当前值，它从`zero`开始，然后将当前值和下一个值应用于给定的函数，发出下一个当前值。|
 |Source/Flow|<a name="scanasync"></a>@ref[scanAsync](Source-or-Flow/scanAsync.md)|Just like `scan` but receives a function that results in a @scala[`Future`] @java[`CompletionStage`] to the next value.|
 |Source/Flow|<a name="setup"></a>@ref[setup](Source-or-Flow/setup.md)|Defer the creation of a `Source/Flow` until materialization and access `Materializer` and `Attributes`|

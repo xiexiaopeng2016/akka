@@ -37,7 +37,7 @@ Akka流是一个使用有限的缓冲区空间处理和传输元素序列的库�
 : 流处理拓扑的描述，定义了流运行时元素流经的路径。
 
 运算符
-: 构成图的所有构建块的通用名称。运算符的例子是`map()`，`filter()`，自定义的扩展 @ref[`GraphStage`s](stream-customize.md)和图交叉点如`Merge`或`Broadcast`。有关内置运算符的完整列表，请参见 @ref:[运算符索引](operators/index.md)
+: 构成图的所有构建块的通用名称。运算符的例子是`map()`，`filter()`，自定义的扩展 @ref[`GraphStage`](stream-customize.md)和图交叉点如`Merge`或`Broadcast`。有关内置运算符的完整列表，请参见 @ref:[运算符索引](operators/index.md)
 
 当我们谈论 *异步，非阻塞背压* 时，我们的意思是Akka流中可用的运算符将不使用阻塞调用，而是使用异步消息传递在彼此之间交换消息。通过这种方式，它们可以降低快速生产者的速度，而不阻塞它的线程。这是一种线程池友好的设计，因为需要等待的实体(快速的生产者等待缓慢的消费者)不会阻塞线程，而是可以将它交给底层线程池以供将来使用。
 
@@ -58,7 +58,7 @@ Flow
 RunnableGraph
 : 一个Flow的两端分别"附加"到源和接收器，并准备`run()`。
 
-可以将一个`Flow`附加到一个`Source`产生一个复合源，也可以在`Sink`之前加上一个`Flow`来得到一个新的Sink。当一个流通过同时拥有一个源和一个接收器而正确地终止后，它将由`RunnableGraph`类型表示，这表明它已经准备好执行了。在同时具有源和接收器的流正确终止后，该流将由RunnableGraph类型表示，表明它已准备好被执行。
+可以将一个`Flow`附加到一个`Source`产生一个复合源，也可以在`Sink`之前加上一个`Flow`来得到一个新的Sink。当一个流通过同时拥有一个源和一个接收器而正确地终止后，它将由`RunnableGraph`类型表示，这表明它已经准备好执行了。
 
 重要的是要记住，即使通过连接所有的源、接收器和不同的运算符构造了`RunnableGraph`之后，也不会有数据流经它，直到它被物化。物化是分配运行图描述的计算所需的所有资源的过程(在Akka流中，这通常涉及启动Actor)。由于Flow是对处理管道的描述，因此它们是 *不可变的，线程安全的和可自由共享的*，这意味着例如可以安全地在actors之间共享和发送它们，让一个actor准备工作，然后让它在代码中完全不同的地方物化。
 
@@ -70,7 +70,7 @@ Java
 
 @@@ div { .group-scala }
 
-运行(物化)`RunnableGraph[T]`后，我们将获得类型T的物化值。每个stream运算符都可以产生物化值，用户有责任将它们组合成一个新类型。在上面的示例中，我们使用`toMat`来表示我们想要转换的源和接收器的物化值，并且使用便利函数`Keep.right`来表示我们只对接收器的物化值感兴趣。
+运行(物化)`RunnableGraph[T]`后，我们将获得类型T的物化值。每个流运算符都可以产生物化值，用户有责任将它们组合成一个新类型。在上面的示例中，我们使用`toMat`来表示我们想要转换的源和接收器的物化值，并且使用便利函数`Keep.right`来表示我们只对接收器的物化值感兴趣。
 
 在我们的示例中，`FoldSink`物化了一个`Future`类型的值，它表示流折叠过程的结果。通常，流可以暴露多个物化值，但是仅对流中的`Source`或`Sink`的值感兴趣是很常见的。由于这个原因，一个称为`runWith()`的便捷方法可用于`Sink`，`Source`或`Flow`的需求，分别供给`Source`(为了运行一个`Sink`)，`Sink`(为了运行一个`Source`)或两者`Source`和`Sink`(为了运行一个`Flow`，因为它两者都均未连上)。
 
@@ -110,9 +110,9 @@ Java
 
 @@@
 
-在上面的示例中，我们使用了`runWith`方法，它既物化了stream又返回了给定接收器或源的物化值。
+在上面的示例中，我们使用了`runWith`方法，它既物化了流又返回了给定接收器或源的物化值。
 
-由于可以多次物化一个stream，因此对于每个这样的实现，物化值也将重新计算，通常会导致每次返回不同的值。在下面的示例中，我们创建了在`runnable`变量中描述的stream的两个正在运行的物化实例。这两个物化从map给了我们一个不同的 @scala[`Future`] @java[`CompletionStage`]，尽管我们使用相同的`sink`来引用future:
+由于可以多次物化一个流，因此对于每个这样的实现，物化值也将重新计算，通常会导致每次返回不同的值。在下面的示例中，我们创建了在`runnable`变量中描述的流的两个正在运行的物化实例。这两个物化从map给了我们一个不同的 @scala[`Future`] @java[`CompletionStage`]，尽管我们使用相同的`sink`来引用future:
 
 Scala
 :   @@snip [FlowDocSpec.scala](/akka-docs/src/test/scala/docs/stream/FlowDocSpec.scala) { #stream-reuse }
@@ -140,28 +140,28 @@ Java
 
 ### 非法流元素
 
-根据Reactive Streams规范([规则2.13](https://github.com/reactive-streams/reactive-streams-jvm#2.13))，Akka流不允许`null`作为一个元素通过流传递。如果您想对不存在值的概念建模，我们建议使用 @scala[`scala.Option`或`scala.util.Either`]。
+根据响应流规范([规则2.13](https://github.com/reactive-streams/reactive-streams-jvm#2.13))，Akka流不允许`null`作为一个元素通过流传递。如果您想对不存在值的概念建模，我们建议使用 @scala[`scala.Option`或`scala.util.Either`]。
 
 <a id="back-pressure-explained"></a>
 ## 背压说明
 
-Akka流实现了由[Reactive Streams](http://reactive-streams.org/)规范标准化的一个异步无阻塞背压协议，Akka是该规范的创始成员。
+Akka流实现了由[响应流](http://reactive-streams.org/)规范标准化的一个异步无阻塞背压协议，Akka是该规范的创始成员。
 
 库的用户不必编写任何显式的背压处理代码 - 它是内置的，并且由所有提供的Akka流运算符自动处理。
 但是，可以添加具有溢出策略的显式缓冲区运算符，它可以影响流的行为。
 这对于复杂的处理图尤其重要，因为它甚至可能包含循环(那些 *必须* 特别小心地处理，如 @ref:[图周期, 活跃性和死锁](stream-graphs.md#graph-cycles)中所述)。
 
-背压协议是根据下游`Subscriber`能够接收和缓冲的元素数目定义的，参考`demand`。数据的源，在Reactive Streams术语中称为`Publisher`，在Akka流中实现为`Source`，保证它永远不会发出比任何给定`Subscriber`接收的总需求更多的元素。
+背压协议是根据下游`Subscriber`能够接收和缓冲的元素数目定义的，参考`demand`。数据的源，在响应流术语中称为`Publisher`，在Akka流中实现为`Source`，保证它永远不会发出比任何给定`Subscriber`接收的总需求更多的元素。
 
 @@@ note
 
-Reactive Streams规范根据`Publisher`和`Subscriber`定义它的协议。这些类型并 **不** 意味着是面向用户的API，而是作为不同Reactive Streams实现的低级构建块。
+响应流规范根据`Publisher`和`Subscriber`定义它的协议。这些类型并 **不** 意味着是面向用户的API，而是作为不同响应流实现的低级构建块。
 
-Akka流将这些概念实现为`Source`，`Flow`(在Reactive Streams中称为`Processor`)和`Sink`，没有直接公开Reactive Streams接口。如果您需要与其他Reactive Stream库集成，请阅读 @ref:[与Reactive Streams集成](stream-integrations.md#reactive-streams-integration)。
+Akka流将这些概念实现为`Source`，`Flow`(在响应流中称为`Processor`)和`Sink`，没有直接公开响应流接口。如果您需要与其他响应流库集成，请阅读 @ref:[与响应流集成](stream-integrations.md#reactive-streams-integration)。
 
 @@@
 
-Reactive Streams背压的工作模式可以通俗地描述为"动态推/拉模式"，因为它将根据下游是否能够应付上游的生产速度，在推和拉的背压模式之间进行切换。
+响应流背压的工作模式可以通俗地描述为"动态推/拉模式"，因为它将根据下游是否能够应付上游的生产速度，在推和拉的背压模式之间进行切换。
 
 为了进一步说明这一点，让我们考虑两个问题情境，以及背压协议如何处理它们:
 
@@ -170,7 +170,7 @@ Reactive Streams背压的工作模式可以通俗地描述为"动态推/拉模�
 这是理想的情况 – 在这种情况下，我们不需要放慢发布者的速度。
 然而，信号速度很少是恒定的，并且可能在任何时间点发生变化，最终会导致订阅方的速度比发布方慢。为了避免这些情况，在这种情况下仍然必须启用背压协议，但是我们不希望为启用这个安全网付出高昂的代价。
 
-Reactive Streams协议通过从订阅者发送异步信号 @scala[`Request(n:Int)`]@java[`Request(int n)`]到发布者来解决此问题。该协议保证了发布者永远不会发送比信号的需求更多的元素。
+响应流协议通过从订阅者发送异步信号 @scala[`Request(n:Int)`]@java[`Request(int n)`]到发布者来解决此问题。该协议保证了发布者永远不会发送比信号的需求更多的元素。
 
 但是，由于订阅者当前更快，它将以更高的频率发送这些请求消息(可能还会将需求批量处理 - 在一个请求信号中请求多个元素)。这意味着发布者永远不必等待(被背压)发布其传入的元素。
 

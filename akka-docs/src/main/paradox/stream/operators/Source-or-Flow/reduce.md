@@ -1,6 +1,6 @@
 # reduce
 
-Start with first element and then apply the current and next value to the given function, when upstream complete the current value is emitted downstream.
+开始第一个元素，然后将当前值和下一个值应用于给定函数，当上游完成时，当前值向下游发出。
 
 @ref[Simple operators](../index.md#simple-operators)
 
@@ -14,8 +14,7 @@ Start with first element and then apply the current and next value to the given 
 
 ## 描述
 
-Start with first element and then apply the current and next value to the given function, when upstream
-complete the current value is emitted downstream. Similar to `fold`.
+开始第一个元素，然后将当前值和下一个值应用于给定函数，当上游完成时，当前值向下游发出。类似于`fold`。
 
 ## 响应流语义
 
