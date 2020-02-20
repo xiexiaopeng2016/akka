@@ -1,13 +1,14 @@
 ---
 project.description: The Akka Actor lifecycle.
 ---
-# Actor lifecycle
+<a id="actor-lifecycle"></a>
+# Actor生命周期
 
-For the Akka Classic documentation of this feature see @ref:[Classic Actors](../actors.md).
+有关此功能的Akka经典文档，请参阅 @ref:[经典Actor](../actors.md)。
 
 ## 依赖
 
-To use Akka Actor Typed, you must add the following dependency in your project:
+要使用类型化Akka Actor，必须在项目中添加以下依赖项：
 
 @@dependency[sbt,Maven,Gradle] {
   group=com.typesafe.akka
@@ -15,41 +16,34 @@ To use Akka Actor Typed, you must add the following dependency in your project:
   version=$akka.version$
 }
 
-## Introduction
+## 介绍
 
-An actor is a stateful resource that has to be explicitly started and stopped.
+一个actor是必须显式启动和停止的有状态资源。
 
-It is important to note that actors do not stop automatically when no longer
-referenced, every Actor that is created must also explicitly be destroyed.
-The only simplification is that stopping a parent Actor will also recursively
-stop all the child Actors that this parent has created. All actors are also
-stopped automatically when the `ActorSystem` is shut down.
+需要注意的是，当不再引用Actor时，Actor不会自动停止，创建的每个Actor也必须显式地销毁。惟一的简化是，停止父Actor也将递归地停止父Actor创建的所有子Actor。`ActorSystem`关闭时，所有actor也将自动停止。
 
 @@@ note
-An `ActorSystem` is a heavyweight structure that will allocate threads,
-so create one per logical application. Typically one `ActorSystem` per JVM process.
+一个`ActorSystem`是一个重量级结构，它将分配线程，因此请为每个逻辑应用程序创建一个。通常每个JVM进程一个`ActorSystem`。
 @@@
 
-## Creating Actors
+<a id="creating-actors"></a>
+## 创建Actor
 
-An actor can create, or _spawn_, an arbitrary number of child actors, which in turn can spawn children of their own, thus
-forming an actor hierarchy. @apidoc[akka.actor.typed.ActorSystem] hosts the hierarchy and there can be only one _root actor_,
-actor at the top of the hierarchy of the `ActorSystem`. The lifecycle of a child actor is tied to the parent -- a child
-can stop itself or be stopped at any time but it can never outlive its parent.
+一个actor可以创建，或 _spawn_，任意数量的子actor，这些反过来又可以产生它们自己的后代，从而形成一个actor层次结构。@apidoc[akka.actor.typed.ActorSystem] 托管层次结构，并且只能有 _一个根actor，actor位于`ActorSystem`层次结构的顶部。子actor的生命周期与父actor绑定在一起 – 子actor可以自己停止或者在任何时候被停止，但它永远不会比它的父actor活得更久。
 
-### The ActorContext
+<a id="the-actorcontext"></a>
+### ActorContext
 
-The ActorContext can be accessed for many purposes such as:
+可以出于多种目的访问ActorContext，例如：
 
-* Spawning child actors and supervision
-* Watching other actors to receive a `Terminated(otherActor)` event should the watched actor stop permanently
-* Logging
-* Creating message adapters
-* Request-response interactions (ask) with another actor
-* Access to the `self` ActorRef
+* 产生子actor和监督
+* 监控其它actor，为了接收`Terminated(otherActor)`事件，当监控的actor永久停止时
+* 日志记录
+* 创建消息适配器
+* 与其它actor请求-响应交互(ask)
+* 访问`self` ActorRef
 
-If a behavior needs to use the `ActorContext`, for example to spawn child actors, or use
-@scala[`context.self`]@java[`context.getSelf()`], it can be obtained by wrapping construction with `Behaviors.setup`:
+如果一个行为需要使用`ActorContext`，例如产生子actor或使用`context.self`，则可以用`Behaviors.setup`包装构造得到：
 
 Scala
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/scala/docs/akka/typed/IntroSpec.scala) { #hello-world-main }
@@ -57,19 +51,19 @@ Scala
 Java
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/java/jdocs/akka/typed/IntroTest.java) { #hello-world-main-setup }
 
-#### ActorContext Thread Safety
+<a id="actorcontext-thread-safety"></a>
+#### ActorContext线程安全
 
-Many of the methods in `ActorContext` are not thread-safe and
+`ActorContext`中的许多方法都不是线程安全的，并且
 
-* Must not be accessed by threads from @scala[`scala.concurrent.Future`]@java[`java.util.concurrent.CompletionStage`] callbacks
-* Must not be shared between several actor instances
-* Must only be used in the ordinary actor message processing thread
+* 不能被`scala.concurrent.Future`回调中的线程访问
+* 不能在多个actor实例之间共享
+* 必须仅在普通actor消息处理线程中使用
 
-### The Guardian Actor
+<a id="the-guardian-actor"></a>
+### 守护者Actor
 
-The top level actor, also called the guardian actor, is created along with the `ActorSystem`. Messages sent to the actor
-system are directed to the root actor. The root actor is defined by the behavior used to create the `ActorSystem`,
-named `HelloWorldMain` in the example below:
+顶级actor(也称为用户监督者actor)与`ActorSystem`一起创建。发送到actor系统的消息被定向到根actor。根actor由用于创建`ActorSystem`的行为定义，在以下示例中被命名为`HelloWorldMain`：
 
 Scala
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/scala/docs/akka/typed/IntroSpec.scala) { #hello-world }
@@ -77,14 +71,11 @@ Scala
 Java
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/java/jdocs/akka/typed/IntroTest.java) { #hello-world }
 
-For very simple applications the guardian may contain the actual application logic and handle messages. As soon as the application
-handles more than one concern the guardian should instead just bootstrap the application, spawn the various subsystems as
-children and monitor their lifecycles.
+对于非常简单的应用程序，监督者可能包含实际的应用程序逻辑并处理消息。一旦应用程序处理了不止一个问题，监督者就应该引导应用程序，将各种子系统作为后代生成，并监视它们的生命周期。
 
-When the guardian actor stops this will stop the `ActorSystem`.
+当监督者actor停止时，这将停止`ActorSystem`。
 
-When `ActorSystem.terminate` is invoked the @ref:[Coordinated Shutdown](../coordinated-shutdown.md) process will
-stop actors and services in a specific order.
+当`ActorSystem.terminate`被调用， @ref:[联动关闭](../coordinated-shutdown.md)过程将停止actor和服务，按一个特定的顺序。
 
 @@@ Note
 
@@ -94,13 +85,10 @@ is a tool that mimics the old style of starting up actors.
 
 @@@
 
+<a id="spawning-children"></a>
+### 产生后代
 
-### Spawning Children
-
-Child actors are created and started with @apidoc[typed.*.ActorContext]'s `spawn`.
-In the example below, when the root actor
-is started, it spawns a child actor described by the `HelloWorld` behavior. Additionally, when the root actor receives a
-`Start` message, it creates a child actor defined by the behavior `HelloWorldBot`:
+子actor由 @apidoc[typed.*.ActorContext]的`spawn`创建和启动。在下面的示例中，当根actor启动时，它生成一个由`HelloWorld`行为描述的子actor。此外，当根actor接收到一条`Start`消息时，它将创建一个由`HelloWorldBot`行为定义的子actor:
 
 Scala
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/scala/docs/akka/typed/IntroSpec.scala) { #hello-world-main }
@@ -108,8 +96,7 @@ Scala
 Java
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/java/jdocs/akka/typed/IntroTest.java) { #hello-world-main }
 
-To specify a dispatcher when spawning an actor use @apidoc[DispatcherSelector]. If not specified, the actor will
-use the default dispatcher, see @ref:[Default dispatcher](dispatchers.md#default-dispatcher) for details.
+要在生成actor时指定调度程序，请使用 @apidoc[DispatcherSelector]。如果未指定，则actor将使用默认调度程序，有关详细信息，请参见 @ref:[默认调度程序](dispatchers.md#default-dispatcher)。
 
 Scala
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/scala/docs/akka/typed/IntroSpec.scala) { #hello-world-main-with-dispatchers }
@@ -117,22 +104,16 @@ Scala
 Java
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/java/jdocs/akka/typed/IntroTest.java) { #hello-world-main-with-dispatchers }
 
-Refer to @ref:[Actors](actors.md#first-example) for a walk-through of the above examples.
+有关上述示例的演练，请参阅 @ref:[Actors](actors.md#first-example)。
 
-### SpawnProtocol
+<a id="spawnprotocol"></a>
+### Spawn协议
 
-The guardian actor should be responsible for initialization of tasks and create the initial actors of the application,
-but sometimes you might want to spawn new actors from the outside of the guardian actor. For example creating one actor
-per HTTP request.
+监督者actor应负责任务的初始化并创建应用程序的初始actor，但是有时您可能想从监督者外部产生新的actor。例如，每个HTTP请求创建一个actor。
 
-That is not difficult to implement in your behavior, but since this is a common pattern there is a predefined
-message protocol and implementation of a behavior for this. It can be used as the guardian actor of the `ActorSystem`,
-possibly combined with `Behaviors.setup` to start some initial tasks or actors. Child actors can then be started from
-the outside by telling or asking `SpawnProtocol.Spawn` to the actor reference of the system. When using `ask` this is
-similar to how `ActorSystem.actorOf` can be used in classic actors with the difference that a
-@scala[`Future`]@java[`CompletionStage`] of the `ActorRef` is returned.
+这并不难在你的行为中实现，但是，由于这是一种常见的模式，因此有一个预定义的消息协议和实现行为。它可以作为`ActorSystem`的监督者actor，也可以与`Behaviors.setup`结合使用，设置启动一些初始任务或actor。然后，可以通过向系统的actor引用告知或询问`SpawnProtocol.Spawn`，从外部启动子actor。衍生到系统的参与者引用。在使用`ask`的时候，这类似于`ActorSystem.actorOf`如何可以用在经典的actor中，不同之处在于返回的是一个`ActorRef`的`Future`。
 
-The guardian behavior can be defined as:
+监护人的行为可以定义为：
 
 Scala
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/scala/docs/akka/typed/SpawnProtocolDocSpec.scala) { #imports1 #main }
@@ -140,7 +121,7 @@ Scala
 Java
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/java/jdocs/akka/typed/SpawnProtocolDocTest.java) { #imports1 #main }
 
-and the `ActorSystem` can be created with that `main` behavior and asked to spawn other actors:
+并且`ActorSystem`可以用`main`行为创建，并要求生成其他actor：
 
 Scala
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/scala/docs/akka/typed/SpawnProtocolDocSpec.scala) { #imports2 #system-spawn }
@@ -148,25 +129,22 @@ Scala
 Java
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/java/jdocs/akka/typed/SpawnProtocolDocTest.java) { #imports2 #system-spawn }
 
-The `SpawnProtocol` can also be used at other places in the actor hierarchy. It doesn't have to be the root
-guardian actor.
+`SpawnProtocol`也可以在actor层次结构的其他地方使用。它不必是根监督者actor。
 
-A way to find running actors is described in @ref:[Actor discovery](actor-discovery.md).
+@ref:[Actor发现](actor-discovery.md)中介绍了一种查找正在运行的actor的方法。
 
-## Stopping Actors
+<a id="stopping-actors"></a>
+## 停止Actor
 
-An actor can stop itself by returning `Behaviors.stopped` as the next behavior.
+Actor可以通过返回`Behaviors.stopped`作为下一个行为来停止自己。
 
-A child actor can be forced to stop after it finishes processing its current message by using the
-`stop` method of the `ActorContext` from the parent actor. Only child actors can be stopped in that way.
+通过使用来自父actor的`ActorContext`的`stop`方法，可以迫使子actor在处理完当前消息后停止。这种方式只能停止子actor。
 
-All child actors will be stopped when their parent is stopped.
+当其父actor被停止时，所有子actor也将被停止。
 
-When an actor is stopped, it receives the `PostStop` signal that can be used for cleaning up resources.
-A callback function may be specified as parameter to `Behaviors.stopped` to handle the `PostStop` signal 
-when stopping gracefully. This allows to apply different actions from when it is stopped abruptly.
+当一个actor停止时，它会收到可用于清理资源的`PostStop`信号。可以将一个回调函数作为参赛指定给`Behaviors.stopped`，用于在正常停止时处理`PostStop`信号。这允许在突然停止时应用不同的动作。
 
-Here is an illustrating example:
+这是一个说明性的示例：
 
 Scala
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/scala/docs/akka/typed/GracefulStopDocSpec.scala) {
@@ -184,15 +162,12 @@ Java
    #graceful-shutdown
  }
 
-When cleaning up resources from `PostStop` you should also consider doing the same for the `PreRestart` signal,
-which is emitted when the @ref:[actor is restarted](fault-tolerance.md#the-prerestart-signal). Note that `PostStop`
-is not emitted for a restart. 
+从`PostStop`清除资源时，您还应该考虑对`PreRestart`信号执行相同的操作，该信号在 @ref:[actor重新启动后](fault-tolerance.md#the-prerestart-signal)发出。请注意，重新启动时不会发出`PostStop`。
 
-## Watching Actors
+<a id="watching-actors"></a>
+## 监视Actor
 
-In order to be notified when another actor terminates (i.e. stops permanently, not temporary failure and restart),
-an actor can `watch` another actor. It will receive the @apidoc[akka.actor.typed.Terminated] signal upon
-termination (see @ref:[Stopping Actors](#stopping-actors)) of the watched actor.
+为了在另一个actor终止时(即永久停止，不是暂时性的故障并重新启动)得到通知，一个actor可以选择`watch`另一个actor。当被监视的actor终止(请参阅 @ref:[停止Actor](#stopping-actors))后，它将接收 @apidoc[akka.actor.typed.Terminated]信号。
 
 Scala
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/scala/docs/akka/typed/GracefulStopDocSpec.scala) { #master-actor-watch }
@@ -200,11 +175,9 @@ Scala
 Java
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/java/jdocs/akka/typed/GracefulStopDocTest.java)  { #master-actor-watch }
 
-An alternative to `watch` is `watchWith`, which allows specifying a custom message instead of the `Terminted`.
-This is often preferred over using `watch` and the `Terminated` signal because additional information can
-be included in the message that can be used later when receiving it.
+`watch`的另一种替代方法是`watchWith`，它允许指定自定义消息，而不是`Terminted`。这通常比使用`watch`和`Terminated`信号更可取，因为消息中可以包含附加信息，这可以在后面接收消息时使用。
 
-Similar example as above, but using `watchWith` and replies to the original requestor when the job has finished.
+与上面类似的示例，但是使用`watchWith`并在作业完成后回复原始请求者。
 
 Scala
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/scala/docs/akka/typed/GracefulStopDocSpec.scala) { #master-actor-watchWith }
@@ -212,24 +185,14 @@ Scala
 Java
 :  @@snip [IntroSpec.scala](/akka-actor-typed-tests/src/test/java/jdocs/akka/typed/GracefulStopDocTest.java)  { #master-actor-watchWith }
 
-Note how the `replyToWhenDone` is included in the `watchWith` message and then used later when receiving the
-`JobTerminated` message. 
+请注意`replyToWhenDone`如何包含在`watchWith`消息中，然后在接收`JobTerminated`消息时使用。
 
-The watched actor can be any `ActorRef`, it doesn't have to be a child actor as in the above example.
+受监视的actor可以是任何`ActorRef`，它不必是上面例子中的子actor。
 
-It should be noted that the terminated message is generated independent of the order in which registration
-and termination occur. In particular, the watching actor will receive a terminated message even if the
-watched actor has already been terminated at the time of registration.
+应当注意，终止消息的产生与注册和终止发生的顺序无关。特别地，即使被监视actor已经被终止，监视actor也将在注册时接收到终止消息。
 
-Registering multiple times does not necessarily lead to multiple messages being generated, but there is no
-guarantee that only exactly one such message is received: if termination of the watched actor has generated and queued
-the message, and another registration is done before this message has been processed, then a second message will be
-queued, because registering for monitoring of an already terminated actor leads to the immediate generation of
-the terminated message.
+多次注册并不一定会导致生成多条消息，但是不能保证仅接收到一条这样的消息：如果被监视的actor的终止已经生成，并排队了消息，并且在此消息被处理之前进行了另一次注册，此时第二条消息将排队，因为注册监视已经终止的actor会直接生成终止的消息。
 
-It is also possible to deregister from watching another actor’s liveliness using `context.unwatch(target)`.
-This works even if the terminated message has already been enqueued in the mailbox; after calling `unwatch`
-no terminated message for that actor will be processed anymore.
+也可以使用`context.unwatch(target)`取消监视其他actor的活跃状态。即使已终止的消息已在邮箱中排队，也可以这样做；在调用`unwatch`后，该actor的终止消息将不再被处理。
 
-The terminated message is also sent when the watched actor is on a node that has been removed from the
-@ref:[Cluster](cluster.md).
+当被监视的actor从 @ref:[Cluster](cluster.md)节点上删除时，也会发送终止的消息。

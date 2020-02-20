@@ -6,6 +6,7 @@ Note that this guide does not cover the classic actor API.
 As with all style guides, treat this as a list of rules to be broken. There are certainly times
 when alternative styles should be preferred over the ones given here.
 
+<a id="function-versus-object-oriented-style"></a>
 ## Functional versus object-oriented style
 
 There are two flavors of the Actor APIs.

@@ -4,7 +4,7 @@
 
 @@@ note
 
-如简介中所述，请记住，Akka流 API与Reactive Streams接口完全解耦，它是关于如何在各个运算符之间传递流数据的实现细节。
+如简介中所述，请记住，Akka流 API与响应流接口完全解耦，它是关于如何在各个运算符之间传递流数据的实现细节。
 
 @@@
 
@@ -24,10 +24,10 @@ Akka建立在一个有意的决策上，即提供最小且一致的api - 而不�
 
 只提供可以信赖的特性的一个重要后果是，Akka流不能确保通过处理拓扑发送的所有对象都得到处理。元素可能被删除的原因有很多:
 
- * 普通的用户代码可以消费*map(...)*运算符中的一个元素，并产生一个完全不同的元素作为结果
+ * 普通的用户代码可以消费 *map(...)* 运算符中的一个元素，并产生一个完全不同的元素作为结果
  * 常见的流运算符有意地删除元素，例如take/drop/filter/conflate/buffer/…
  * 流故障将在没有等待处理完成的情况下中断流，所有处于迁徙状态的元素都将被丢弃
- * 流取消将向上传播(例如，来自*take*操作符)，导致上游处理步骤终止，而没有处理它们的所有输入
+ * 流取消将向上传播(例如，来自 *take* 操作符)，导致上游处理步骤终止，而没有处理它们的所有输入
 
 这意味着，将JVM对象发送到需要清除的流中将需要用户确保此操作在Akka流设施之外发生(例如，在超时后或在流输出中观察到它们的结果时清理它们，或使用终结器等其他方法)。
 
@@ -35,29 +35,29 @@ Akka建立在一个有意的决策上，即提供最小且一致的api - 而不�
 
 组合性要求部分流拓扑具有可重用性，这导致我们采用了一种将数据流描述为(部分)图的提升方法，这些图可以充当复合的源，flows(即管道)和数据接收器。这些构建块将要可以自由共享，并能够自由地组合它们，形成更大的图形。因此，这些片段的表述必须是一个不可变的蓝图，并在显式步骤中物化，以便启动流处理。作为结果的流处理引擎也是不可变的，因为它具有由蓝图规定的固定拓扑结构。动态网络需要通过显式地使用反应式流接口将不同的引擎连接在一起来建模。
 
-物化过程通常会创建特定的对象，这些对象在处理引擎运行时非常有用，例如用于关闭它或提取度量。这意味着物化函数产生的结果称为*图的物化值*。
+物化过程通常会创建特定的对象，这些对象在处理引擎运行时非常有用，例如用于关闭它或提取度量。这意味着物化函数产生的结果称为 *图的物化值* 。
 
-## 与其他Reactive Streams实现的交互
+## 与其他响应流实现的交互
 
-Akka流完全实现了Reactive Streams规范，并可以与所有其他一致的实现进行交互。我们选择将Reactive Streams接口与用户级API彻底地解耦，因为我们认为它们是不面向最终用户的SPI。为了从Akka Stream拓扑获得一个`Publisher`或`Subscriber`，必须使用一个对应的`Sink.asPublisher`或`Source.asSubscriber`元素。
+Akka流完全实现了响应流规范，并可以与所有其他一致的实现进行交互。我们选择将响应流接口与用户级API彻底地解耦，因为我们认为它们是不面向最终用户的SPI。为了从Akka Stream拓扑获得一个`Publisher`或`Subscriber`，必须使用一个对应的`Sink.asPublisher`或`Source.asSubscriber`元素。
 
 所有由Akka流的默认物化产生的流处理器都被限制为只有一个订阅者，额外的订阅者将被拒绝。这样做的原因是，使用DSL描述的流拓扑永远不需要元素的发布端的扇出行为，所有扇出都使用诸如`Broadcast[T]`的显式元素来完成。
 
 这意味着`Sink.asPublisher(true)`(用于启用扇出支持)必须在需要广播行为与其他响应流实现交互的地方使用。
 
-### Sink/Source/Flow没有直接扩展Reactive Streams接口的原理和好处 
+### Sink/Source/Flow没有直接扩展响应流接口的原理和好处 
 
-关于[Reactive Streams](https://github.com/reactive-streams/reactive-streams-jvm/)的一个有时被忽略的关键信息是它们是一个 [服务提供者接口](https://en.m.wikipedia.org/wiki/Service_provider_interface)，正如在有关该规范的 [早期讨论](https://github.com/reactive-streams/reactive-streams-jvm/pull/25)之一中所深入解释的那样。Akka流是在Reactive Streams的开发过程中设计的，因此它们彼此之间有很大的影响。
+关于[响应流](https://github.com/reactive-streams/reactive-streams-jvm/)的一个有时被忽略的关键信息是它们是一个 [服务提供者接口](https://en.m.wikipedia.org/wiki/Service_provider_interface)，正如在有关该规范的 [早期讨论](https://github.com/reactive-streams/reactive-streams-jvm/pull/25)之一中所深入解释的那样。Akka流是在响应流的开发过程中设计的，因此它们彼此之间有很大的影响。
 
 了解到即使在响应式规范中，类型最初也试图向API的用户隐藏`Publisher`、`Subscriber`和其他SPI类型，这可能会有所启发。尽管在某些情况下，这些内部SPI类型最终会出现在标准的最终用户面前，所以决定 [删除API类型，只有保持SPI类型](https://github.com/reactive-streams/reactive-streams-jvm/pull/25)它们是`Publisher`，`Subscriber`等等。
 
 有了标准目标的历史知识和上下文 – 作为交互库的内部细节 – 我们可以肯定地说，它不能真的被说成与这些类型的一种直接的_继承_关系视为某种形式的优势或库之间有意义的区别。相反，可以看出向最终用户公开那些SPI类型的API意外泄漏了内部实现细节。
 
-`Source`，`Sink`和`Flow`类型是Akka流的一部分，它们的目的是提供流畅的DSL，并充当运行这些流的"工厂"。它们在Reactive Streams中的直接对应项分别是`Publisher`，`Subscriber`和`Processor`。换句话说，Akka流对计算图的提升表示进行操作，然后根据Reactive Streams规则将其物化并执行。这还允许Akka流在物化步骤中执行诸如融合和调度程序配置之类的优化。
+`Source`，`Sink`和`Flow`类型是Akka流的一部分，它们的目的是提供流畅的DSL，并充当运行这些流的"工厂"。它们在响应流中的直接对应项分别是`Publisher`，`Subscriber`和`Processor`。换句话说，Akka流对计算图的提升表示进行操作，然后根据响应流规则将其物化并执行。这还允许Akka流在物化步骤中执行诸如融合和调度程序配置之类的优化。
 
-源于隐藏Reactive Streams接口的另一个不明显的收获来自于这样一个事实，即`org.reactivestreams.Subscriber`(等等)现在已包含在Java 9+中，并因此成为Java本身的一部分，因此库应迁移到使用`java.util.concurrent.Flow.Subscriber`代替`org.reactivestreams.Subscriber`。选择公开和直接扩展Reactive Streams类型的库现在将更难适应JDK9 +类型 -- 他们所有扩展Subscriber和Friends的类都将需要复制或更改以扩展完全相同的接口，但是从不同的包中进行的。在Akka中，我们仅在需要时暴露新类型 -- 已经支持JDK9类型，从JDK9发布之日起。
+源于隐藏响应流接口的另一个不明显的收获来自于这样一个事实，即`org.reactivestreams.Subscriber`(等等)现在已包含在Java 9+中，并因此成为Java本身的一部分，因此库应迁移到使用`java.util.concurrent.Flow.Subscriber`代替`org.reactivestreams.Subscriber`。选择公开和直接扩展响应流类型的库现在将更难适应JDK9 +类型 -- 他们所有扩展Subscriber和Friends的类都将需要复制或更改以扩展完全相同的接口，但是从不同的包中进行的。在Akka中，我们仅在需要时暴露新类型 -- 已经支持JDK9类型，从JDK9发布之日起。
 
-隐藏Reactive Streams接口的另一个可能是更重要的原因，可以追溯到该解释的第一点：Reactive Streams是SPI的事实，因此在专门实现中很难"正确"。因此，Akka流不鼓励使用底层基础设施中难以实现的部分，并为用户提供了更简单，更类型安全但功能更强大的抽象供用户使用：GraphStages和运算符。当然，仍然可以(或轻松地)接受或获取流操作符的Reactive Streams(或JDK+ Flow)表示形式，通过使用类似`asPublisher`或`fromSubscriber`的方法。
+隐藏响应流接口的另一个可能是更重要的原因，可以追溯到该解释的第一点：响应流是SPI的事实，因此在专门实现中很难"正确"。因此，Akka流不鼓励使用底层基础设施中难以实现的部分，并为用户提供了更简单，更类型安全但功能更强大的抽象供用户使用：GraphStages和运算符。当然，仍然可以(或轻松地)接受或获取流操作符的响应流(或JDK+ Flow)表示形式，通过使用类似`asPublisher`或`fromSubscriber`的方法。
 
 ## streaming库用户应该期待什么？
 
@@ -96,11 +96,11 @@ Akka流必须使库能够根据不变的蓝图表达任何流处理实用程序�
 
 ## 错误和失败之间的区别
 
-本次讨论的起点是[反应式宣言给出的定义](http://www.reactivemanifesto.org/glossary#Failure)。转换为流意味着在流中错误可以作为普通数据元素来访问，而故障意味着流本身已经失败并且正在崩溃。具体而言，在Reactive Streams接口级数据元素(包括错误)是通过`onNext`发出信号，而故障则抛出`onError`信号。
+本次讨论的起点是[反应式宣言给出的定义](http://www.reactivemanifesto.org/glossary#Failure)。转换为流意味着在流中错误可以作为普通数据元素来访问，而故障意味着流本身已经失败并且正在崩溃。具体而言，在响应流接口级数据元素(包括错误)是通过`onNext`发出信号，而故障则抛出`onError`信号。
 
 @@@ note
 
-不幸的是，由于历史原因，向订阅者发送*失败*信号的方法名为`onError`。始终牢记，Reactive Streams接口(Publisher/Subscription/Subscriber)正在为在执行单元之间传递流的低级基础结构建模，而此级别的错误恰恰是我们在更高级别上谈论的失败，其由Akka流建模。
+不幸的是，由于历史原因，向订阅者发送*失败*信号的方法名为`onError`。始终牢记，响应流接口(Publisher/Subscription/Subscriber)正在为在执行单元之间传递流的低级基础结构建模，而此级别的错误恰恰是我们在更高级别上谈论的失败，其由Akka流建模。
 
 @@@
 
