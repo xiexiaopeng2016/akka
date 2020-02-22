@@ -1,8 +1,10 @@
-# Testing
+<a id="testing"></a>
+# 测试
 
+<a id="dependency"></a>
 ## 依赖
 
-To use Akka Persistence and Actor TestKit, add the module to your project:
+要使用Akka持久化和Actor TestKit，请将模块添加到您的项目中：
 
 @@dependency[sbt,Maven,Gradle] {
   group1=com.typesafe.akka
@@ -14,16 +16,14 @@ To use Akka Persistence and Actor TestKit, add the module to your project:
   scope2=test
 }
 
-## Unit testing
+<a id="unit-testing"></a>
+## 单元测试
 
-Unit testing of `EventSourcedBehavior` can be done with the @ref:[ActorTestKit](testing-async.md)
-in the same way as other behaviors.
+`EventSourcedBehavior`的单元测试可以使用 @ref:[ActorTestKit](testing-async.md)来进行，测试方式与其他行为相同。
 
-@ref:[Synchronous behavior testing](testing-sync.md) for `EventSourcedBehavior` is not supported yet, but
-tracked in @github[issue #26338](#23712).
+针对`EventSourcedBehavior`的 @ref:[同步行为测试](testing-sync.md)尚不支持，但在 @github[问题#26338](#23712)跟踪。
 
-You need to configure a journal, and the in-memory journal is sufficient for unit testing. To enable the
-in-memory journal you need to pass the following configuration to the @scala[`ScalaTestWithActorTestKit`]@java[`TestKitJunitResource`].
+您需要配置一个日志，并且内存日志对于单元测试来说已经足够了。要启用内存日志，您需要将以下配置传递给`ScalaTestWithActorTestKit`。
 
 Scala
 :  @@snip [AccountExampleDocSpec.scala](/akka-cluster-sharding-typed/src/test/scala/docs/akka/cluster/sharding/typed/AccountExampleDocSpec.scala) { #inmem-config }
@@ -31,8 +31,9 @@ Scala
 Java
 :  @@snip [AccountExampleDocTest.java](/akka-cluster-sharding-typed/src/test/java/jdocs/akka/cluster/sharding/typed/AccountExampleDocTest.java) { #inmem-config } 
 
-Optionally you can also configure a snapshot store. To enable the file based snapshot store you need to pass the
-following configuration to the @scala[`ScalaTestWithActorTestKit`]@java[`TestKitJunitResource`].
+配置`InmemJournal`的`test-serialization = on`将验证持久化的事件可以序列化和反序列化。
+
+可选的，您还可以配置快照存储。要启用基于文件的快照存储，您需要将以下配置传递给`ScalaTestWithActorTestKit`。
 
 Scala
 :  @@snip [AccountExampleDocSpec.scala](/akka-cluster-sharding-typed/src/test/scala/docs/akka/cluster/sharding/typed/AccountExampleDocSpec.scala) { #snapshot-store-config }
@@ -40,10 +41,9 @@ Scala
 Java
 :  @@snip [AccountExampleDocTest.java](/akka-cluster-sharding-typed/src/test/java/jdocs/akka/cluster/sharding/typed/AccountExampleDocTest.java) { #snapshot-store-config }
 
-Then you can `spawn` the `EventSourcedBehavior` and verify the outcome of sending commands to the actor using
-the facilities of the @ref:[ActorTestKit](testing-async.md).
+然后你就可以`spawn`(生成)`EventSourcedBehavior`，并验证使用以下命令向参与者发送命令的结果，工具是 @ref:[ActorTestKit](testing-async.md)。
 
-A full test for the `AccountEntity`, which is shown in the @ref:[Persistence Style Guide](persistence-style.md), may look like this:
+一个`AccountEntity`的完整测试，在@ref:[持久化风格指南](persistence-style.md)中显示的可能如下所示：
 
 Scala
 :  @@snip [AccountExampleDocSpec.scala](/akka-cluster-sharding-typed/src/test/scala/docs/akka/cluster/sharding/typed/AccountExampleDocSpec.scala) { #test }
@@ -51,15 +51,13 @@ Scala
 Java
 :  @@snip [AccountExampleDocTest.java](/akka-cluster-sharding-typed/src/test/java/jdocs/akka/cluster/sharding/typed/AccountExampleDocTest.java) { #test }  
 
-Note that each test case is using a different `PersistenceId` to not interfere with each other.
+请注意，每个测试用例都使用不同的`PersistenceId`，以免彼此干扰。
 
-## Integration testing
+<a id="integration-testing"></a>
+## 集成测试
 
-The in-memory journal and file based snapshot store can be used also for integration style testing of a single
-`ActorSystem`, for example when using Cluster Sharding with a single Cluster node.
+基于内存的日志和基于文件的快照存储也可以用于单个`ActorSystem`实例的集成样式测试，例如，在使用单个集群节点的集群分片时。
 
-For tests that involve more than one Cluster node you have to use another journal and snapshot store.
-While it's possible to use the @ref:[Persistence Plugin Proxy](../persistence-plugins.md#persistence-plugin-proxy)
-it's often better and more realistic to use a real database.
+对于涉及多个集群节点的测试，必须使用另一个日志和快照存储。尽管可以使用 @ref:[持久化插件代理](../persistence-plugins.md#persistence-plugin-proxy)，但使用真实数据库通常更好，更现实。
 
-See [akka-samples issue #128](https://github.com/akka/akka-samples/issues/128).    
+参见[akka-samples issue #128](https://github.com/akka/akka-samples/issues/128).    

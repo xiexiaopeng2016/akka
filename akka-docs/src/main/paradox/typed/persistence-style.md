@@ -1,17 +1,14 @@
-# Style Guide 
+<a id="style-guide"></a>
+# 风格指南
 
-## Event handlers in the state
+<a id="event-handlers-in-the-state"></a>
+## 状态中的事件处理程序
 
-The section about @ref:[Changing Behavior](persistence.md#changing-behavior) described how commands and events
-can be handled differently depending on the state. One can take that one step further and define the event
-handler inside the state classes. @scala[In @ref:[next section the command handlers](#command-handlers-in-the-state) are
-also defined in the state.]
+关于 @ref:[更改行为](persistence.md#changing-behavior)的部分描述了如何根据状态来不同地处理命令和事件。可以更进一步，在状态类中定义事件处理程序。下一节的 @ref:[命令处理程序](#command-handlers-in-the-state)也定义在状态中。
 
-The state can be seen as your domain object and it should contain the core business logic. Then it's a matter
-of taste if event handlers and command handlers should be defined in the state or be kept outside it.
+状态可以看作是您的领域对象，并且它应该包含核心业务逻辑。此外，事件处理程序和命令处理程序是应该定义在状态中，还是应该定义在状态之外，这只是一个喜好问题了。
 
-Here we are using a bank account as the example domain. It has 3 state classes that are representing the lifecycle
-of the account; `EmptyAccount`, `OpenedAccount`, and `ClosedAccount`.
+在这里，我们使用一个银行帐户作为示例领域。它具有3个状态类，它们代表帐户的生命周期；`EmptyAccount`，`OpenedAccount`，和`ClosedAccount`。
 
 Scala
 :  @@snip [AccountExampleWithEventHandlersInState.scala](/akka-cluster-sharding-typed/src/test/scala/docs/akka/cluster/sharding/typed/AccountExampleWithEventHandlersInState.scala) { #account-entity }
@@ -19,35 +16,26 @@ Scala
 Java
 :  @@snip [AccountExampleWithEventHandlersInState.java](/akka-cluster-sharding-typed/src/test/java/jdocs/akka/cluster/sharding/typed/AccountExampleWithEventHandlersInState.java) { #account-entity }
 
-@scala[Notice how the `eventHandler` delegates to the `applyEvent` in the `Account` (state), which is implemented
-in the concrete `EmptyAccount`, `OpenedAccount`, and `ClosedAccount`.]
-@java[Notice how the `eventHandler` delegates to methods in the concrete `Account` (state) classes;
-`EmptyAccount`, `OpenedAccount`, and `ClosedAccount`.]
+请注意`eventHandler`如何在`Account`(状态)中委托给`applyEvent`，这是在具体的`EmptyAccount`，`OpenedAccount`和`ClosedAccount`实现的。
 
 @@@ div { .group-scala }
-## Command handlers in the state
+<a id="command-handlers-in-the-state"></a>
+## 状态中的命令处理程序
 
-We can take the previous bank account example one step further by handling the commands in the state too.
+我们还可以通过在状态中处理命令进一步处理前面的银行帐户示例。
 
 Scala
 :  @@snip [AccountExampleWithCommandHandlersInState.scala](/akka-cluster-sharding-typed/src/test/scala/docs/akka/cluster/sharding/typed/AccountExampleWithCommandHandlersInState.scala) { #account-entity }
 
-Notice how the command handler is delegating to `applyCommand` in the `Account` (state), which is implemented
-in the concrete `EmptyAccount`, `OpenedAccount`, and `ClosedAccount`.
+注意命令处理程序是如何在`Account`(状态)中委托给`applyCommand`的，它是在具体的`EmptyAccount`，`OpenedAccount`和`ClosedAccount`中实现的。
 
 @@@
 
-## Optional initial state
+<a id="optional-initial-state"></a>
+## 可选的初始状态
 
-Sometimes it's not desirable to use a separate state class for the empty initial state, but rather treat that as
-there is no state yet.
-@java[`null` can then be used as the `emptyState`, but be aware of that the `state` parameter
-will then be `null` for the first commands and events until the first event has be persisted to create the
-non-null state. It's possible to use `Optional` instead of `null` but that results in rather much boilerplate
-to unwrap the `Optional` state parameter and therefore `null` is probably preferred. The following example
-illustrates using `null` as the `emptyState`.]
-@scala[`Option[State]` can be used as the state type and `None` as the `emptyState`. Pattern matching
-is then used in command and event handlers at the outer layer before delegating to the state or other methods.]
+有时不希望为空的初始状态使用单独的状态类，而是将其视为还没有状态。`Option[State]`可以被用作状态类型和`None`作为`emptyState`。然后，在委托给状态或其他方法之前，将模式匹配用于外层的命令和事件处理程序中。
+
 
 Scala
 :  @@snip [AccountExampleWithOptionState.scala](/akka-cluster-sharding-typed/src/test/scala/docs/akka/cluster/sharding/typed/AccountExampleWithOptionState.scala) { #account-entity }

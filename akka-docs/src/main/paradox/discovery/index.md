@@ -1,18 +1,18 @@
 ---
 project.description: Service discovery with Akka using DNS, Kubernetes, AWS, Consul or Marathon.
 ---
-# Discovery
+<a id="discovery"></a>
+# 发现
 
-The Akka Discovery API enables **service discovery** to be provided by different technologies. 
-It allows to delegate endpoint lookup so that services can be configured depending on the environment by other means than configuration files. 
+Akka发现API使**服务发现**可以由不同的技术提供。它允许委托端点查找，以便可以根据环境通过配置文件以外的其他方式配置服务。
 
-Implementations provided by the Akka Discovery module are 
+Akka Discovery模块提供的实现是
 
-* @ref:[Configuration](#discovery-method-configuration) (HOCON)
+* @ref:[配置](#discovery-method-configuration) (HOCON)
 * @ref:[DNS](#discovery-method-dns) (SRV records)
-* @ref:[Aggregate](#discovery-method-aggregate-multiple-discovery-methods) multiple discovery methods
+* @ref:[聚合](#discovery-method-aggregate-multiple-discovery-methods)多种发现方法
 
-In addition the @extref:[Akka Management](akka-management:) toolbox contains Akka Discovery implementations for
+此外， @extref:[Akka管理工具](akka-management:) 箱还包含用于以下方面的Akka Discovery实现：
 
 * @extref:[Kubernetes API](akka-management:discovery/kubernetes.html)
 * @extref:[AWS API: EC2 Tag-Based Discovery](akka-management:discovery/aws.html#discovery-method-aws-api-ec2-tag-based-discovery)
@@ -23,15 +23,14 @@ In addition the @extref:[Akka Management](akka-management:) toolbox contains Akk
 
 @@@ note
 
-Discovery used to be part of Akka Management but has become an Akka module as of `2.5.19` of Akka and version `1.0.0`
-of Akka Management. If you're also using Akka Management for other service discovery methods or bootstrap make
-sure you are using at least version `1.0.0` of Akka Management.
+发现曾经是Akka管理的一部分，但是在Akka的`2.5.19`和Akka管理的`1.0.0`版本中变成了一个Akka模块。如果您还将Akka管理用于其他服务发现方法或引导程序，请确保至少使用了Akka管理的`1.0.0`版本。
 
-See @ref:[Migration hints](#migrating-from-akka-management-discovery-before-1-0-0-)
+查看 @ref:[迁移提示](#migrating-from-akka-management-discovery-before-1-0-0-)
 
 @@@
 
-## Module info
+<a id="module-info"></a>
+## 模块信息
 
 @@dependency[sbt,Gradle,Maven] {
   group="com.typesafe.akka"
@@ -41,9 +40,10 @@ See @ref:[Migration hints](#migrating-from-akka-management-discovery-before-1-0-
 
 @@project-info{ projectId="akka-discovery" }
 
-## How it works
+<a id="how-it-works"></a>
+## 它是如何运作的
 
-Loading the extension:
+加载扩展：
 
 Scala
 :  @@snip [CompileOnlySpec.scala](/akka-discovery/src/test/scala/doc/akka/discovery/CompileOnlySpec.scala) { #loading }
@@ -51,8 +51,7 @@ Scala
 Java
 :  @@snip [CompileOnlyTest.java](/akka-discovery/src/test/java/jdoc/akka/discovery/CompileOnlyTest.java) { #loading }
 
-A `Lookup` contains a mandatory `serviceName` and an optional `portName` and `protocol`. How these are interpreted is discovery 
-method dependent e.g.DNS does an A/AAAA record query if any of the fields are missing and an SRV query for a full look up:
+一个`Lookup`包含一个必填`serviceName`，和一个可选的`portName`和`protocol`。如何解释这些取决于发现方法，例如，如果缺少任何字段，DNS会进行一个A/AAAA记录查询，和一个SRV查询为了一个完整查找：
 
 Scala
 :  @@snip [CompileOnlySpec.scala](/akka-discovery/src/test/scala/doc/akka/discovery/CompileOnlySpec.scala) { #basic }
@@ -60,8 +59,7 @@ Scala
 Java
 :  @@snip [CompileOnlyTest.java](/akka-discovery/src/test/java/jdoc/akka/discovery/CompileOnlyTest.java) { #basic }
 
-
-`portName` and `protocol` are optional and their meaning is interpreted by the method.
+`portName`和`protocol`是可选的，其含义由方法解释。
 
 Scala
 :  @@snip [CompileOnlySpec.scala](/akka-discovery/src/test/scala/doc/akka/discovery/CompileOnlySpec.scala) { #full }
@@ -69,26 +67,27 @@ Scala
 Java
 :  @@snip [CompileOnlyTest.java](/akka-discovery/src/test/java/jdoc/akka/discovery/CompileOnlyTest.java) { #full }
 
-Port can be used when a service opens multiple ports e.g. a HTTP port and an Akka remoting port.
+当服务打开多个端口(例如HTTP端口和Akka远程端口)时，可以使用端口。
 
-## Discovery Method: DNS
+<a id="discovery-method-dns"></a>
+## 发现方法：DNS
 
-DNS discovery maps `Lookup` queries as follows:
+DNS发现将`Lookup`查询映射如下：
 
-* `serviceName`, `portName` and `protocol` set: SRV query in the form: `_port._protocol.name` Where the `_`s are added.
-* Any query  missing any of the fields is mapped to a A/AAAA query for the `serviceName`
+* `serviceName`，`portName`和`protocol`设置: SRV查询，格式为: `_port._protocol.name` Where the `_`s are added.
+* 缺少任何字段的任何查询都将为`serviceName`映射到一个A/AAAA查询
 
-The mapping between Akka service discovery terminology and SRV terminology:
+Akka服务发现术语和SRV术语之间的映射：
 
 * SRV service = port
 * SRV name = serviceName
 * SRV protocol = protocol
 
-Configure `akka-dns` to be used as the discovery implementation in your `application.conf`:
+在你的`application.conf`中配置`akka-dns`作为发现实现:
 
 @@snip[application.conf](/akka-discovery/src/test/scala/akka/discovery/dns/DnsDiscoverySpec.scala){ #configure-dns }
 
-From there on, you can use the generic API that hides the fact which discovery method is being used by calling:
+从那里开始，您可以使用通用API，这就隐藏了调用正在使用哪个发现方法的事实:
 
 Scala
 :   ```scala
@@ -108,14 +107,14 @@ Java
     Future<SimpleServiceDiscovery.Resolved> result = discovery.lookup("service-name", Duration.create("500 millis"));
     ```
 
-### DNS records used
+<a id="dns-records-used"></a>
+### 使用的DNS记录
 
-DNS discovery will use either A/AAAA records or SRV records depending on whether a `Simple` or `Full` lookup is issued.
-The advantage of SRV records is that they can include a port.
+DNS发现将使用A/AAAA记录还是SRV记录，具体取决于发出的查找是一个`Simple`还是`Full`。SRV记录的优点是它们可以包含一个端口。
 
-#### SRV records
+#### SRV记录
 
-Lookups with all the fields set become SRV queries. For example:
+设置了所有字段的查找将变成SRV查询。例如：
 
 ```
 dig srv _service._tcp.akka.test
@@ -138,12 +137,14 @@ _service._tcp.akka.test.  86400   IN      SRV     10 40 5070 a-double.akka.test.
 
 ```
 
+在这种情况下，`service.tcp.akka.test`解析为`a-single.akka.test`在端口`5060`和`a-double.akka.test`在端口`5070`。当前发现不支持权重。
+
 In this case `service.tcp.akka.test` resolves to `a-single.akka.test` on port `5060`
 and `a-double.akka.test` on port `5070`. Currently discovery does not support the weightings.
 
-#### A/AAAA records
+#### A/AAAA记录
 
-Lookups with any fields missing become A/AAAA record queries. For example:
+缺少任何字段的查找将变成A/AAAA记录查询。例如:
 
 ```
 dig a-double.akka.test
@@ -166,18 +167,16 @@ a-double.akka.test.     86400   IN      A       192.168.1.22
 
 ```
 
-In this case `a-double.akka.test` would resolve to `192.168.1.21` and `192.168.1.22`.
+在这种情况下，`service.tcp.akka.test`解析为`a-single.akka.test`在端口`5060`和`a-double.akka.test`在端口`5070`。目前发现并不支持权重。
 
-## Discovery Method: Configuration
+<a id="discovery-method-configuration"></a>
+## 发现方法：配置
 
-Configuration currently ignores all fields apart from service name.
+配置当前将忽略除服务名称之外的所有字段。
 
-For simple use cases configuration can be used for service discovery. The advantage of using Akka Discovery with
-configuration rather than your own configuration values is that applications can be migrated to a more
-sophisticated discovery method without any code changes.
+对于简单的用例，可以将配置用于服务发现。在配置中使用Akka发现而不是您自己的配置值的优点是，可以将应用程序迁移到更复杂的发现方法，而不需要进行任何代码更改。
 
-
-Configure it to be used as discovery method in your `application.conf`
+在你的`application.conf`中配置它以用作您的发现方法
 
 ```
 akka {
@@ -185,7 +184,7 @@ akka {
 }
 ```
 
-By default the services discoverable are defined in `akka.discovery.config.services` and have the following format:
+默认情况下，可发现服务的定义在`akka.discovery.config.services`，并有如下格式：
 
 ```
 akka.discovery.config.services = {
@@ -207,18 +206,16 @@ akka.discovery.config.services = {
 }
 ```
 
-Where the above block defines two services, `service1` and `service2`.
-Each service can have multiple endpoints.
+上面的块定义了两个服务，`service1`和`service2`。每个服务可以具有多个端点。
 
-## Discovery Method: Aggregate multiple discovery methods
+<a id="discovery-method-aggregate-multiple-discovery-methods"></a>
+## 发现方法：聚合多种发现方法
 
-Aggregate discovery allows multiple discovery methods to be aggregated e.g. try and resolve
-via DNS and fall back to configuration.
+聚合发现允许聚合多种发现方法，例如，通过DNS尝试并解决回退到配置。
 
-To use aggregate discovery add its dependency as well as all of the discovery that you
-want to aggregate.
+要使用聚合发现，请添加它的依赖项以及希望聚合的所有发现。
 
-Configure `aggregate` as `akka.discovery.method` and which discovery methods are tried and in which order.
+配置`aggregate`为`akka.discovery.method`，尝试哪些发现方法，按什么顺序。
 
 ```
 akka {
@@ -248,11 +245,10 @@ akka {
 
 ```
 
-The above configuration will result in `akka-dns` first being checked and if it fails or returns no
-targets for the given service name then `config` is queried which i configured with one service called
-`service1` which two hosts `host1` and `host2`.
+上述配置将导致首先检查`akka-dns`，如果失败了或未返回给定服务名的目标，则`config`将查询，其中配置了一个名为`service1`的服务，它有两个主机`host1`和`host2`。
 
-## Migrating from Akka Management Discovery (before 1.0.0)
+<a id="migrating-from-akka-management-discovery-before-1-0-0-"></a>
+## 从Akka Management Discovery迁移(1.0.0之前)
 
 Akka Discovery started out as a submodule of Akka Management, before 1.0.0 of Akka Management. Akka Discovery is not compatible with those versions of Akka Management Discovery.
 
@@ -263,6 +259,3 @@ Migration steps:
 * Any custom discovery method should now implement `akka.discovery.ServiceDiscovery`
 * `discovery-method` now has to be a configuration location under `akka.discovery` with at minimum a property `class` specifying the fully qualified name of the implementation of `akka.discovery.ServiceDiscovery`.
   Previous versions allowed this to be a class name or a fully qualified config location e.g. `akka.discovery.kubernetes-api` rather than just `kubernetes-api`
-
-
-

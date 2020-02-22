@@ -1,19 +1,17 @@
 ---
 project.description: Append only event logs, snapshots and recovery with Akka event sourced actors.
 ---
-# Snapshotting
+<a id="snapshotting"></a>
+# 快照
 
-For the Akka Classic documentation of this feature see @ref:[Classic Akka Persistence](../persistence.md).
+有关此功能的Akka经典文档，请参阅 @ref:[经典Akka持久化](../persistence.md)。
 
-## Snapshots
+<a id="snapshots"></a>
+## 快照
 
-As you model your domain using @ref:[event sourced actors](persistence.md), you may notice that some actors may be
-prone to accumulating extremely long event logs and experiencing long recovery times. Sometimes, the right approach
-may be to split out into a set of shorter lived actors. However, when this is not an option, you can use snapshots
-to reduce recovery times drastically.
+当您使用 @ref:[事件溯源actor](persistence.md)来为领域建模时，您可能会注意到，有些actor可能倾向于积累非常长的事件日志并经历很长的恢复时间。有时，正确的做法可能是分成一组寿命较短的actor。但是，如果没有这个选项，您可以使用快照来大大减少恢复时间。
 
-Persistent actors can save snapshots of internal state every N events or when a given predicate of the state
-is fulfilled.
+持久化actor可以每隔N个事件或在满足状态的给定谓词时保存内部状态的快照。
 
 Scala
 :  @@snip [BasicPersistentActorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #retentionCriteria }
@@ -28,17 +26,11 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #snapshottingPredicate }
 
-When a snapshot is triggered, incoming commands are stashed until the snapshot has been saved. This means that
-the state can safely be mutable although the serialization and storage of the state is performed asynchronously.
-The state instance will not be updated by new events until after the snapshot has been saved.
+触发快照时，将存储传入的命令，直到快照被保存为止。这意味着虽然状态的序列化和存储是异步执行的，但状态可以安全地被改变。在保存快照之前，状态实例不会被新的事件更新。
 
-During recovery, the persistent actor is using the latest saved snapshot to initialize the state. Thereafter the events
-after the snapshot are replayed using the event handler to recover the persistent actor to its current (i.e. latest)
-state.
+在恢复期间，持久化actor正在使用最新保存的快照来初始化状态。此后，使用事件处理程序重播快照后的事件，以将持久化actor恢复到其当前(即最新)状态。
 
-If not specified, they default to @scala[`SnapshotSelectionCriteria.Latest`]@java[`SnapshotSelectionCriteria.latest()`]
-which selects the latest (youngest) snapshot. It's possible to override the selection of which snapshot to use for
-recovery like this:
+如果未指定，则默认将`SnapshotSelectionCriteria.Latest`选择为最新(最新)快照。可以像这样覆盖要用于恢复的快照选择：
 
 Scala
 :  @@snip [BasicPersistentActorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #snapshotSelection }
@@ -46,34 +38,25 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #snapshotSelection }
 
-To disable snapshot-based recovery, applications can use @scala[`SnapshotSelectionCriteria.None`]@java[`SnapshotSelectionCriteria.none()`].
-A recovery where no saved snapshot matches the specified `SnapshotSelectionCriteria` will replay all journaled
-events. This can be useful if snapshot serialization format has changed in an incompatible way. It should typically
-not be used when events have been deleted.
+要禁用基于快照的恢复，应用程序可以使用`SnapshotSelectionCriteria.None`。如果没有保存的快照与指定的`SnapshotSelectionCriteria`匹配，则恢复将重播所有日志事件。这将很有用，如果快照序列化格式已经用不兼容的方式更改。通常在删除事件时不应该使用它。
 
-In order to use snapshots, a default snapshot-store (`akka.persistence.snapshot-store.plugin`) must be configured,
-or you can pick a snapshot store for for a specific `EventSourcedBehavior` by
-@scala[defining it with `withSnapshotPluginId` of the `EventSourcedBehavior`]@java[overriding `snapshotPluginId` in
-the `EventSourcedBehavior`].
+为了使用快照，默认的快照存储(`akka.persistence.snapshot-store.plugin`)必须进行配置，
+或者你可以通过定义`EventSourcedBehavior`的`withSnapshotPluginId`来为一个特定的`EventSourcedBehavior`选择一个快照存储。
 
-Because some use cases may not benefit from or need snapshots, it is perfectly valid not to not configure a snapshot store.
-However, Akka will log a warning message when this situation is detected and then continue to operate until
-an actor tries to store a snapshot, at which point the operation will fail.
+因为有些用例可能不会从快照中受益或需要快照，所以不配置快照存储是完全正确的。但是，当检测到这种情况时，Akka将记录一条警告消息，然后继续操作，直到一个actor试图存储快照，此时操作将失败。
 
-## Snapshot failures
+<a id="snapshot-failures"></a>
+## 快照失败
 
-Saving snapshots can either succeed or fail – this information is reported back to the persistent actor via
-the `SnapshotCompleted` or `SnapshotFailed` signal. Snapshot failures are logged by default but do not cause
-the actor to stop or restart.
+保存快照可以成功也可以失败 - 这个信息将通过`SnapshotCompleted`或`SnapshotFailed`信号反馈给持久化actor。默认情况下会记录快照故障，但不会导致Actor停止或重新启动。
 
-If there is a problem with recovering the state of the actor from the journal when the actor is
-started, `RecoveryFailed` signal is emitted (logging the error by default), and the actor will be stopped.
-Note that failure to load snapshot is also treated like this, but you can disable loading of snapshots
-if you for example know that serialization format has changed in an incompatible way.
+如果在启动actor时从日志中恢复actor的状态存在问题，则会发出`RecoveryFailed`信号(默认情况下记录错误)，并且actor将停止。
+请注意，加载快照失败也被这样处理，但是您可以禁用快照的加载，如果您知道序列化格式已经以不兼容的方式改变了。
 
+<a id="snapshot-deletion"></a>
 ## Snapshot deletion
 
-To free up space, an event sourced actor can automatically delete older snapshots based on the given `RetentionCriteria`.
+为了释放空间，事件溯源的actor可以根据给定`RetentionCriteria`，自动删除较旧的快照。
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #retentionCriteria }
@@ -81,19 +64,14 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #retentionCriteria #snapshottingPredicate }
 
-Snapshot deletion is triggered after saving a new snapshot.
+快照删除是在保存新快照后触发的。
 
-The above example will save snapshots automatically every `numberOfEvents = 100`. Snapshots that have sequence
-number less than the sequence number of the saved snapshot minus `keepNSnapshots * numberOfEvents` (`100 * 2`) are automatically
-deleted.
+上面的示例将在每个`numberOfEvents = 100`自动保存快照。序列号小于已保存快照的序列号减`keepNSnapshots * numberOfEvents` (`100 * 2`)的快照将被自动删除。
 
-In addition, it will also save a snapshot when the persisted event is `BookingCompleted`. Automatic snapshotting
-based on `numberOfEvents` can be used without specifying @scala[`snapshotWhen`]@java[`shouldSnapshot`]. Snapshots
-triggered by the @scala[`snapshotWhen`]@java[`shouldSnapshot`] predicate will not trigger deletion of old snapshots.
+此外，当持久化事件为`BookingCompleted`时，它还将保存一个快照。可以使用基于`numberOfEvents`的自动快照，而无需指定由`snapshotWhen`谓词触发的`snapshotWhen`快照， 不会触发旧快照的删除。
 
-On async deletion, either a `DeleteSnapshotsCompleted` or `DeleteSnapshotsFailed` signal is emitted.
-You can react to signal outcomes by using @scala[with `receiveSignal` handler] @java[by overriding `receiveSignal`].
-By default, successful completion is logged by the system at log level `debug`, failures at log level `warning`.
+在异步删除时，将发出一个`DeleteSnapshotsCompleted`或`DeleteSnapshotsFailed`信号。
+您可以通过使用`receiveSignal`处理程序对信号结果作出反应。默认情况下，系统将在`debug`日志级别记录成功完成，而在`warning`日志级别记录失败。
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #retentionCriteriaWithSignals }
@@ -101,16 +79,16 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #retentionCriteriaWithSignals }
 
-## Event deletion
+<a id="event-deletion"></a>
+## 事件删除
 
-Deleting events in event sourcing based applications is typically either not used at all, or used in conjunction with snapshotting.
-By deleting events you will lose the history of how the system changed before it reached current state, which is
-one of the main reasons for using event sourcing in the first place.
+在基于事件溯源的应用程序中删除事件通常要么根本不使用，要么与快照结合使用。
 
-If snapshot-based retention is enabled, after a snapshot has been successfully stored, a delete of the events
-(journaled by a single event sourced actor) up until the sequence number of the data held by that snapshot can be issued.
+通常根本不使用基于事件源的应用程序中的事件，或者与快照结合使用。通过删除事件，您将丢失系统在达到当前状态之前如何更改的历史记录，这是首先使用事件源的主要原因之一。
 
-To elect to use this, enable `withDeleteEventsOnSnapshot` of the `RetentionCriteria` which is disabled by default.
+如果启用了基于快照的保留，则在成功存储一个快照之后，一个事件的删除(由单个事件溯源的actor记录)，直到可以发出该快照所持有的数据的序列号为止。
+
+要选择使用这一点，启用`RetentionCriteria`的`withDeleteEventsOnSnapshot`，其默认为禁用。
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #snapshotAndEventDeletes }
@@ -118,16 +96,14 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #snapshotAndEventDeletes }
 
-Event deletion is triggered after saving a new snapshot. Old events would be deleted prior to old snapshots being deleted.
+事件删除在保存新快照后触发。旧事件将在旧快照被删除之前被删除。
 
-On async deletion, either a `DeleteEventsCompleted` or `DeleteEventsFailed` signal is emitted.
-You can react to signal outcomes by using @scala[with `receiveSignal` handler] @java[by overriding `receiveSignal`].
-By default, successful completion is logged by the system at log level `debug`, failures at log level `warning`.
+在异步删除时，将发出一个`DeleteEventsCompleted`或`DeleteEventsFailed`信号。您可以通过使用`receiveSignal`处理程序对信号结果作出反应。默认情况下，系统将在`debug`日志级别记录成功完成，而在`warning`日志级别记录失败。
 
-Message deletion does not affect the highest sequence number of the journal, even if all messages were deleted from it after a delete occurs.
+消息删除不会影响日志的最高序列号，即使所有的消息在删除发生后都被删除了。
 
 @@@ note
 
-It is up to the journal implementation whether events are actually removed from storage.
+事件是否从存储中实际删除取决于日志实现。
 
 @@@

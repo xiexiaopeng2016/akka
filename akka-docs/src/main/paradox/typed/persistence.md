@@ -1,13 +1,14 @@
 ---
 project.description: Event Sourcing with Akka Persistence enables actors to persist your events for recovery on failure or when migrated within a cluster.
 ---
-# Event Sourcing
+<a id="event-sourcing"></a>
+# 事件溯源
 
-For the Akka Classic documentation of this feature see @ref:[Classic Akka Persistence](../persistence.md).
+有关此功能的Akka经典文档，请参阅 @ref:[经典Akka持久化](../persistence.md).
 
-## Module info
+## 模块信息
 
-To use Akka Persistence, add the module to your project:
+要使用Akka持久化，请将模块添加到您的项目中：
 
 @@dependency[sbt,Maven,Gradle] {
   group=com.typesafe.akka
@@ -15,53 +16,36 @@ To use Akka Persistence, add the module to your project:
   version=$akka.version$
 }
 
-You also have to select journal plugin and optionally snapshot store plugin, see 
-@ref:[Persistence Plugins](../persistence-plugins.md).
+您还必须选择日志插件和可选的快照存储插件，请参阅 @ref:[持久性插件](../persistence-plugins.md)。
 
 @@project-info{ projectId="akka-persistence-typed" }
 
-## Introduction
+<a id="introduction"></a>
+## 介绍
 
-Akka Persistence enables stateful actors to persist their state so that it can be recovered when an actor
-is either restarted, such as after a JVM crash, by a supervisor or a manual stop-start, or migrated within a cluster. The key concept behind Akka
-Persistence is that only the _events_ that are persisted by the actor are stored, not the actual state of the actor
-(though actor state snapshot support is also available). The events are persisted by appending to storage (nothing is ever mutated) which
-allows for very high transaction rates and efficient replication. A stateful actor is recovered by replaying the stored
-events to the actor, allowing it to rebuild its state. This can be either the full history of changes
-or starting from a checkpoint in a snapshot which can dramatically reduce recovery times.
+Akka持久化使有状态的actor能够保持其状态，以便当actor重新启动时恢复，例如，在JVM崩溃后，由监督者或手动停止-启动，或者在集群中迁移。Akka持久化背后的关键概念是，仅存储由actor保留的_事件_，而不存储actor的实际状态(尽管也提供了actor状态快照支持)。通过将事件附加到存储中(不会发生任何变化)来持久存储事件，这允许非常高的事务率和有效的复制。有状态的actor通过将存储的事件重新播放给actor来恢复，从而允许它重新构建状态。这可以是变动的完整历史记录，也可以是从快照中的检查点开始，从而大大减少恢复时间。
 
 @@@ note
 
-The General Data Protection Regulation (GDPR) requires that personal information must be deleted at the request of users.
-Deleting or modifying events that carry personal information would be difficult. Data shredding can be used to forget
-information instead of deleting or modifying it. This is achieved by encrypting the data with a key for a given data
-subject id (person) and deleting the key when that data subject is to be forgotten. Lightbend's
-[GDPR for Akka Persistence](https://doc.akka.io/docs/akka-enhancements/current/gdpr/index.html)
-provides tools to facilitate in building GDPR capable systems.
+通用数据保护条例(GDPR)要求必须根据用户的要求删除个人信息。删除或修改包含个人信息的事件将是困难的。数据粉碎可以用来忘记信息，而不是删除或修改它。这是通过使用给定数据主体id(人)的密钥加密数据，并在要忘记该数据主体时删除该密钥来实现的。Lightbend的[用于Akka持久化的GDPR](https://doc.akka.io/docs/akka-enhancements/current/gdpr/index.html)提供了一些工具，以帮助构建具有GDPR功能的系统。
 
 @@@
 
-### Event sourcing concepts
+<a id="event-sourcing-concepts"></a>
+### 事件溯源概念
 
-See an [introduction to EventSourcing](https://msdn.microsoft.com/en-us/library/jj591559.aspx) at MSDN.
+请参阅MSDN上的[事件溯源介绍](https://msdn.microsoft.com/en-us/library/jj591559.aspx)。
 
-Another excellent article about "thinking in Events" is [Events As First-Class Citizens](https://hackernoon.com/events-as-first-class-citizens-8633e8479493)
-by Randy Shoup. It is a short and recommended read if you're starting developing Events based applications.
- 
-What follows is Akka's implementation via event sourced actors. 
+关于"在事件中思考"的另一篇优秀文章是Randy Shoup撰写的[事件作为头等公民](https://hackernoon.com/events-as-first-class-citizens-8633e8479493) 。如果您正开始开发基于事件的应用程序，这是一本简短的推荐读物。
 
-An event sourced actor (also known as a persistent actor) receives a (non-persistent) command
-which is first validated if it can be applied to the current state. Here validation can mean anything, from simple
-inspection of a command message's fields up to a conversation with several external services, for example.
-If validation succeeds, events are generated from the command, representing the effect of the command. These events
-are then persisted and, after successful persistence, used to change the actor's state. When the event sourced actor
-needs to be recovered, only the persisted events are replayed of which we know that they can be successfully applied.
-In other words, events cannot fail when being replayed to a persistent actor, in contrast to commands. Event sourced
-actors may also process commands that do not change application state such as query commands for example.
+接下来是Akka实现的事件溯源Actor。
 
-## Example and core API
+事件溯源的actor(也称为持久性actor)接收(非持久性)命令，如果可以将其应用于当前状态，则首先对其进行验证。在这里，验证可以是任何东西，从简单地检查命令消息的字段到与几个外部服务的对话。如果验证成功，则从命令生成事件，表示命令的效果。然后，这些事件被持久化，并在成功持久化后用于更改actor的状态。当需要恢复事件溯源的actor时，只有我们知道可以成功应用的持久化事件才会被重新播放。换句话说，相对于命令，事件在重放给一个持久化actor时不会失败。事件溯源的actor也可以处理不改变应用程序状态的命令，例如查询命令。
 
-Let's start with a simple example. The minimum required for a @apidoc[EventSourcedBehavior] is:
+<a id="example-and-core-api"></a>
+## 示例和核心API
+
+让我们从一个简单的例子开始。 @apidoc[EventSourcedBehavior]的最低要求是：
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #structure }
@@ -69,98 +53,72 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #structure }
 
-The first important thing to notice is the `Behavior` of a persistent actor is typed to the type of the `Command`
-because this is the type of message a persistent actor should receive. In Akka this is now enforced by the type system.
+要注意的第一件重要事情是持久化actor的`Behavior`是`Command`类型的类型化，因为这是持久化actor应该接收的消息类型。在Akka中，这现在由类型系统强制执行。
 
-The components that make up a EventSourcedBehavior are:
+组成一个`EventSourcedBehavior`的组件有:
 
-* `persistenceId` is the stable unique identifier for the persistent actor.
-* `emptyState` defines the `State` when the entity is first created e.g. a Counter would start with 0 as state.
-* `commandHandler` defines how to handle command by producing Effects e.g. persisting events, stopping the persistent actor.
-* `eventHandler` returns the new state given the current state when an event has been persisted.
+* `persistenceId` 是持久化actor的稳定唯一标识符。
+* `emptyState` 首次创建实体时定义`State`，例如，一个计数器将从0开始作为状态。 
+* `commandHandler` 定义如何通过产生效果来处理命令，例如，持久化事件，停止持久化actor。
+* `eventHandler` 当一个事件已持久化时，根据当前状态返回新状态。
 
-@@@ div { .group-java }
-
-Note that the concrete class does not contain any fields with state like a regular POJO. All state of the 
-`EventSourcedBehavior` must be represented in the `State` or else they will not be persisted and therefore be
-lost when the actor is stopped or restarted. Updates to the State are always performed in the eventHandler 
-based on the events.
-
-@@@
-
-Next we'll discuss each of these in detail.
+接下来，我们将详细讨论其中的每一个。
 
 ### PersistenceId
 
-The @apidoc[akka.persistence.typed.PersistenceId] is the stable unique identifier for the persistent actor in the backend
-event journal and snapshot store.
+@apidoc[akka.persistence.typed.PersistenceId]是后端事件日志和快照存储中持久化actor的稳定唯一标识符。
 
-@ref:[Cluster Sharding](cluster-sharding.md) is typically used together with `EventSourcedBehavior` to ensure
-that there is only one active entity for each `PersistenceId` (`entityId`).
+@ref:[群集分片](cluster-sharding.md)通常与`EventSourcedBehavior`一起使用，以确保每个`PersistenceId`(`entityId`)仅存在一个活动实体。
 
-The `entityId` in Cluster Sharding is the business domain identifier of the entity. The `entityId` might not
-be unique enough to be used as the `PersistenceId` by itself. For example two different types of
-entities may have the same `entityId`. To create a unique `PersistenceId` the `entityId` should be prefixed
-with a stable name of the entity type, which typically is the same as the `EntityTypeKey.name` that
-is used in Cluster Sharding. There are @scala[`PersistenceId.apply`]@java[`PersistenceId.of`] factory methods
-to help with constructing such `PersistenceId` from a `entityTypeHint` and `entityId`.
+集群分片中的`entityId`是实体的业务域标识符。`entityId`可能不够惟一，不能单独用作`PersistenceId`。例如，两个不同类型的实体可能具有相同的`entityId`。
 
-The default separator when concatenating the `entityTypeHint` and `entityId` is `|`, but a custom separator
-is supported.
+要创建一个唯一的`PersistenceId`，应该在`entityId`前面加上实体类型的稳定名称，它通常与集群分片中使用的`EntityTypeKey.name`相同。有`PersistenceId.apply`工厂方法来帮助从一个`entityTypeHint`和`entityId`构造这样的`PersistenceId`。
+
+连接`entityTypeHint`和`entityId`时的默认分隔符是`|`，但是支持自定义分隔符。
 
 @@@ note
 
-The `|` separator is also used in Lagom's `scaladsl.PersistentEntity` but no separator is used
-in Lagom's `javadsl.PersistentEntity`. For compatibility with Lagom's `javadsl.PersistentEntity`
-you should use `""` as the separator.
+这个`|`分隔符还用于Lagom的`scaladsl.PersistentEntity`，但是在Lagom的`javadsl.PersistentEntity`中没有使用任何分隔符。为了与Lagom的`javadsl.PersistentEntity`兼容，你应该使用`""`作为分隔符。
 
 @@@
 
-The @ref:[Persistence example in the Cluster Sharding documentation](cluster-sharding.md#persistence-example)
-illustrates how to construct the `PersistenceId` from the `entityTypeKey` and `entityId` provided by the
-`EntityContext`.
+@ref:[集群分片文档中的持久化示例](cluster-sharding.md#persistence-example)演示了如何从`entityTypeKey`和`entityId`提供的`EntityContext`构造`PersistenceId`。
 
-A custom identifier can be created with `PersistenceId.ofUniqueId`.  
+可以使用`PersistenceId.ofUniqueId`创建自定义标识符。
 
-### Command handler
+<a id="command-handler"></a>
+### 命令处理程序
 
-The command handler is a function with 2 parameters, the current `State` and the incoming `Command`.
+命令处理程序是一个具有2个参数的函数，当前的`State`和传入的`Command`。
 
-A command handler returns an `Effect` directive that defines what event or events, if any, to persist. 
-Effects are created using @java[a factory that is returned via the `Effect()` method] @scala[the `Effect` factory].
+命令处理程序返回一个`Effect`指令，该指令定义了一个或多个什么事件，如果有的话，要持久化。效果是使用`Effect`工厂创建的。
 
-The two most commonly used effects are: 
+最常用的两种效果是:
 
-* `persist` will persist one single event or several events atomically, i.e. all events
-  are stored or none of them are stored if there is an error
-* `none` no events are to be persisted, for example a read-only command
+* `persist` 将持久地保留一个事件或多个事件，将存储所有事件或不存储任何事件，假如发生错误
+* `none` 没有事件被持久化，例如一个读命令
 
-More effects are explained in @ref:[Effects and Side Effects](#effects-and-side-effects).
+更多效果在 @ref:[效果和副作用](#effects-and-side-effects)中进行了说明。
 
-In addition to returning the primary `Effect` for the command `EventSourcedBehavior`s can also 
-chain side effects that are to be performed after successful persist which is achieved with the `thenRun`
-function e.g @scala[`Effect.persist(..).thenRun`]@java[`Effect().persist(..).thenRun`].
+除了为命令`EventSourcedBehavior`返回主要`Effect`外，还可以链式副作用，这些副作用将在持久化成功后执行，这是通过`thenRun`函数完成的，例如`Effect.persist(..).thenRun`。
 
-### Event handler
+<a id="event-handler"></a>
+### 事件处理程序
 
-When an event has been persisted successfully the new state is created by applying the event to the current state with the `eventHandler`.
+当一个事件被持久化成功后，通过使用`eventHandler`将事件应用到当前状态来创建新状态。
 
-The state is typically defined as an immutable class and then the event handler returns a new instance of the state.
-You may choose to use a mutable class for the state, and then the event handler may update the state instance and
-return the same instance. Both immutable and mutable state is supported.
+状态通常定义为不可变类，然后事件处理程序返回状态的新实例。您可以选择为状态使用一个可变类，然后事件处理程序可能更新状态实例并返回相同的实例。不可变和可变状态均受支持。
 
-The same event handler is also used when the entity is started up to recover its state from the stored events.
+当实体启动以从存储的事件中恢复其状态时，也使用相同的事件处理程序。
 
-The event handler must only update the state and never perform side effects, as those would also be
-executed during recovery of the persistent actor. Side effects should be performed in `thenRun` from the
-@ref:[command handler](#command-handler) after persisting the event or from the `RecoveryCompleted`
-after @ref:[Recovery](#recovery).
+事件处理程序必须只更新状态，而不执行副作用，因为这些副作用也将在持久化actor恢复期间执行。副作用应该在`thenRun`中执行，它来自 @ref:[事件处理程序](#command-handler)，在持久化事件之后，或来自`RecoveryCompleted`，在 @ref:[恢复](#recovery) 之后。
 
-### Completing the example
+<a id="completing-the-example"></a>
+### 完成示例
 
-Let's fill in the details of the example.
+让我们填写示例的细节。
 
-Command and event:
+命令和事件：
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #command }
@@ -168,7 +126,7 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #command }
 
-State is a List containing the 5 latest items:
+状态是包含5个最新项目的列表：
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #state }
@@ -176,7 +134,7 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #state }
 
-The command handler persists the `Add` payload in an `Added` event:
+命令处理程序在一个`Added`事件中持久化`Add`有效负载：
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #command-handler }
@@ -184,8 +142,7 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #command-handler }
 
-The event handler appends the item to the state and keeps 5 items. This is called after successfully
-persisting the event in the database:
+事件处理程序将项目追加到状态并保留5个项目。这是在成功地将事件持久化到数据库后调用的:
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #event-handler }
@@ -193,8 +150,7 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #event-handler }
 
-@scala[These are used to create a `EventSourcedBehavior`:]
-@java[These are defined in an `EventSourcedBehavior`:]
+这些用于创建一个`EventSourcedBehavior`：
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #behavior }
@@ -202,40 +158,34 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #behavior }
 
-## Effects and Side Effects
+<a id="effects-and-side-effects"></a>
+## 效果和副作用
 
-A command handler returns an `Effect` directive that defines what event or events, if any, to persist. 
-Effects are created using @java[a factory that is returned via the `Effect()` method] @scala[the `Effect` factory]
-and can be one of: 
+命令处理程序返回一个`Effect`指令，它定义了一个或多个什么样的事件，如果有，要持久化。效果是使用`Effect`工厂创建的，可以是以下之一：
 
-* `persist` will persist one single event or several events atomically, i.e. all events
-  are stored or none of them are stored if there is an error
-* `none` no events are to be persisted, for example a read-only command
-* `unhandled` the command is unhandled (not supported) in current state
-* `stop` stop this actor
-* `stash` the current command is stashed
-* `unstashAll` process the commands that were stashed with @scala[`Effect.stash`]@java[`Effect().stash`]
-* `reply` send a reply message to the given `ActorRef`
+* `persist` 将持久化一个事件或多个事件，将存储所有事件或不存储任何事件，如果发生错误
+* `none` 没有事件会被持久化，例如，只一个只读命令
+* `unhandled` 当前状态下未处理(不支持)该命令
+* `stop` 停止这个actor
+* `stash` 当前命令已被存储
+* `unstashAll` 处理被`Effect.stash`存储的命令
+* `reply` 向给定的`ActorRef`发送一条回复消息
 
-Note that only one of those can be chosen per incoming command. It is not possible to both persist and say none/unhandled.
+请注意，每个传入命令只能选择其中之一。不可能既persist又说none/unhandled。
 
-In addition to returning the primary `Effect` for the command `EventSourcedBehavior`s can also 
-chain side effects that are to be performed after successful persist which is achieved with the `thenRun`
-function e.g @scala[`Effect.persist(..).thenRun`]@java[`Effect().persist(..).thenRun`].
+除了为命令`EventSourcedBehavior`返回主要`Effect`外，还可以链式副作用，这些副作用将在持久化成功后执行，这是通过`thenRun`函数完成的，例如`Effect.persist(..).thenRun`。
 
-In the example below the state is sent to the `subscriber` ActorRef. Note that the new state after applying 
-the event is passed as parameter of the `thenRun` function.
+在下面的示例中，状态被发送到`subscriber`ActorRef。请注意，应用事件后的新状态将作为`thenRun`函数的参数传递。
 
-All `thenRun` registered callbacks are executed sequentially after successful execution of the persist statement
-(or immediately, in case of `none` and `unhandled`).
+在成功执行持久化语句后，所有`thenRun`已注册的回调将顺序执行(假如使用`none`和`unhandled`，则立即执行)。
 
-In addition to `thenRun` the following actions can also be performed after successful persist:
+除了`thenRun`之外，成功持久化后还可以执行以下操作：
 
-* `thenStop` the actor will be stopped
-* `thenUnstashAll` process the commands that were stashed with @scala[`Effect.stash`]@java[`Effect().stash`]
-* `thenReply` send a reply message to the given `ActorRef`
+* `thenStop` actor将被停止
+* `thenUnstashAll` 处理被`Effect.stash`存储的命令
+* `thenReply` 向给定的`ActorRef`发送一条回复消息
 
-Example of effects:
+效果的示例：
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #effects }
@@ -243,8 +193,7 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #effects }
 
-Most of the time this will be done with the `thenRun` method on the `Effect` above. You can factor out
-common side effects into functions and reuse for several commands. For example:
+大多数情况下，将使用上述`Effect`上的`thenRun`方法完成此操作。你可以把常见的副作用分解成函数，并重复使用几个命令。例如：
 
 Scala
 :  @@snip [PersistentActorCompileOnlyTest.scala](/akka-persistence-typed/src/test/scala/akka/persistence/typed/scaladsl/PersistentActorCompileOnlyTest.scala) { #commonChainedEffects }
@@ -252,50 +201,39 @@ Scala
 Java
 :  @@snip [PersistentActorCompileOnlyTest.java](/akka-persistence-typed/src/test/java/akka/persistence/typed/javadsl/PersistentActorCompileOnlyTest.java) { #commonChainedEffects }
 
-### Side effects ordering and guarantees
+<a id="side-effects-ordering-and-guarantees"></a>
+### 副作用排序和保证
 
-Any side effects are executed on an at-most-once basis and will not be executed if the persist fails.
+任何副作用最多只能执行一次，并且如果持久化失败将不会执行任何副作用。
 
-Side effects are not run when the actor is restarted or started again after being stopped.
-You may inspect the state when receiving the `RecoveryCompleted` signal and execute side effects that
-have not been acknowledged at that point. That may possibly result in executing side effects more than once.
+当actor重新启动或停止后再次启动时，不会运行副作用。您可以在接收`RecoveryCompleted`信号时检查状态，并执行此时尚未确认的副作用。这可能会导致多次执行副作用。
 
-The side effects are executed sequentially, it is not possible to execute side effects in parallel, unless they
-call out to something that is running concurrently (for example sending a message to another actor).
+副作用是按顺序执行的，不可能同时执行副作用，除非它们调用并发运行的东西(例如，向其他actor发送消息)。
 
-It's possible to execute a side effects before persisting the event, but that can result in that the
-side effect is performed but the event is not stored if the persist fails.
+可以在持久化事件之前执行一个副作用，但是这可能导致执行了副作用，但事件没有存储，如果持久化失败的话。
 
-### Atomic writes
+<a id="atomic-writes"></a>
+### 原子写入
 
-It is possible to store several events atomically by using the `persist` effect with a list of events.
-That means that all events passed to that method are stored or none of them are stored if there is an error.
+可以原子地存储多个事件，通过在一系列事件上使用`persist`效果。这意味着传递给该方法的所有事件都将被存储，如果出现错误，则不存储任何事件。
 
-The recovery of a persistent actor will therefore never be done partially with only a subset of events persisted by
-a single `persist` effect.
+因此，如果仅使用单个`persist`效果持久化的事件子集，则永远无法部分地恢复持久化actor。
 
-Some journals may not support atomic writes of several events and they will then reject the `persist` with
-multiple events. This is signalled to a `EventSourcedBehavior` via a `EventRejectedException` (typically with a 
-`UnsupportedOperationException`) and can be handled with a @ref[supervisor](fault-tolerance.md).
+有些日志可能不支持对多个事件进行原子写入，因此它们将拒绝`persist`具有多个事件的事件。这通过EventRejectedException（通常带有UnsupportedOperationException）发出信号到，并可以由主管处理。
 
-## Cluster Sharding and EventSourcedBehavior
+这是通过一个`EventRejectedException`向一个`EventSourcedBehavior`发出信号的(通常使用一个`UnsupportedOperationException`)并且可以通过一个 @ref[监督者](fault-tolerance.md)来处理。
 
-In a use case where the number of persistent actors needed is higher than what would fit in the memory of one node or
-where resilience is important so that if a node crashes the persistent actors are quickly started on a new node and can
-resume operations @ref:[Cluster Sharding](cluster-sharding.md) is an excellent fit to spread persistent actors over a
-cluster and address them by id.
+<a id="cluster-sharding-and-eventsourcedbehavior"></a>
+## 群集分片和EventSourcedBehavior
 
-The `EventSourcedBehavior` can then be run as with any plain actor as described in @ref:[actors documentation](actors.md),
-but since Akka Persistence is based on the single-writer principle the persistent actors are typically used together
-with Cluster Sharding. For a particular `persistenceId` only one persistent actor instance should be active at one time.
-If multiple instances were to persist events at the same time, the events would be interleaved and might not be
-interpreted correctly on replay. Cluster Sharding ensures that there is only one active entity for each id. The
-@ref:[Cluster Sharding example](cluster-sharding.md#persistence-example) illustrates this common combination.
+In a use case where the number of persistent actors needed is higher than what would fit in the memory of one node or where resilience is important so that if a node crashes the persistent actors are quickly started on a new node and can resume operations @ref:[Cluster Sharding](cluster-sharding.md) is an excellent fit to spread persistent actors over a cluster and address them by id.
 
-## Accessing the ActorContext
+The `EventSourcedBehavior` can then be run as with any plain actor as described in @ref:[actors documentation](actors.md), but since Akka Persistence is based on the single-writer principle the persistent actors are typically used together with Cluster Sharding. For a particular `persistenceId` only one persistent actor instance should be active at one time. If multiple instances were to persist events at the same time, the events would be interleaved and might not be interpreted correctly on replay. Cluster Sharding ensures that there is only one active entity for each id. The @ref:[Cluster Sharding example](cluster-sharding.md#persistence-example) illustrates this common combination.
 
-If the @apidoc[EventSourcedBehavior] needs to use the @apidoc[typed.*.ActorContext], for example to spawn child actors, it can be obtained by
-wrapping construction with `Behaviors.setup`:
+<a id="accessing-the-actorcontext"></a>
+## 访问ActorContext
+
+如果 @apidoc[EventSourcedBehavior] 需要使用@apidoc[typed.*.ActorContext]，例如生成子actor，它可以通过使用`Behaviors.setup`来包装构造来获得。
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #actor-context }
@@ -303,27 +241,18 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #actor-context }
 
-## Changing Behavior
+<a id="changing-behavior"></a>
+## 改变行为
 
-After processing a message, actors are able to return the `Behavior` that is used
-for next message.
+处理完一条消息后，actor可以返回用于下一条消息的`Behavior`。
 
-As you can see in the above examples this is not supported by persistent actors. Instead, the state is
-returned by `eventHandler`. The reason a new behavior can't be returned is that behavior is part of the actor's
-state and must also carefully be reconstructed during recovery. If it would have been supported it would mean
-that the behavior must be restored when replaying events and also encoded in the state anyway when snapshots are used.
-That would be very prone to mistakes and thus not allowed in Akka Persistence.
+正如您在上面的示例中看到的那样，持久化actor不支持此功能。而是由`eventHandler`返回状态。无法返回一个新行为的原因是，行为是actor状态的一部分，并且在恢复过程中也必须仔细地进行重构。如果它是受支持的，这就意味着在回放事件时必须恢复行为，并且在使用快照时也必须在状态中进行编码。这很容易出错，因此在Akka持久化中是不允许的。
 
-For basic actors you can use the same set of command handlers independent of what state the entity is in,
-as shown in above example. For more complex actors it's useful to be able to change the behavior in the sense
-that different functions for processing commands may be defined depending on what state the actor is in.
-This is useful when implementing finite state machine (FSM) like entities.
+对于基本actor，您可以使用与实体处于什么状态无关的同一组命令处理程序，如上面的示例所示。对于更复杂的actor，可以根据actor所处的状态定义不同的处理命令功能的意义上说，能够更改行为是有用的。这在实现有限状态机(FSM)之类的实体时非常有用。
 
-The next example shows how to define different behavior based on the current `State`. It is an actor that
-represents the state of a blog post. Before a post is started the only command it can process is to `AddPost`.
-Once it is started then it we can look it up with `GetPost`, modify it with `ChangeBody` or publish it with `Publish`.
+下一个示例演示如何基于当前`State`定义不同的行为。它是一个代表博客发表状态的actor。在一个发表启动之前，它唯一能处理的命令是`AddPost`。它一旦启动，便可以使用`GetPost`进行查找，使用`ChangeBody`修改或使用进行`Publish`发布。
 
-The state is captured by:
+通过以下方式捕获状态：
 
 Scala
 :  @@snip [BlogPostEntity.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BlogPostEntity.scala) { #state }
@@ -331,7 +260,7 @@ Scala
 Java
 :  @@snip [BlogPostEntity.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BlogPostEntity.java) { #state }
 
-The commands, of which only a subset are valid depending on the state:
+这些命令，取决于状态其中只有一个子集是有效的:
 
 Scala
 :  @@snip [BlogPostEntity.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BlogPostEntity.scala) { #commands }
@@ -339,11 +268,7 @@ Scala
 Java
 :  @@snip [BlogPostEntity.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BlogPostEntity.java) { #commands }
 
-@java[The commandler handler to process each command is decided by the state class (or state predicate) that is
-given to the `forStateType` of the `CommandHandlerBuilder` and the match cases in the builders.]
-@scala[The command handler to process each command is decided by first looking at the state and then the command.
-It typically becomes two levels of pattern matching, first on the state and then on the command.]
-Delegating to methods is a good practice because the one-line cases give a nice overview of the message dispatch.
+处理每个命令的命令处理程序是通过先查看状态然后查看命令来确定的。通常，它变成模式匹配的两个级别，首先是状态，然后是命令。委托给方法是一种很好的实践，因为单行的case很好地概述了消息的分发。
 
 Scala
 :  @@snip [BlogPostEntity.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BlogPostEntity.scala) { #command-handler }
@@ -351,8 +276,7 @@ Scala
 Java
 :  @@snip [BlogPostEntity.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BlogPostEntity.java) { #command-handler }
 
-
-The event handler:
+事件处理程序：
 
 Scala
 :  @@snip [BlogPostEntity.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BlogPostEntity.scala) { #event-handler }
@@ -360,7 +284,7 @@ Scala
 Java
 :  @@snip [BlogPostEntity.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BlogPostEntity.java) { #event-handler }
 
-And finally the behavior is created @scala[from the `EventSourcedBehavior.apply`]:
+最后，行为是从`EventSourcedBehavior.apply`创建的：
 
 Scala
 :  @@snip [BlogPostEntity.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BlogPostEntity.scala) { #behavior }
@@ -368,21 +292,16 @@ Scala
 Java
 :  @@snip [BlogPostEntity.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BlogPostEntity.java) { #behavior }
 
-This can be taken one or two steps further by defining the event and command handlers in the state class as
-illustrated in @ref:[event handlers in the state](persistence-style.md#event-handlers-in-the-state) and
-@ref:[command handlers in the state](persistence-style.md#command-handlers-in-the-state).
+这可以采取一个或两个步骤，通过在state类中定义事件和命令处理程序，正如在 @ref:[状态中的事件处理程序](persistence-style.md#event-handlers-in-the-state)和 @ref:[状态中的命令处理程序](persistence-style.md#command-handlers-in-the-state)所示。
 
-There is also an example illustrating an @ref:[optional initial state](persistence-style.md#optional-initial-state).
+还有一个示例演示了一个 @ref:[可选的初始状态](persistence-style.md#optional-initial-state)。
 
-## Replies
+<a id="replies"></a>
+## 回复
 
-The @ref:[Request-Response interaction pattern](interaction-patterns.md#request-response) is very common for
-persistent actors, because you typically want to know if the command was rejected due to validation errors and
-when accepted you want a confirmation when the events have been successfully stored.
+对于持久化actor，@ref:[请求-响应交互模式](interaction-patterns.md#request-response)是很常见的，因为你通常想知道，假如拒绝了该命令是由于验证错误，并且在接受该命令时，您希望在事件已成功存储时得到一个确认。
 
-Therefore you typically include a @scala[`ActorRef[ReplyMessageType]`]@java[`ActorRef<ReplyMessageType>`] in the
-commands. After validation errors or after persisting events, using a `thenRun` side effect, the reply message can
-be sent to the `ActorRef`.
+因此，您通常会在命令中包含一个`ActorRef[ReplyMessageType]`。在验证错误或事件持久化之后，使用一个`thenRun`副作用，回复消息可以被发送到`ActorRef`。
 
 Scala
 :  @@snip [BlogPostEntity.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BlogPostEntity.scala) { #reply-command }
@@ -397,13 +316,9 @@ Scala
 Java
 :  @@snip [BlogPostEntity.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BlogPostEntity.java) { #reply }
 
+由于这是一种常见的模式，这里有一个回复效果对于这个目的。它具有很好的属性，它可以用来强制执行，在实现`EventSourcedBehavior`时不会忘记回复。
 
-Since this is such a common pattern there is a reply effect for this purpose. It has the nice property that
-it can be used to enforce that replies are not forgotten when implementing the `EventSourcedBehavior`.
-If it's defined with @scala[`EventSourcedBehavior.withEnforcedReplies`]@java[`EventSourcedBehaviorWithEnforcedReplies`]
-there will be compilation errors if the returned effect isn't a `ReplyEffect`, which can be
-created with @scala[`Effect.reply`]@java[`Effects().reply`], @scala[`Effect.noReply`]@java[`Effects().noReply`],
-@scala[`Effect.thenReply`]@java[`Effects().thenReply`], or @scala[`Effect.thenNoReply`]@java[`Effects().thenNoReply`].
+如果它是用`EventSourcedBehavior.withEnforcedReplies`定义的，如果返回的效果不是`ReplyEffect`，会有编译错误，那些可用`Effect.reply`，`Effect.noReply`，`Effect.thenReply`，或`Effect.thenNoReply`创建。
 
 Scala
 :  @@snip [AccountExampleWithEventHandlersInState.scala](/akka-cluster-sharding-typed/src/test/scala/docs/akka/cluster/sharding/typed/AccountExampleWithEventHandlersInState.scala) { #withEnforcedReplies }
@@ -411,7 +326,7 @@ Scala
 Java
 :  @@snip [AccountExampleWithNullState.java](/akka-cluster-sharding-typed/src/test/java/jdocs/akka/cluster/sharding/typed/AccountExampleWithEventHandlersInState.java) { #withEnforcedReplies }
 
-The commands must have a field of @scala[`ActorRef[ReplyMessageType]`]@java[`ActorRef<ReplyMessageType>`] that can then be used to send a reply.
+这些命令必须具有一个`ActorRef[ReplyMessageType]`字段，该字段然后可以用于发送一个答复。
 
 Scala
 :  @@snip [AccountExampleWithEventHandlersInState.scala](/akka-cluster-sharding-typed/src/test/scala/docs/akka/cluster/sharding/typed/AccountExampleWithEventHandlersInState.scala) { #reply-command }
@@ -419,11 +334,7 @@ Scala
 Java
 :  @@snip [AccountExampleWithNullState.java](/akka-cluster-sharding-typed/src/test/java/jdocs/akka/cluster/sharding/typed/AccountExampleWithEventHandlersInState.java) { #reply-command }
 
-The `ReplyEffect` is created with @scala[`Effect.reply`]@java[`Effects().reply`], @scala[`Effect.noReply`]@java[`Effects().noReply`],
-@scala[`Effect.thenReply`]@java[`Effects().thenReply`], or @scala[`Effect.thenNoReply`]@java[`Effects().thenNoReply`].
-
-@java[Note that command handlers are defined with `newCommandHandlerWithReplyBuilder` when using
-`EventSourcedBehaviorWithEnforcedReplies`, as opposed to newCommandHandlerBuilder when using `EventSourcedBehavior`.]
+`ReplyEffect`是使用`Effect.reply`，`Effect.noReply`，`Effect.thenReply`，或`Effect.thenNoReply`创建的。
 
 Scala
 :  @@snip [AccountExampleWithEventHandlersInState.scala](/akka-cluster-sharding-typed/src/test/scala/docs/akka/cluster/sharding/typed/AccountExampleWithEventHandlersInState.scala) { #reply }
@@ -431,41 +342,31 @@ Scala
 Java
 :  @@snip [AccountExampleWithNullState.java](/akka-cluster-sharding-typed/src/test/java/jdocs/akka/cluster/sharding/typed/AccountExampleWithEventHandlersInState.java) { #reply }
 
-These effects will send the reply message even when @scala[`EventSourcedBehavior.withEnforcedReplies`]@java[`EventSourcedBehaviorWithEnforcedReplies`]
-is not used, but then there will be no compilation errors if the reply decision is left out.
+即使没有使用`EventSourcedBehavior.withEnforcedReplies`，这些效果也会发送回复消息，但是不会有编译错误，如果不考虑应答决策。
 
-Note that the `noReply` is a way of making conscious decision that a reply shouldn't be sent for a specific
-command or the reply will be sent later, perhaps after some asynchronous interaction with other actors or services.
+请注意，`noReply`是一种有意识地决定不应该针对特定命令发送应答，或者稍后将发送应答的方式，可能在与其他actor或服务进行异步交互之后。
 
-## Serialization
+<a id="serialization"></a>
+## 序列化
 
-The same @ref:[serialization](../serialization.md) mechanism as for actor messages is also used for persistent actors.
-When picking serialization solution for the events you should also consider that it must be possible read old events
-when the application has evolved.
-Strategies for that can be found in the @ref:[schema evolution](../persistence-schema-evolution.md).
+与actor消息相同的 @ref:[序列化](../serialization.md)机制也用于持久化actor。在为事件选择序列化解决方案时，您还应该考虑当应用程序已经发展时，必须能够读取旧事件。可以在 @ref:[模式演变](../persistence-schema-evolution.md)中找到相应的策略。
 
-You need to enable @ref:[serialization](../serialization.md) for your commands (messages), events, and state (snapshot).
-@ref:[Serialization with Jackson](../serialization-jackson.md) is a good choice in many cases and our
-recommendation if you don't have other preference.
+您需要为命令(消息)，事件和状态(快照)启用 @ref:[序列化](../serialization.md)。在许多情况下，使用 @ref:[使用Jackson序列化](../serialization-jackson.md)是一个不错的选择，如果您没有其他选择，我们建议您这样做。
 
-## Recovery
+<a id="recovery"></a>
+## 恢复
 
-An event sourced actor is automatically recovered on start and on restart by replaying journaled events.
-New messages sent to the actor during recovery do not interfere with replayed events.
-They are stashed and received by the `EventSourcedBehavior` after the recovery phase completes.
+事件溯源的actor在启动和重新启动时通过重播日志事件自动恢复。恢复期间发送给actor的新消息不会干扰重播事件。在恢复阶段完成之后，`EventSourcedBehavior`将它们存储起来并接收。
 
-The number of concurrent recoveries that can be in progress at the same time is limited
-to not overload the system and the backend data store. When exceeding the limit the actors will wait
-until other recoveries have been completed. This is configured by:
+可以同时进行的并发恢复的数量是受限制的，为不使系统和后端数据存储超载。当超出限制时，actor将等到其他恢复完成。这是由以下配置的：
 
 ```
 akka.persistence.max-concurrent-recoveries = 50
 ```
 
-The @ref:[event handler](#event-handler) is used for updating the state when replaying the journaled events.
+@ref:[事件处理程序](#event-handler)用于重播日志事件时更新状态。
 
-It is strongly discouraged to perform side effects in the event handler, so side effects should be performed
-once recovery has completed as a reaction to the `RecoveryCompleted` signal @scala[in the `receiveSignal` handler] @java[by overriding `receiveSignal`]
+强烈建议在事件处理程序中执行副作用，因此，一旦恢复完成后就应该执行副作用，作为对`receiveSignal`处理程序中的`RecoveryCompleted`信号的响应。
 
 Scala
 :  @@snip [BasicPersistentBehaviorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #recovery }
@@ -473,29 +374,25 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #recovery }
 
-The `RecoveryCompleted` contains the current `State`.
+`RecoveryCompleted`包含当前`State`。
 
-The actor will always receive a `RecoveryCompleted` signal, even if there are no events
-in the journal and the snapshot store is empty, or if it's a new persistent actor with a previously
-unused `PersistenceId`.
+actor总是会收到一个`RecoveryCompleted`的信号，即使日志中没有事件并且快照存储为空，或者它是一个新的持久化actor，之前没有使用过`PersistenceId`。
 
-@ref[Snapshots](persistence-snapshot.md) can be used for optimizing recovery times.
+@ref[快照](persistence-snapshot.md) 可用于优化恢复时间。
 
-### Replay filter
+<a id="replay-filter"></a>
+### 重播过滤器
 
-There could be cases where event streams are corrupted and multiple writers (i.e. multiple persistent actor instances)
-journaled different messages with the same sequence number.
-In such a case, you can configure how you filter replayed messages from multiple writers, upon recovery.
+在某些情况下，事件流可能会损坏，并且多个写入者(即，多个持久化Actor实例)使用相同序列号记录不同的消息。在这种情况下，您可以配置如何在恢复时过滤来自多个写入器的重播消息。
 
-In your configuration, under the `akka.persistence.journal.xxx.replay-filter` section (where `xxx` is your journal plugin id),
-you can select the replay filter `mode` from one of the following values:
+在您的配置中，在`akka.persistence.journal.xxx.replay-filter`部分(那里`xxx`是日志插件ID)下面，您可以从以下值中选择重一个播过滤器`mode`：
 
  * repair-by-discard-old
  * fail
  * warn
  * off
 
-For example, if you configure the replay filter for leveldb plugin, it looks like this:
+例如，如果您为leveldb插件配置了重播过滤器，则它看起来像这样：
 
 ```
 # The replay filter can detect a corrupt event stream by inspecting
@@ -512,9 +409,10 @@ akka.persistence.journal.leveldb.replay-filter {
 }
 ```
 
-## Tagging
+<a id="tagging"></a>
+## 标记
 
-Persistence allows you to use event tags without using @ref[`EventAdapter`](../persistence.md#event-adapters):
+持久化允许您使用事件标签，而无需使用 @ref[`EventAdapter`](../persistence.md#event-adapters)：
 
 Scala
 :  @@snip [BasicPersistentActorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #tagging }
@@ -522,12 +420,14 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #tagging }
 
-## Event adapters
+<a id="event-adapters"></a>
+## 事件适配器
 
-Event adapters can be programmatically added to your `EventSourcedBehavior`s that can convert from your `Event` type
-to another type that is then passed to the journal.
+事件适配器可以以编程方式添加到您的`EventSourcedBehavior`中，该行为可以将您的`Event`类型转换为另一种类型，然后传递给日志。
 
-Defining an event adapter is done by extending an EventAdapter:
+可以以编程方式将事件适配器添加到您EventSourcedBehavior的，可以将您的Event类型转换为其他类型，然后将其传递给日志。
+
+通过扩展`EventAdapter`来定义一个事件适配器：
 
 Scala
 :  @@snip [x](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #event-wrapper }
@@ -535,7 +435,7 @@ Scala
 Java
 :  @@snip [x](/akka-persistence-typed/src/test/java/akka/persistence/typed/javadsl/PersistentActorCompileOnlyTest.java) { #event-wrapper }
 
-Then install it on a `EventSourcedBehavior`:
+然后将其安装在一个`EventSourcedBehavior`：
 
 Scala
 :  @@snip [x](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #install-event-adapter }
@@ -543,11 +443,10 @@ Scala
 Java
 :  @@snip [x](/akka-persistence-typed/src/test/java/akka/persistence/typed/javadsl/PersistentActorCompileOnlyTest.java) { #install-event-adapter }
 
-## Wrapping EventSourcedBehavior
+<a id="wrapping-eventsourcedbehavior"></a>
+## 包装EventSourcedBehavior
 
-When creating a `EventSourcedBehavior`, it is possible to wrap `EventSourcedBehavior` in
-other behaviors such as `Behaviors.setup` in order to access the `ActorContext` object. For instance
-to access the actor logging upon taking snapshots for debug purpose.
+在创建一个`EventSourcedBehavior`时，可以将`EventSourcedBehavior`封装到其他行为中，比如`Behaviors.setup`，以便访问`ActorContext`对象。例如，在为调试目的获取快照时访问actor日志记录。
 
 Scala
 :  @@snip [BasicPersistentActorCompileOnly.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #wrapPersistentBehavior }
@@ -555,12 +454,10 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #wrapPersistentBehavior }
 
+<a id="journal-failures"></a>
+## 日志失败
 
-## Journal failures
-
-By default a `EventSourcedBehavior` will stop if an exception is thrown from the journal. It is possible to override this with
-any `BackoffSupervisorStrategy`. It is not possible to use the normal supervision wrapping for this as it isn't valid to
-`resume` a behavior on a journal failure as it is not known if the event was persisted.
+默认情况下，如果从日志中抛出一个异常，`EventSourcedBehavior`将停止。可以用任何`BackoffSupervisorStrategy`覆盖它。对此无法使用正常的监督包装，因为在失败日志上`resume`一个的行为无效的，因为尚不清楚事件是否已经持久化。
 
 Scala
 :  @@snip [BasicPersistentBehaviorSpec.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/BasicPersistentBehaviorCompileOnly.scala) { #supervision }
@@ -568,36 +465,23 @@ Scala
 Java
 :  @@snip [BasicPersistentBehaviorTest.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/BasicPersistentBehaviorTest.java) { #supervision }
 
-If there is a problem with recovering the state of the actor from the journal, `RecoveryFailed` signal is
-emitted to the @scala[`receiveSignal` handler] @java[`receiveSignal` method] and the actor will be stopped
-(or restarted with backoff).
+如果从日志中恢复actor的状态存在问题，则会向`receiveSignal`处理程序发出`RecoveryFailed`信号，并且actor将停止(或通过backoff重新启动)。
 
-### Journal rejections
+<a id="journal-rejections"></a>
+### 日志拒绝
 
-Journals can reject events. The difference from a failure is that the journal must decide to reject an event before
-trying to persist it e.g. because of a serialization exception. If an event is rejected it definitely won't be in the journal. 
-This is signalled to a `EventSourcedBehavior` via a `EventRejectedException` and can be handled with a @ref[supervisor](fault-tolerance.md).
-Not all journal implementations use rejections and treat these kind of problems also as journal failures. 
+日志可以拒绝事件。与失败的区别在于，日志必须在尝试持久化事件之前决定拒绝一个事件，例如由于一个序列化异常。如果一个事件被拒绝，它肯定不会出现在日志中。这是通过一个`EventRejectedException`发给一个`EventSourcedBehavior`，并可以由 @ref[监督者](fault-tolerance.md)处理。并非所有日志实现都使用拒绝并将此类问题也视为日志失败。
 
-## Stash
+<a id="stash"></a>
+## 存储
 
-When persisting events with `persist` or `persistAll` it is guaranteed that the `EventSourcedBehavior` will not receive
-further commands until after the events have been confirmed to be persisted and additional side effects have been run.
-Incoming messages are stashed automatically until the `persist` is completed.
+当使用`persist`或`persistAll`来持久化事件时，能够确保在确认事件已持久化并且运行了其他副作用之前，`EventSourcedBehavior`不会接收进一步的命令。传入的消息会自动存储，直到`persist`完成。
 
-Commands are also stashed during recovery and will not interfere with replayed events. Commands will be received
-when recovery has been completed.
+在恢复过程中，命令也会存储起来，并且不会干扰重播的事件。恢复完成后，命令将被接收。
 
-The stashing described above is handled automatically, but there is also a possibility to stash commands when
-they are received to defer processing of them until later. One example could be waiting for some external condition
-or interaction to complete before processing additional commands. That is accomplished by returning a `stash` effect
-and later use `thenUnstashAll`.
+上面描述的存储是自动处理的，但是也有可能在收到命令时将命令存储起来，以将其处理推迟到以后。一个例子是，可以等待某些外部条件或交互完成后再处理其他命令。这是通过返回一个`stash`效果并随后使用`thenUnstashAll`来实现的。
 
-Let's use an example of a task manager to illustrate how the stashing effects can be used. It handles three commands;
-`StartTask`, `NextStep` and `EndTask`. Those commands are associated with a given `taskId` and the manager process
-one `taskId` at a time. A task is started when receiving `StartTask`, and continues when receiving `NextStep` commands
-until the final `EndTask` is received. Commands with another `taskId` than the one in progress are deferred by
-stashing them. When `EndTask` is processed a new task can start and the stashed commands are processed.
+让我们使用一个任务管理器示例来说明如何使用存储效果。它处理三个命令；`StartTask`，`NextStep`和`EndTask`。这些命令与给定的`taskId`相关联，并且管理器一次处理一个`taskId`。一个任务在接收`StartTask`时启动，在接收`NextStep`命令时继续，直到接收到最终任务`EndTask`为止。使用另一个`taskId`而不是正在执行的`taskId`发出命令将通过存储它们来延迟执行。当`EndTask`被处理，一个新任务可以启动，并且存储命令已经处理。
 
 Scala
 :  @@snip [StashingExample.scala](/akka-persistence-typed/src/test/scala/docs/akka/persistence/typed/StashingExample.scala) { #stashing }
@@ -605,59 +489,40 @@ Scala
 Java
 :  @@snip [StashingExample.java](/akka-persistence-typed/src/test/java/jdocs/akka/persistence/typed/StashingExample.java) { #stashing }
 
-You should be careful to not send more messages to a persistent actor than it can keep up with, otherwise the stash
-buffer will fill up and when reaching its maximum capacity the commands will be dropped. The capacity can be configured with:
+您应该小心，不要向持久化actor发送超过其存储能力的消息，否则存储缓冲区将被填满，并且当达到最大容量时，命令将被丢弃。容量可以配置为：
 
 ```
 akka.persistence.typed.stash-capacity = 10000
 ```
 
-Note that the stashed commands are kept in an in-memory buffer, so in case of a crash they will not be
-processed.
+请注意，存储命令将保留在内存缓冲区中，因此如果发生崩溃，将不会对其进行处理。
 
-* Stashed commands are discarded if the actor (entity) is passivated or rebalanced by Cluster Sharding.
-* Stashed commands are discarded if the actor is restarted (or stopped) due to that an exception was thrown from processing a command or side effect after persisting.
-* Stashed commands are preserved and processed later in case of failure in storing events if an `onPersistFailure` backoff supervisor strategy is defined.
+* 如果actor(实体)被集群分片钝化或重新平衡，则存储的命令将被丢弃。
+* 如果在持久化后处理一个命令或副作用时，由于抛出异常而导致actor重新启动(或停止)，则存储的命令将被丢弃
+* 当存储事件失败时，隐藏的命令将被保留并在稍后进行处理
+* 如果定义了一个`onPersistFailure`回退(backoff)监督者策略，在存储事件失败的情况下，存储命令被保存，并稍后被处理。
 
-It's allowed to stash messages while unstashing. Those newly added commands will not be processed by the
-`unstashAll` effect that was in progress and have to be unstashed by another `unstashAll`.
+那些新添加的命令将不会被正在执行的`unstashAll`效果处理，而必须被另一个`unstashAll`取消存储。
 
-## Scaling out
+<a id="scaling-out"></a>
+## 横向扩展
 
-In a use case where the number of persistent actors needed is higher than what would fit in the memory of one node or
-where resilience is important so that if a node crashes the persistent actors are quickly started on a new node and can
-resume operations @ref:[Cluster Sharding](cluster-sharding.md) is an excellent fit to spread persistent actors over a 
-cluster and address them by id.
+在一个用例中，需要持久化actor的数量比一个节点的内存中的容量大，或者说弹性很重要，因此，如果一个节点崩溃，持久化actor将在一个新节点上快速启动，并可以恢复运行。@ref:[集群分片](cluster-sharding.md)是非常适合在集群上分布持久化actor并通过id对其进行寻址。
 
-Akka Persistence is based on the single-writer principle. For a particular `PersistenceId` only one `EventSourcedBehavior`
-instance should be active at one time. If multiple instances were to persist events at the same time, the events would
-be interleaved and might not be interpreted correctly on replay. Cluster Sharding ensures that there is only one
-active entity (`EventSourcedBehavior`) for each id within a data center. Lightbend's
-[Multi-DC Persistence](https://doc.akka.io/docs/akka-enhancements/current/persistence-dc/index.html)
-supports active-active persistent entities across data centers.
+Akka持久化基于单个写入者原则。对于一个特定的`PersistenceId`，一次只能激活一个`EventSourcedBehavior`实例。如果多个实例要同时持久化事件，则事件将被交错处理，并且在重播时可能无法正确解释。集群分片确保数据中心中的每个id只有一个实体(`EventSourcedBehavior`)。Lightbend的[Multi-DC持久化](https://doc.akka.io/docs/akka-enhancements/current/persistence-dc/index.html)支持active-active跨数据中心的持久化实体.
 
-## Configuration
+<a id="configuration"></a>
+## 配置
 
-There are several configuration properties for the persistence module, please refer
-to the @ref:[reference configuration](../general/configuration-reference.md#config-akka-persistence).
+持久化模块有多个配置属性，请参考 @ref:[参考配置](../general/configuration-reference.md#config-akka-persistence)。
 
-The @ref:[journal and snapshot store plugins](../persistence-plugins.md) have specific configuration, see
-reference documentation of the chosen plugin.
+@ref:[日志和快照存储插件](../persistence-plugins.md)具有特定的配置，请参见所选择的插件的参考文档。
 
-## Example project
+<a id="example-project"></a>
+## 示例项目
 
-@java[@extref[Persistence example project](samples:akka-samples-persistence-java)]
-@scala[@extref[Persistence example project](samples:akka-samples-persistence-scala)]
-is an example project that can be downloaded, and with instructions of how to run.
-This project contains a Shopping Cart sample illustrating how to use Akka Persistence.
+@extref[持久化示例项目](samples:akka-samples-persistence-scala)是一个示例项目，可以被下载并带有如何运行的说明。该项目包含一个购物车样本，说明如何使用Akka持久化。
 
-The Shopping Cart sample is expanded further in the
-@java[@extref[CQRS example project](samples:akka-samples-cqrs-java)]
-@scala[@extref[CQRS example project](samples:akka-samples-cqrs-scala)]
-sample. In that sample the events are tagged to be consumed by even processors to build other representations
-from the events, or publish the events to other services.
+在 @extref[CQRS示例项目](samples:akka-samples-cqrs-scala)示例中进一步扩展了购物车示例。在该示例中，事件被标记为甚至由处理器使用，以根据事件构建其他表示，或将事件发布到其他服务。
 
-@java[@extref[Multi-DC Persistence example project](samples:akka-samples-persistence-dc-java)]
-@scala[@extref[Multi-DC Persistence example project](samples:akka-samples-persistence-dc-scala)]
-illustrates how to use Lightbend's [Multi-DC Persistence](https://doc.akka.io/docs/akka-enhancements/current/persistence-dc/index.html)
-with active-active persistent entities across data centers.
+@extref[Multi-DC持久化示例项目](samples:akka-samples-persistence-dc-scala)说明了如何将Lightbend的[Multi-DC持久化](https://doc.akka.io/docs/akka-enhancements/current/persistence-dc/index.html)与跨数据中心的active-active持久化实体一起使用。
