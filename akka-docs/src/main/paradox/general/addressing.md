@@ -1,171 +1,98 @@
 ---
 project.description: Local and remote Akka Actor references, locating Actors, Actor paths and addresses.
 ---
-# Actor References, Paths and Addresses
+<a id="actor-references-paths-and-addresses"></a>
+# Actor引用，路径和地址
 
-This chapter describes how actors are identified and located within a possibly
-distributed Akka application. 
+本章介绍如何识别actor并将其放置在一个可能的分布式Akka应用程序中。
 
 ![actor-paths-overview.png](../images/actor-paths-overview.png)
 
-The above image displays the relationship between the most important entities
-within an actor system, please read on for the details.
+上图显示了actor系统中最重要实体之间的关系，请继续阅读以获取详细信息。
 
-## What is an Actor Reference
+<a id="what-is-an-actor-reference"></a>
+## 什么是一个演员引用
 
-An actor reference is a subtype of `ActorRef`, whose foremost purpose is
-to support sending messages to the actor it represents. Each actor has access
-to its canonical (local) reference through the `ActorContext.self` field; this
-reference can be included in messages to other actors to get replies back.
+一个actor引用是一个`ActorRef`的子类型，其首要用途是支持向其表示的actor发送消息。每个actor都可以通过`ActorContext.self`字段访问它的标准(本地)引用。此引用可以包含在发给其他actor的消息中用来获得回复。
 
-There are several different types of actor references that are supported
-depending on the configuration of the actor system:
+根据actor系统的配置，支持几种不同类型的actor引用：
 
- * Purely local actor references are used by actor systems which are not
-configured to support networking functions. These actor references will not
-function if sent across a network connection to a remote JVM.
- * Local actor references when remoting is enabled are used by actor systems
-which support networking functions for those references which represent
-actors within the same JVM. In order to also be reachable when sent to
-other network nodes, these references include protocol and remote addressing
-information.
- * Remote actor references represent actors which are reachable using remote
-communication, i.e. sending messages to them will serialize the messages
-transparently and send them to the remote JVM.
- * There are several special types of actor references which behave like local
-actor references for all practical purposes:
-    * `PromiseActorRef` is the special representation of a `Promise`
-for the purpose of being completed by the response from an actor.
-`akka.pattern.ask` creates this actor reference.
-    * `DeadLetterActorRef` is the default implementation of the dead
-letters service to which Akka routes all messages whose destinations
-are shut down or non-existent.
-    * `EmptyLocalActorRef` is what Akka returns when looking up a
-non-existent local actor path: it is equivalent to a
-`DeadLetterActorRef`, but it retains its path so that Akka can send
-it over the network and compare it to other existing actor references for
-that path, some of which might have been obtained before the actor died.
- * And then there are some one-off internal implementations which you should
-never really see:
-    * There is an actor reference which does not represent an actor but acts only
-as a pseudo-supervisor for the root guardian, we call it “the one who walks
-the bubbles of space-time”.
-    * The first logging service started before actually firing up actor creation
-facilities is a fake actor reference which accepts log events and prints
-them directly to standard output; it is `Logging.StandardOutLogger`.
+ * 未配置为支持联网功能的actor系统使用的是纯本地actor引用。如果通过网络连接发送到远程JVM，则这些actor引用将不起作用。
+ * 启用远程处理后，本地actor引用将由actor系统使用，它支持那些表示相同JVM中的actor的引用的网络功能。为了在发送到其他网络节点时也可以访问，这些引用包括协议和远程寻址信息。
+ * 远程actor引用表示使用远程通信可到达的actor，即向它们发送消息将透明地序列化消息并将它们发送到远程JVM。
+ * 有几种特殊类型的actor引用，它们的行为类似于本地actor引用，用于所有实际用途：
+    * `PromiseActorRef`是一个`Promise`的特殊表示形式，用途是通过一个actor的响应来完成。`akka.pattern.ask`创建这个actor引用。
+    * `DeadLetterActorRef`是死信服务的默认实现，Akka将所有目标已关闭或不存在的消息路由到死信服务。
+    * `EmptyLocalActorRef`是Akka在查找不存在的本地actor路径时返回的结果：它等效于一个`DeadLetterActorRef`，但是会保留其路径，以便Akka可以通过网络发送它，并将它与其他现有actor引用的路径进行比较。其中一些可能是在actor死前获得的。。
+ * 然后有一些一次性的内部实现，您应该永远不会真正看到它们：
+    * 有一个actor引用，它不代表一个actor，而只是作为根守护者的伪监督者，我们称之为“在时空的气泡中行走的人”。
+    * 在实际启动actor创建工具之前启动的第一个日志服务是一个伪actor引用，它接受日志事件并将其直接打印到标准输出；它是`Logging.StandardOutLogger`。
 
-## What is an Actor Path?
+<a id="what-is-an-actor-path-"></a>
+## 什么是一个actor路径？
 
-Since actors are created in a strictly hierarchical fashion, there exists a
-unique sequence of actor names given by recursively following the supervision
-links between child and parent down towards the root of the actor system. This
-sequence can be seen as enclosing folders in a file system, hence we adopted
-the name “path” to refer to it, although actor hierarchy has some fundamental difference from file system hierarchy.
+由于actor是按照严格的分层方式创建的，存在一个唯一的actor名称序号，由通过递归地跟踪子actor和父actor之间的监控链接，向下到达actor系统的根给出的。actor路径由一个锚组成，锚标识actor系统，随后是path元素的连接，从根监督者到指定的actor；路径元素是被遍历的actor的名称，并由斜线分隔。
 
-An actor path consists of an anchor, which identifies the actor system,
-followed by the concatenation of the path elements, from root guardian to the
-designated actor; the path elements are the names of the traversed actors and
-are separated by slashes.
+<a id="what-is-the-difference-between-actor-reference-and-path-"></a>
+### Actor引用和路径之间有什么区别？
 
-### What is the Difference Between Actor Reference and Path?
+一个actor引用指定一个单独的actor，而且引用的生命周期与该actor的生命周期相匹配；一个actor路径代表一个名称，该名称可能由一个actor占用也可能没有，并且路径本身没有生命周期，因此永远不会无效。您可以在不创建一个actor的情况下创建一个actor路径。但是，如果不创建相应的actor，就不能创建一个actor引用。
 
-An actor reference designates a single actor and the life-cycle of the reference
-matches that actor’s life-cycle; an actor path represents a name which may or
-may not be inhabited by an actor and the path itself does not have a life-cycle,
-it never becomes invalid. You can create an actor path without creating an actor,
-but you cannot create an actor reference without creating corresponding actor.
+您可以创建一个actor，将其终止，然后使用相同的actor路径创建一个新actor。新创建的actor是actor的新替身。不是同一位actor。一个旧替身的actor引用对新替身无效。发送到旧actor引用的消息即使路径相同，也不会传递到新actor。
 
-You can create an actor, terminate it, and then create a new actor with the same
-actor path. The newly created actor is a new incarnation of the actor. It is not
-the same actor. An actor reference to the old incarnation is not valid for the new
-incarnation. Messages sent to the old actor reference will not be delivered
-to the new incarnation even though they have the same path.
+<a id="actor-path-anchors"></a>
+### actor路径锚
 
-### Actor Path Anchors
-
-Each actor path has an address component, describing the protocol and location
-by which the corresponding actor is reachable, followed by the names of the
-actors in the hierarchy from the root up. Examples are:
+每个actor路径都有一个地址组件，描述了可通过其访问相应actor的协议和位置，按照层次结构中从根开始的actor名称。例如：
 
 ```
 "akka://my-sys/user/service-a/worker1"               // purely local
 "akka://my-sys@host.example.com:5678/user/service-b" // remote
 ```
 
-The interpretation of the host and port part (i.e. `host.example.com:5678` in the example)
-depends on the transport mechanism used, but it must abide by the URI structural rules.
+主机和端口部分的解释(即例子中的`host.example.com:5678`)取决于所使用的传输机制，但是必须遵守URI结构规则。
 
-### Logical Actor Paths
+<a id="logical-actor-paths"></a>
+### 逻辑actor路径
 
-The unique path obtained by following the parental supervision links towards
-the root guardian is called the logical actor path. This path matches exactly
-the creation ancestry of an actor, so it is completely deterministic as soon as
-the actor system’s remoting configuration (and with it the address component of
-the path) is set.
+通过跟踪父监督者链接直到根监督者，获得的唯一路径称为逻辑actor路径。该路径与actor的创建祖先完全匹配，因此，只要设置了actor系统的远程配置(以及路径的地址组件)，它就是完全确定的。
 
-### Actor path alias or symbolic link?
+<a id="actor-path-alias-or-symbolic-link-"></a>
+### actor路径别名或符号链接？
 
-As in some real file-systems you might think of a “path alias” or “symbolic link” for an actor,
-i.e. one actor may be reachable using more than one path.
-However, you should note that actor hierarchy is different from file system hierarchy.
-You cannot freely create actor paths like symbolic links to refer to arbitrary actors.
+就像在某些实际文件系统中一样，您可能会想到一个actor的“路径别名”或“符号链接”，即，一个参与者可以使用多个路径来访问。但是，您应该注意到actor层次结构与文件系统层次结构不同。您不能自由创建诸如符号链接之类的actor路径来引用任意actor。
 
-## How are Actor References obtained?
+<a id="how-are-actor-references-obtained-"></a>
+## 如何获得actor引用？
 
-There are two general categories to how actor references may be obtained: by
-@ref:[creating actors](../typed/actor-lifecycle.md#creating-actors) or by looking them up through the @ref:[Receptionist](../typed/actor-discovery.md#receptionist).
+关于如何获得actor引用的方法，大致分为两类：通过 @ref:[创建actor](../typed/actor-lifecycle.md#creating-actors)或通过 @ref:[传达者](../typed/actor-discovery.md#receptionist)查找他们。
 
-## Actor Reference and Path Equality
+<a id="actor-reference-and-path-equality"></a>
+## actor引用和路径平等
 
-Equality of `ActorRef` match the intention that an `ActorRef` corresponds to
-the target actor incarnation. Two actor references are compared equal when they have
-the same path and point to the same actor incarnation. A reference pointing to a
-terminated actor does not compare equal to a reference pointing to another (re-created)
-actor with the same path. Note that a restart of an actor caused by a failure still
-means that it is the same actor incarnation, i.e. a restart is not visible for the
-consumer of the `ActorRef`.
+`ActorRef`匹配的相等性，意图是一个`ActorRef`对应于目标actor的化身。当两个actor引用具有相同的路径并指向相同的actor化身时，它们对比起来是相等的。一个指向终止的actor的引用与指向具有相同路径的另一个(重新创建的)actor的引用是不同的。注意，由于失败而导致的actor重新启动仍然意味着它是相同的actor化身，也就是说，对于`ActorRef`的消费者来说，重新启动是不可见的。
 
-If you need to keep track of actor references in a collection and do not care about
-the exact actor incarnation you can use the `ActorPath` as key, because the identifier
-of the target actor is not taken into account when comparing actor paths.
+如果你需要跟踪集合中的actor引用，而不关心确切的actor化身，你可以使用`ActorPath`作为键，因为在比较actor路径时不会考虑目标actor的标识符。
 
-## Reusing Actor Paths
+<a id="reusing-actor-paths"></a>
+## 重用actor路径
 
-When an actor is terminated, its reference will point to the dead letter mailbox,
-DeathWatch will publish its final transition and in general it is not expected
-to come back to life again (since the actor life cycle does not allow this).
+当一个actor终止时，它的引用会指向死信邮箱，DeathWatch将发布其最终转变，并且通常不希望它重新恢复生命(因为actor生命周期不允许这样做)。
 
-## What is the Address part used for?
+<a id="what-is-the-address-part-used-for-"></a>
+## 地址部分是用来做什么的？
 
-When sending an actor reference across the network, it is represented by its
-path. Hence, the path must fully encode all information necessary to send
-messages to the underlying actor. This is achieved by encoding protocol, host
-and port in the address part of the path string. When an actor system receives
-an actor path from a remote node, it checks whether that path’s address matches
-the address of this actor system, in which case it will be resolved to the
-actor’s local reference. Otherwise, it will be represented by a remote actor
-reference.
+当通过网络发送一个actor引用时，它由它的路径表示。因此，该路径必须完全编码将消息发送到底层参与者所需的所有信息。这是通过在路径字符串的地址部分对协议、主机和端口进行编码来实现的。当一个actor系统从远程节点接收一个actor路径时，它检查该路径的地址是否与此actor系统的地址匹配，在这种情况下，它将解析为actor的本地引用。否则，它将由远程actor引用表示。
 
 <a id="toplevel-paths"></a>
-## Top-Level Scopes for Actor Paths
+## actor路径的顶层范围
 
-At the root of the path hierarchy resides the root guardian above which all
-other actors are found; its name is `"/"`. The next level consists of the
-following:
+在路径层次结构的根部是根监督者，在该根监督者之上可以找到所有其他actor。它的名字是"/"。下一级别包括以下内容：
 
- * `"/user"` is the guardian actor for all user-created top-level actors;
-actors created using `ActorSystem.actorOf` are found below this one.
- * `"/system"` is the guardian actor for all system-created top-level actors,
-e.g. logging listeners or actors automatically deployed by configuration at
-the start of the actor system.
- * `"/deadLetters"` is the dead letter actor, which is where all messages sent to
-stopped or non-existing actors are re-routed (on a best-effort basis: messages
-may be lost even within the local JVM).
- * `"/temp"` is the guardian for all short-lived system-created actors, e.g.
-those which are used in the implementation of `ActorRef.ask`.
- * `"/remote"` is an artificial path below which all actors reside whose
-supervisors are remote actor references
+ * `"/user"` 是所有用户创建的顶级actor的监督者actor；使用`ActorSystem.actorOf`创建的actor可以在下面找到。
+ * `"/system"` 是所有系统的监督者actor - 创建顶层actor，例如，日志监听器或在actor系统启动时通过配置自动部署的actor。
+ * `"/deadLetters"` 是死信actor，所有发送给已停止或不存在的actor的消息都将在这里重新路由(尽了最大努力：即使在本地JVM中，消息也可能丢失)。
+ * `"/temp"` 是所有临时系统创建角色的监督者 - 创建actor，例如在执行`ActorRef.ask`时所使用的。
+ * `"/remote"` 这是一个人工路径，所有actor都位于其下，其监督者是远程actor的引用
 
-The need to structure the name space for actors like this arises from a central
-and very simple design goal: everything in the hierarchy is an actor, and all
-actors function in the same way. 
+为这样的actor组织名称空间的需求源于一个核心的、非常简单的设计目标：层次结构中的所有内容都是一个actor，并且所有actor以相同的方式起作用。

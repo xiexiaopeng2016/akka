@@ -1,135 +1,88 @@
 ---
 project.description: Hierarchical supervision, lifecycle monitoring and error or failure handling in Akka.
 ---
-# Supervision and Monitoring
+<a id="supervision-and-monitoring"></a>
+# 监督与监视
 
-This chapter outlines the concept behind supervision, the primitives offered
-and their semantics. For details on how that translates into real code, please
-refer to @ref:[supervision](../typed/fault-tolerance.md).
+本章概述了监督背后的概念，所提供的原语及其语义。有关如何将其转换为真实代码的详细信息，请参阅 @ref:[监督](../typed/fault-tolerance.md)。
 
-Supervision has changed since classic, for details on classic supervision see @ref:[Classic Supervision](../supervision-classic.md)
+自经典以来，监督已发生变化，有关经典监督的详细信息，请参阅 @ref:[经典监督](../supervision-classic.md)。
 
 <a id="supervision-directives"></a>
-## What Supervision Means
+## 监督的意义
 
-There are two categories of exception that can happen in an actor:
+在一个actor中可能发生两类异常:
 
- 1. Input validation errors, expected exceptions which can be handled with a regular try-catch 
-    or other language and standard library tools.
- 1. Unexpected **failures**, for example a network resource being unavailable, a disk write failing or perhaps
-    a bug in the application logic.
+ 1. 输入验证错误，预期的异常，可以使用常规try-catch或其他语言和标准库工具进行处理。
+ 2. 意外**故障**，例如网络资源不可用，磁盘写入失败或应用程序逻辑中的错误。
 
-Supervision deals with failures and should be separated from the business logic while validating data and handling
-of expected exceptions is a vital part of the business logic. Therefore supervision is added to an actor as decoration
-rather than something that is intermingled with the message processing logic of the actor.
+监视处理故障，应该与业务逻辑分离，同时验证数据和处理预期的异常是业务逻辑的重要组成部分。因此，监督被添加到一个actor作为装饰，而不是与actor的消息处理逻辑混杂在一起。
 
-Depending on the nature of the work to be supervised and the nature of the failure, supervision
-provides the following three strategies:
+根据被监督工作的性质和故障的性质，监督提供了以下三种策略：
 
- 1. Resume the actor, keeping its accumulated internal state
- 2. Restart the actor, clearing out its accumulated internal state, with a potential delay starting again
- 3. Stop the actor permanently
+ 1. 恢复actor，保留其累积的内部状态
+ 2. 重启actor，清除其累积的内部状态，并可能再次延迟
+ 3. 永久停止actor
 
-Since actors are part of a hierarchy it can often make sense to propagate
-the permanent failures upwards, if all children of an actor has stopped
-unexpectedly it may make sense for the actor itself to restart or stop to
-get back to a functional state. This can achieved through a combination of
-supervision and watching the children to get notified when they terminate.
-An example of this can be found in @ref:[Bubble failures up through the hierarchy](../typed/fault-tolerance.md#bubble).
+由于actor是层次结构的一部分，所以将永久性故障向上传播通常是有意义的，如果actor的所有子actor都意外停止，则actor本身重新启动或停止以返回到一个功能状态可能是有意义的。这可以通过一个监督结合和监视子actor来得到通知，当他们终止时。这方面的一个例子可以在 @ref:[冒泡失败贯穿整个层级](../typed/fault-tolerance.md#bubble)找到。
 
-## The Top-Level actors
+<a id="the-top-level-actors"></a>
+## 顶级的演员
 
-An actor system will during its creation start at least two actors. 
+一个actor系统在其创建期间将至少启动两个actor。
 
-### `/user`: the user guardian cator
+### `/user`: 用户监护者actor
 
-This is the top level user provided actor, meant to bootstrap the application
-by spawning subsystems as children. When the user guardian stops the entire
-actor system is shut down.
+这是顶级用户提供的actor，意味着通过生成子系统作为子actor来引导应用程序。当用户监督者停止时，整个actor系统都将关闭。
 
-### `/system`: the system guardian
+### `/system`: 系统监督者
 
-This special guardian has been introduced in order to achieve an orderly
-shut-down sequence where logging remains active while all normal actors
-terminate, even though logging itself is implemented using actors. This is
-realized by having the system guardian watch the user guardian and initiate its own
-shut-down upon having seen the user guardian stop. 
+引入这个特殊的监督者是为了实现有序的关闭顺序，在那里，虽然日志本身是使用actor实现的，但在所有正常actor终止时，日志仍然是活动的。这是通过让系统监督者监视用户监督者，并在看到用户监督者停止后启动自己的关闭来实现的。
 
 <a id="supervision-restart"></a>
-## What Restarting Means
+## 重启意味着什么
 
-When presented with an actor which failed while processing a certain message,
-causes for the failure fall into three categories:
+当处理某条消息时遇到一个actor失败时，引起失败的原因可以分为三类：
 
- * Systematic (i.e. programming) error for the specific message received
- * (Transient) failure of some external resource used during processing the message
- * Corrupt internal state of the actor
+ * 接收到的特定消息的系统(即编程)错误
+ * 处理消息期间使用的某些外部资源(暂时)失败
+ * actor的内部状态已损坏
 
-Unless the failure is specifically recognizable, the third cause cannot be
-ruled out, which leads to the conclusion that the internal state needs to be
-cleared out. If the supervisor decides that its other children or itself is not
-affected by the corruption—e.g. because of conscious application of the error
-kernel pattern—it is therefore best to restart the actor. This is carried out
-by creating a new instance of the underlying `Behavior` class and replacing
-the failed instance with the fresh one inside the child’s `ActorRef`;
-the ability to do this is one of the reasons for encapsulating actors within
-special references. The new actor then resumes processing its mailbox, meaning
-that the restart is not visible outside of the actor itself with the notable
-exception that the message during which the failure occurred is not
-re-processed.
+除非故障是特别可识别的，否则无法排除第三个原因，从而得出内部状态需要被清除的结论。如果监督者断定它的其它子actor或自身不受损坏的影响 — 例如，由于错误内核模式的有意识的应用 — 因此，最好重新启动actor。这是通过创建一个以`Behavior`类为基础的新实例，并在子actor的`ActorRef`内部将失败的实例替换为新的那个实例来实现的；能够这样做是在特殊引用中封装actor的一个原因。
 
-## What Lifecycle Monitoring Means
+然后，新的actor恢复对其邮箱的处理，这意味着重启在actor本身之外是不可见的，值得注意的例外是，发生故障的消息未得到重新处理。
+
+<a id="what-lifecycle-monitoring-means"></a>
+## 生命周期监控的含义
 
 @@@ note
 
-Lifecycle Monitoring in Akka is usually referred to as `DeathWatch`
+在Akka中，生命周期监控通常称为`DeathWatch`
 
 @@@
 
-In contrast to the special relationship between parent and child described
-above, each actor may monitor any other actor. Since actors emerge from
-creation fully alive and restarts are not visible outside of the affected
-supervisors, the only state change available for monitoring is the transition
-from alive to dead. Monitoring is thus used to tie one actor to another so that
-it may react to the other actor’s termination, in contrast to supervision which
-reacts to failure.
+与上面描述的父actor和子actor之间的特殊关系不同，每个actor可以监视任何其他actor。
 
-Lifecycle monitoring is implemented using a `Terminated` message to be
-received by the monitoring actor, where the default behavior is to throw a
-special `DeathPactException` if not otherwise handled. In order to start
-listening for `Terminated` messages, invoke
-`ActorContext.watch(targetActorRef)`.  To stop listening, invoke
-`ActorContext.unwatch(targetActorRef)`.  One important property is that the
-message will be delivered irrespective of the order in which the monitoring
-request and target’s termination occur, i.e. you still get the message even if
-at the time of registration the target is already dead.
+由于参与者从创建中完全活跃地出现，并且在受影响的监控器之外无法看到重新启动。由于actor从创造中完全活过来，并且重新启动在受影响的监督者之外是不可见的，因此可用于监视的唯一状态改变是从活动状到死亡的转换。因此，监控是用来把一个actor与另一个actor联系起来，以便对其它actor的终止作出反应，而不是对故障作出反应的监督。
 
-## Actors and exceptions
+生命周期监视是使用监视actor接收的一个`Terminated`消息来实现的，默认的行为是抛出一个特殊的`DeathPactException`，如果没有另外处理。为了开始监听`Terminated`消息，调用`ActorContext.watch(targetActorRef)`。要停止监听，请调用`ActorContext.unwatch(targetActorRef)`。一个重要的特性是，无论监视请求和目标的终止发生的顺序如何，消息都将被传递，也就是说，即使在注册时目标已经死亡，您仍然会收到消息。
 
-It can happen that while a message is being processed by an actor, that some
-kind of exception is thrown, e.g. a database exception.
+<a id="actors-and-exceptions"></a>
+## Actors与异常
 
-### What happens to the Message
+可能发生的是，当一个actor正在处理一条消息时，会抛出某种异常，例如数据库异常。
 
-If an exception is thrown while a message is being processed (i.e. taken out of
-its mailbox and handed over to the current behavior), then this message will be
-lost. It is important to understand that it is not put back on the mailbox. So
-if you want to retry processing of a message, you need to deal with it yourself
-by catching the exception and retry your flow. Make sure that you put a bound
-on the number of retries since you don't want a system to livelock (so
-consuming a lot of cpu cycles without making progress).
+<a id="what-happens-to-the-message"></a>
+### 消息发生了什么
 
-### What happens to the mailbox
+如果在处理一条消息时抛出一个异常(即从其邮箱中取出并移交给当前行为)，则该消息将丢失。重要的是要了解它不会放回邮箱。因此，如果您想重试消息处理，则需要自己捕获异常并重试处理流程。确保你设置了重试次数的上限，因为你不希望系统死机(livelock)(所以消耗了很多cpu周期却没有任何进展)。
 
-If an exception is thrown while a message is being processed, nothing happens to
-the mailbox. If the actor is restarted, the same mailbox will be there. So all
-messages on that mailbox will be there as well.
+<a id="what-happens-to-the-mailbox"></a>
+### 邮箱发生了什么
 
-### What happens to the actor
+如果在处理一条消息时引发一个异常，则邮箱不会做出任何反应。如果actor重新启动，则相同的邮箱将在那里。因此，该邮箱上的所有消息也将在那里。
 
-If code within an actor throws an exception, that actor is suspended and the
-supervision process is started. Depending on the
-supervisor’s decision the actor is resumed (as if nothing happened), restarted
-(wiping out its internal state and starting from scratch) or terminated.
+<a id="what-happens-to-the-actor"></a>
+### actor发生了什么
 
-
+如果一个actor中的代码引发一个异常，则该actor将被挂起并启动监督过程。根据监督者的决定，actor可以恢复(好像什么也没发生)，重新启动(清除其内部状态并从出错处开始)或终止。

@@ -1,62 +1,34 @@
-# Location Transparency
+<a id="location-transparency"></a>
+# 位置透明性
 
-The previous section describes how actor paths are used to enable location
-transparency. This special feature deserves some extra explanation, because the
-related term “transparent remoting” was used quite differently in the context
-of programming languages, platforms and technologies.
+前一节描述了如何使用actor路径来启用位置透明性。这个特殊功能值得进一步解释，因为相关术语“透明的远程处理”在编程语言，平台和技术的上下文中使用的方式完全不同。
 
-## Distributed by Default
+<a id="distributed-by-default"></a>
+## 默认分布
 
-Everything in Akka is designed to work in a distributed setting: all
-interactions of actors use purely message passing and everything is
-asynchronous. This effort has been undertaken to ensure that all functions are
-available equally when running within a single JVM or on a cluster of hundreds
-of machines. The key for enabling this is to go from remote to local by way of
-optimization instead of trying to go from local to remote by way of
-generalization. See [this classic paper](http://doc.akka.io/docs/misc/smli_tr-94-29.pdf)
-for a detailed discussion on why the second approach is bound to fail.
+Akka中的一切事物都被设计为在分布式环境中工作：actor的所有交互都使用纯粹的消息传递，并且一切都是异步的。进行这项工作是为了确保在单个JVM中或在数百台机器的集群中运行时，所有功能都是同样可用的。实现此功能的关键是通过优化的方式从远程转移到本地，而不是试图通过泛化的方式从本地转移到远程。请参阅[这篇经典文章](http://doc.akka.io/docs/misc/smli_tr-94-29.pdf)，详细讨论为什么第二种方法必然会失败。
 
-## Ways in which Transparency is Broken
+<a id="ways-in-which-transparency-is-broken"></a>
+## 破坏透明性的方式
 
-What is true of Akka need not be true of the application which uses it, since
-designing for distributed execution poses some restrictions on what is
-possible. The most obvious one is that all messages sent over the wire must be
-serializable.
+Akka的真实情况不必对使用它的应用程序真实，因为为分布式执行的设计会对可能的情况造成一些限制。最明显的一点是，通过网络发送的所有消息都必须是可序列化的。
 
-Another consequence is that everything needs to be aware of all interactions
-being fully asynchronous, which in a computer network might mean that it may
-take several minutes for a message to reach its recipient (depending on
-configuration). It also means that the probability for a message to be lost is
-much higher than within one JVM, where it is close to zero (still: no hard
-guarantee!).
+另一个后果是，所有事物都需要意识到所有交互都是完全异步的，这在计算机网络中，这意味着信息到达收件人可能需要几分钟时间(取决于配置)。
+这也意味着消息丢失的概率比在一个JVM中要高得多，在一个JVM中消息丢失的概率接近于零(仍然有：没有硬保证!)
 
 <a id="symmetric-communication"></a>
-## Peer-to-Peer vs. Client-Server
+## 点对点 vs 客户端-服务器
 
-Akka Remoting is a communication module for connecting actor systems in a peer-to-peer fashion,
-and it is the foundation for Akka Clustering. The design of remoting is driven by two (related)
-design decisions:
+Akka远程是一个以点对点方式连接actor系统的通信模块，并且是Akka集群的基础。远程调用的设计是由两个(相关的)设计决策驱动的:
 
- 1. Communication between involved systems is symmetric: if a system A can connect to a system B
-then system B must also be able to connect to system A independently.
- 2. The role of the communicating systems are symmetric in regards to connection patterns: there
-is no system that only accepts connections, and there is no system that only initiates connections.
+ 1. 涉及的系统之间的通信是对称的：如果系统A可以连接到系统B，则系统B也必须能够独立连接到系统A。
+ 2. 通信系统的角色在连接模式方面是对称的：没有系统仅接受连接，也没有系统仅发起连接。
 
-The consequence of these decisions is that it is not possible to safely create
-pure client-server setups with predefined roles (violates assumption 2).
-For client-server setups it is better to use HTTP or Akka I/O.
+这些决策的结果是不可能安全地创建具有预定义角色的纯客户机-服务器设置(违反了假设2)。对于客户端-服务器设置，最好使用HTTP或Akka I/O。
 
-**Important**: Using setups involving Network Address Translation, Load Balancers or Docker
-containers violates assumption 1, unless additional steps are taken in the
-network configuration to allow symmetric communication between involved systems.
-In such situations Akka can be configured to bind to a different network
-address than the one used for establishing connections between Akka nodes.
-See @ref:[Akka behind NAT or in a Docker container](../remoting-artery.md#remote-configuration-nat-artery).
+**重要提示**: 使用涉及网络地址转换的设置，负载均衡器或Docker容器会违反假设1，除非在网络配置中采取额外的步骤以允许所涉及系统之间的对称通信。在这种情况下，可以将Akka配置为绑定到不同的网络地址，而不是一个用来建立Akka节点之间的连接。请参阅 @ref:[NAT后面或Docker容器中的Akka](../remoting-artery.md#remote-configuration-nat-artery)。
 
-## Marking Points for Scaling Up with Routers
+<a id="marking-points-for-scaling-up-with-routers"></a>
+## 扩展路由器的标记点
 
-In addition to being able to run different parts of an actor system on
-different nodes of a cluster, it is also possible to scale up onto more cores
-by multiplying actor sub-trees which support parallelization (think for example
-a search engine processing different queries in parallel). The clones can then
-be routed to in different fashions, e.g. round-robin. See @ref:[Routing](../typed/routers.md) for more details.
+除了能够在集群的不同节点上运行actor系统的不同部分外，还可以扩展到更多的内核，通过增加支持并行化的actor子树(例如，一个搜索引擎并行处理不同的查询)。然后可以将克隆以不同的方式路由，例如循环法。有关更多详细信息，请参见 @ref:[路由](../typed/routers.md)。

@@ -1,114 +1,56 @@
 ---
 project.description: The Akka ActorSystem.
 ---
-# Actor Systems
+<a id="actor-systems"></a>
+# Actor系统
 
-Actors are objects which encapsulate state and behavior, they communicate
-exclusively by exchanging messages which are placed into the recipient’s
-mailbox. In a sense, actors are the most stringent form of object-oriented
-programming, but it serves better to view them as persons: while modeling a
-solution with actors, envision a group of people and assign sub-tasks to them,
-arrange their functions into an organizational structure and think about how to
-escalate failure (all with the benefit of not actually dealing with people,
-which means that we need not concern ourselves with their emotional state or
-moral issues). The result can then serve as a mental scaffolding for building
-the software implementation.
+Actor是封装状态和行为的对象，它们仅通过交换放置在接收者邮箱中的消息进行通信。从某种意义上说，actor是面向对象编程最严格的形式，但把他们看成人更好：在用actor建模一个解决方案时，设想一组人并为他们分配子任务，将他们的功能安排到一个组织结构并考虑如何升级故障(所有这些都是不实际与人打交道的好处，这意味着我们不必担心自己的情感状态或道德问题)。然后，结果可以作为构建软件实现的思想框架。
 
 @@@ note
 
-An ActorSystem is a heavyweight structure that will allocate 1…N Threads,
-so create one per logical application.
+一个ActorSystem是一个重量级的结构，它将分配1…N个线程，因此请为每个逻辑应用程序创建一个。
 
 @@@
 
-## Hierarchical Structure
+<a id="hierarchical-structure"></a>
+## 层次结构
 
-Like in an economic organization, actors naturally form hierarchies. One actor,
-which is to oversee a certain function in the program might want to split up
-its task into smaller, more manageable pieces. For this purpose, it starts child
-actors.
+就像在一个经济组织中一样，actor自然会形成层次结构。一个actor，它负责监督程序中某个功能，可能希望将其任务分解成更小、更易于管理的部分。为此，它启动了子actor。
 
-The quintessential feature of actor systems is that tasks are split up and
-delegated until they become small enough to be handled in one piece. In doing
-so, not only is the task itself clearly structured, but the resulting actors
-can be reasoned about in terms of which messages they should process, how they
-should react normally and how failure should be handled.
+actor系统的典型特征是任务被分解和委托，直到它们变得足够小，可以单独处理。这样做时，不仅任务本身的结构非常清晰，还可以对作为结果的actor进行推理，根据应该处理哪些消息，他们应该如何正常反应，以及应该如何处理失败。
 
-Compare this to layered software design which easily devolves into defensive
-programming with the aim of not leaking any failure out: if the problem is
-communicated to the right person, a better solution can be found than if
-trying to keep everything “under the carpet”.
+将此与分层软件设计进行比较，它很容易演变为防御性编程，目的是不泄漏任何故障：如果将问题传达给正确的人，则比将一切都“掩盖”的情况下，可以找到更好的解决方案。
 
-Now, the difficulty in designing such a system is how to decide how to
-structure the work. There is no single best solution, but there are a few
-guidelines which might be helpful:
+现在，设计这样一个系统的困难在于如何决定如何组织工作。没有单独的最佳解决方案，但是有一些准则可能会有所帮助：
 
- * If one actor carries very important data (i.e. its state shall not be lost
-   if avoidable), this actor should source out any possibly dangerous sub-tasks
-   to children and handle failures of these children as appropriate. Depending on
-   the nature of the requests, it may be best to create a new child for each request, 
-   which simplifies state management for collecting the replies. This is known as the
-   “Error Kernel Pattern” from Erlang.
- * If one actor depends on another actor for carrying out its duty, it should
-   watch that other actor’s liveness and act upon receiving a termination
-   notice.
- * If one actor has multiple responsibilities each responsibility can often be pushed
-   into a separate child to make the logic and state more simple.
+ * 如果一个actor传递非常重要的数据(即如果可以避免，其状态不会丢失)，这个actor应该将任何可能危险的子任务分配给子actor，并适当地处理这些子actor的故障。根据请求的性质，最好为每个请求创建一个新的子actor，从而简化用于收集答复的状态管理。这就是Erlang中的“错误内核模式”。
+ * 如果一个actor要依靠另一个actor来履行职责，则应监视另一个actor的生命，并在收到终止通知后采取行动。
+ * 如果一个actor有多个职责，则通常可以将每个职责推入一个单独的子actor中，以使逻辑和状态变得更简单。
 
-## Configuration Container
+<a id="configuration-container"></a>
+## 配置容器
 
-The actor system as a collaborating ensemble of actors is the natural unit for
-managing shared facilities like scheduling services, configuration, logging,
-etc. Several actor systems with different configurations may co-exist within the
-same JVM without problems, there is no global shared state within Akka itself,
-however the most common scenario will only involve a single actor system per JVM.
+actor系统作为一个协作的actor集合，是管理共享设施的自然单元，比如调度服务、配置、日志记录等。
+具有不同配置的多个actor系统可以在同一个JVM中共存，不会出现问题，在Akka内部没有全局共享状态。然而，最常见的场景是每个JVM只涉及一个actor系统。
 
-Couple this with the transparent communication between actor systems — within one
-node or across a network connection — and actor systems are a perfect fit to form
-a distributed application.
+将此与Actor系统之间之间的透明通信结合在一起 — 在一个节点内或跨网络连接 — actor系统非常适合构建分布式应用程序。
 
-## Actor Best Practices
+<a id="actor-best-practices"></a>
+## Actor最佳实践
 
- 1. Actors should be like nice co-workers: do their job efficiently without
-    bothering everyone else needlessly and avoid hogging resources. Translated
-    to programming this means to process events and generate responses (or more
-    requests) in an event-driven manner. Actors should not block (i.e. passively
-    wait while occupying a Thread) on some external entity—which might be a
-    lock, a network socket, etc.—unless it is unavoidable; in the latter case
-    see below.
- 2. Do not pass mutable objects between actors. In order to ensure that, prefer
-    immutable messages. If the encapsulation of actors is broken by exposing
-    their mutable state to the outside, you are back in normal Java concurrency
-    land with all the drawbacks.
- 3. Actors are made to be containers for behavior and state, embracing this
-    means to not routinely send behavior within messages (which may be tempting
-    using Scala closures). One of the risks is to accidentally share mutable
-    state between actors, and this violation of the actor model unfortunately
-    breaks all the properties which make programming in actors such a nice
-    experience.
- 4. The top-level actor of the actor system is the innermost part of your 
-    Error Kernel, it should only be responsible for starting the various 
-    sub systems of your application, and not contain much logic in itself, 
-    prefer truly hierarchical systems. This has benefits with
-    respect to fault-handling (both considering the granularity of configuration
-    and the performance) and it also reduces the strain on the guardian actor,
-    which is a single point of contention if over-used.
+ 1. actor应该像好同事一样：有效地完成工作，而不会不必要地打扰其他人，并且避免浪费资源。翻译成编程，这意味着以事件驱动的方式处理事件并生成响应(或更多请求)。actor不应阻塞(例如，占用线程时被动地等待)某个外部实体 — 那些可能是锁，网络套接字等 — 除非不可避免；在后一种情况下，请参见下文。
+ 2. 不要在actor之间传递可变的对象。为了确保这一点，首选不可变消息。如果通过将actor的可变状态暴露于外部而破坏了actor的封装，那么您将回到正常的Java并发领域，并具有所有缺点。
+ 3. Actor被作为行为和状态的容器，接受这一点意味着不要经常在信息中传递行为(使用Scala闭包可能很诱人)。其中一个风险是意外地在actor之间共享可变状态，遗憾的是，这种对actor模型的违反破坏了所有的属性，而这些属性使actor中的编程成为一种很好的体验。
+ 4. actor系统的顶级actor是你的Error Kernel的最内层部分，它应该仅负责启动应用程序的各个子系统，并且本身不包含太多逻辑，更喜欢真正的分层系统。这在处理错误方面有好处(同时考虑配置的粒度和性能)，同时也减轻了监督者actor的压力，如果过度使用，这将是一个争议点。
 
-## What you should not concern yourself with
+<a id="what-you-should-not-concern-yourself-with"></a>
+## 你不该关心的事
 
-An actor system manages the resources it is configured to use in order to run
-the actors which it contains. There may be millions of actors within one such
-system, after all the mantra is to view them as abundant and they weigh in at
-an overhead of only roughly 300 bytes per instance. Naturally, the exact order
-in which messages are processed in large systems is not controllable by the
-application author, but this is also not intended. Take a step back and relax
-while Akka does the heavy lifting under the hood.
+一个actor系统管理资源，它被配置为用于运行它所包含的actor。在一个这样的系统中可能有数百万个actor，毕竟，我们通常认为它们是丰富的，每个实例的开销大约只有300字节。当然，在大型系统中处理消息的确切顺序是应用程序作者无法控制的，但这也不是必须的。后退一步，放松一下，Akka做引擎盖下的苦活。
 
-## Terminating ActorSystem
+<a id="terminating-actorsystem"></a>
+## 终止ActorSystem
 
-When you know everything is done for your application, you can have the user guardian
- actor stop, or call the `terminate` method of `ActorSystem`. That will run @ref:[`CoordinatedShutdown`](../coordinated-shutdown.md)
-stopping all running actors.
+当您知道应用程序已完成所有操作后，您可以停止用户监督者actor或调用`ActorSystem`的`terminate`方法。这将运行 @ref:[`CoordinatedShutdown`](../coordinated-shutdown.md)停止所有正在运行的actor。
 
-If you want to execute some operations while terminating `ActorSystem`,
-look at @ref:[`CoordinatedShutdown`](../coordinated-shutdown.md).
+如果要在终止`ActorSystem`时执行一些操作，请查看 @ref:[`CoordinatedShutdown`](../coordinated-shutdown.md)。

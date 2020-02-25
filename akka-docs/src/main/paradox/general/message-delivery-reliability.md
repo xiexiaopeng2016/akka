@@ -1,363 +1,217 @@
 ---
 project.description: Akka message delivery semantics, at-most-once delivery and message ordering.
 ---
-# Message Delivery Reliability
+<a id="message-delivery-reliability"></a>
+# 消息传递的可靠性
 
-Akka helps you build reliable applications which make use of multiple processor
-cores in one machine (“scaling up”) or distributed across a computer network
-(“scaling out”). The key abstraction to make this work is that all interactions
-between your code units—actors—happen via message passing, which is why the
-precise semantics of how messages are passed between actors deserve their own
-chapter.
+Akka可帮助您构建可靠的应用程序，这些应用程序在一台计算机中使用多个处理器内核("垂直扩展")或分布在整个计算机网络中("横向扩展")。实现此工作的关键抽象是，代码单元(actor)之间的所有交互都是通过消息传递进行的，这就是为什么在actor之间如何传递消息的精确语义应该有自己的一章。
 
-In order to give some context to the discussion below, consider an application
-which spans multiple network hosts. The basic mechanism for communication is
-the same whether sending to an actor on the local JVM or to a remote actor, but
-there will be observable differences in the latency of delivery
-(possibly also depending on the bandwidth of the network link and the message
-size) and the reliability. In case of a remote message send there are
-more steps involved which means that more can go wrong. Another aspect is that
-local sending will pass a reference to the message inside the same JVM,
-without any restrictions on the underlying object which is sent, whereas a
-remote transport will place a limit on the message size.
+为了给下面的讨论一些上下文，考虑一个跨越多个网络主机的应用程序。无论是发送给本地JVM上的actor还是发送给远程actor，通信的基本机制都是相同的，但是传递的延迟会出现明显的差异(也可能取决于网络链接的带宽和消息大小)和可靠性。在远程消息发送的情况下，会涉及更多的步骤，这意味着可能会出现更多的错误。另一方面，本地发送将传递对同一JVM中的消息的引用，不受发送的底层对象的任何限制，而远程传输将限制消息的大小。
 
-Writing your actors such that every interaction could possibly be remote is the
-safe, pessimistic bet. It means to only rely on those properties which are
-always guaranteed and which are discussed in detail below.  This has 
-some overhead in the actor’s implementation. If you are willing to sacrifice full
-location transparency—for example in case of a group of closely collaborating
-actors—you can place them always on the same JVM and enjoy stricter guarantees
-on message delivery. The details of this trade-off are discussed further below.
+将您的actor编写为每个交互都可能是远程的，这是一种安全但悲观的做法。这意味着只依赖于那些总是被保证的属性，这些属性将在下面详细讨论。这在actor的实现中有一些开销。如果您愿意牺牲完全的位置透明性 — 例如一组紧密合作的actor — 您可以始终将它们放在同一个JVM上，并享受更严格的消息传递保证。这种权衡的细节将在下面进一步讨论。
 
-As a supplementary part we give a few pointers at how to build stronger
-reliability on top of the built-in ones. The chapter closes by discussing the
-role of the “Dead Letter Office”.
+作为补充部分，我们给出了一些关于如何在内置可靠性的基础上构建更强的可靠性的指示。本章最后讨论了“死信办公室”的作用。
 
-## The General Rules
+<a id="the-general-rules"></a>
+## 一般规则
 
-These are the rules for message sends (i.e. the `tell` or `!` method, which
-also underlies the `ask` pattern):
+这些是消息发送的规则(即`tell`或`!`方法，这也是`ask`模式的基础)：
 
- * **at-most-once delivery**, i.e. no guaranteed delivery
- * **message ordering per sender–receiver pair**
+ * **最多一次交付**，即不保证交付
+ * **每对发件者-收件者的消息排序**
 
-The first rule is typically found also in other actor implementations while the
-second is specific to Akka.
+第一个规则通常也可以在其他actor实现中找到，而第二个规则是特定于Akka的。
 
-### Discussion: What does “at-most-once” mean?
+<a id="discussion-what-does-at-most-once-mean-"></a>
+### 讨论："最多一次"是什么意思？
 
-When it comes to describing the semantics of a delivery mechanism, there are
-three basic categories:
+在描述传递机制的语义时，有三个基本类别：
 
- * **at-most-once** delivery means that for each message handed to the
-mechanism, that message is delivered once or not at all; in more casual terms
-it means that messages may be lost.
- * **at-least-once** delivery means that for each message handed to the
-mechanism potentially multiple attempts are made at delivering it, such that
-at least one succeeds; again, in more casual terms this means that messages
-may be duplicated but not lost.
- * **exactly-once** delivery means that for each message handed to the mechanism
-exactly one delivery is made to the recipient; the message can neither be
-lost nor duplicated.
+ * **最多一次** 传递意味着对于传递给该机制的每条消息，该消息仅传递一次或根本不传递；随意地说，这意味着消息可能会丢失。
+ * **至少一次** 传递意味着对于传递给该机制的每条消息，可能都进行了多次尝试来传递该消息，从而至少成功了一次；再次，更随意地说，这意味着消息可以重复但不会丢失。
+ * **恰好一次** 传递意味着对传递给该机制的每条消息，精确地传递给收件人。该消息既不会丢失也不会重复。
 
-The first one is the cheapest—highest performance, least implementation
-overhead—because it can be done in a fire-and-forget fashion without keeping
-state at the sending end or in the transport mechanism. The second one requires
-retries to counter transport losses, which means keeping state at the sending
-end and having an acknowledgement mechanism at the receiving end. The third is
-most expensive—and has consequently worst performance—because in addition to
-the second it requires state to be kept at the receiving end in order to filter
-out duplicate deliveries.
+第一个是最便宜的 — 最高的性能，最少的实现开销 — 因为它可以在发送端或传输机制中以即发即弃的方式完成，而无需保持状态。第二种方法需要重试来抵消传输损失，这意味着在发送端保持状态，在接收端有一个确认机制。第三种是最昂贵的 — 并且因此具有最差的性能 — 因为除了第二个之外，它还要求在接收端保留状态，以便过滤掉重复的发送。
 
-### Discussion: Why No Guaranteed Delivery?
+<a id="discussion-why-no-guaranteed-delivery-"></a>
+### 讨论：为什么不保证交付？
 
-At the core of the problem lies the question what exactly this guarantee shall
-mean:
+问题的核心在于，这一保证究竟意味着什么：
 
- 1. The message is sent out on the network?
- 2. The message is received by the other host?
- 3. The message is put into the target actor's mailbox?
- 4. The message is starting to be processed by the target actor?
- 5. The message is processed successfully by the target actor?
+ 1. 消息是在网络上发送的吗?
+ 2. 消息被其他主机接收了吗?
+ 3. 消息被放入目标actor的邮箱了吗?
+ 4. 该消息已开始由目标参与者处理了吗？
+ 5. 该消息已由目标actor成功处理了吗？
 
-Each one of these have different challenges and costs, and it is obvious that
-there are conditions under which any message passing library would be unable to
-comply; think for example about configurable mailbox types and how a bounded
-mailbox would interact with the third point, or even what it would mean to
-decide upon the “successfully” part of point five.
+这些中的每一个都有不同的挑战和成本，显然，在某些情况下，任何传递消息的库都无法遵守；例如，考虑可配置的邮箱类型以及有界邮箱如何与第三点交互，或者甚至决定第五部分“成功”意味着什么。
 
-Along those same lines goes the reasoning in [Nobody Needs Reliable
-Messaging](http://www.infoq.com/articles/no-reliable-messaging). The only meaningful way for a sender to know whether an
-interaction was successful is by receiving a business-level acknowledgement
-message, which is not something Akka could make up on its own (neither are we
-writing a “do what I mean” framework nor would you want us to).
+同样的道理也适用于[没人需要可靠的信息](http://www.infoq.com/articles/no-reliable-messaging)的推理。发送者知道交互是否成功的唯一有意义的方式是通过接收业务级别的确认消息，这不是Akka自己可以弥补的(我们也不是在写一个“做我想做的”的框架，你也不希望我们这样做)。
 
-Akka embraces distributed computing and makes the fallibility of communication
-explicit through message passing, therefore it does not try to lie and emulate
-a leaky abstraction. This is a model that has been used with great success in
-Erlang and requires the users to design their applications around it. You can
-read more about this approach in the [Erlang documentation](http://www.erlang.org/faq/academic.html) (section 10.9 and
-10.10), Akka follows it closely.
+Akka采用了分布式计算，并通过消息传递明确了通信的不可靠性，因此，它不会试图撒谎和模仿一个漏洞百出的抽象概念。这个模型在Erlang中使用得非常成功，它要求用户围绕它设计应用程序。您可以在[Erlang文档](http://www.erlang.org/faq/academic.html)(第10.9和10.10节)中阅读有关此方法的更多信息，Akka紧跟其后。
 
-Another angle on this issue is that by providing only basic guarantees those
-use cases which do not need stronger reliability do not pay the cost of their
-implementation; it is always possible to add stronger reliability on top of
-basic ones, but it is not possible to retro-actively remove reliability in order
-to gain more performance.
+在这个问题上的另一个角度是，通过仅仅提供基本的保证，那些不需要更强可靠性的用例不会支付实现的成本；在基本可靠性的基础上增加更强的可靠性总是可能的，但是为了获得更好的性能而主动地向后删除可靠性是不可能的。
 
 <a id="message-ordering"></a>
-### Discussion: Message Ordering
+### 讨论：消息排序
 
-The rule more specifically is that *for a given pair of actors, messages sent
-directly from the first to the second will not be received out-of-order.* The
-word *directly* emphasizes that this guarantee only applies when sending with
-the *tell* operator to the final destination, not when employing mediators or
-other message dissemination features (unless stated otherwise).
+更具体的规则是*对于给定的一对actor，从第一个actor直接发送到第二个actor的消息不会无序接收*。*直接*这个词强调，此保证仅在与*tell*运算符一起发送到最终目的地时才适用，而在使用调解器或其他消息分发功能时不适用(除非另有说明)。
 
-The guarantee is illustrated in the following:
+保证的说明如下：
 
-> Actor `A1` sends messages `M1`, `M2`, `M3` to `A2`
+> Actor `A1` 发送消息 `M1`, `M2`, `M3` 给 `A2`
 >
-> Actor `A3` sends messages `M4`, `M5`, `M6` to `A2`
+> Actor `A3` 发送消息 `M4`, `M5`, `M6` 给 `A2`
 
-This means that:
+这意味着：
  
- 1. If `M1` is delivered it must be delivered before `M2` and `M3`
- 2. If `M2` is delivered it must be delivered before `M3`
- 3. If `M4` is delivered it must be delivered before `M5` and `M6`
- 4. If `M5` is delivered it must be delivered before `M6`
- 5. `A2` can see messages from `A1` interleaved with messages from `A3`
- 6. Since there is no guaranteed delivery, any of the messages may be dropped, i.e. not arrive at `A2`
-
-
-@@@ note
-
-It is important to note that Akka’s guarantee applies to the order in which
-messages are enqueued into the recipient’s mailbox. If the mailbox
-implementation does not respect FIFO order (e.g. a `PriorityMailbox`),
-then the order of processing by the actor can deviate from the enqueueing
-order.
-
-@@@
-
-Please note that this rule is **not transitive**:
-
-> Actor `A` sends message `M1` to actor `C`
->
-> Actor `A` then sends message `M2` to actor `B`
->
-> Actor `B` forwards message `M2` to actor `C`
->
-> Actor `C` may receive `M1` and `M2` in any order
-
-Causal transitive ordering would imply that `M2` is never received before
-`M1` at actor `C` (though any of them might be lost). This ordering can be
-violated due to different message delivery latencies when `A`, `B` and
-`C` reside on different network hosts, see more below.
+ 1. 如果`M1`已交付，它必须在`M2`和`M3`之前交付
+ 2. 如果`M2`已交付，它必须在`M3`之前交付
+ 3. 如果`M4`已交付，它必须在`M5`和`M6`之前交付
+ 4. 如果`M5`已交付，它必须在`M6`之前交付
+ 5. `A2`可以看到来自`A1`和`A3`的交错的消息
+ 6. 由于没有保证交付，因此任何消息都可能被丢弃，即未到达`A2`
 
 @@@ note
 
-Actor creation is treated as a message sent from the parent to the child,
-with the same semantics as discussed above. Sending a message to an actor in
-a way which could be reordered with this initial creation message means that
-the message might not arrive because the actor does not exist yet. An example
-where the message might arrive too early would be to create a remote-deployed
-actor R1, send its reference to another remote actor R2 and have R2 send a
-message to R1. An example of well-defined ordering is a parent which creates
-an actor and immediately sends a message to it.
+重要的是要注意，Akka的保证适用于消息进入接收者邮箱的顺序。如果邮箱实现不遵守FIFO顺序(例如一个`PriorityMailbox`)，则actor的处理顺序可能会与入队顺序不同。
 
 @@@
 
-#### Communication of failure
+请注意，此规则是**不传递**的：
 
-Please note, that the ordering guarantees discussed above only hold for user messages between actors. Failure of a child
-of an actor is communicated by special system messages that are not ordered relative to ordinary user messages. In
-particular:
-
-> Child actor `C` sends message `M` to its parent `P`
+> Actor`A`发送消息`M1`给actor`C`
 >
-> Child actor fails with failure `F`
+> Actor`A`然后发送消息`M2`给actor`B`
 >
-> Parent actor `P` might receive the two events either in order `M`, `F` or `F`, `M`
+> Actor`B`转发`M2`给actor`C`
+>
+> Actor`C`将受到`M1`和`M2`以任何顺序
 
-The reason for this is that internal system messages have their own mailboxes therefore the ordering of enqueue calls of
-a user and system messages cannot guarantee the ordering of their dequeue times.
+因果关系传递排序意味着`M2`在`M1`之前从未在actor`C`处收到(尽管其中任何一个都可能丢失)。当`A`，`B`和`C`驻留在不同的网络主机上时，由于消息传递延迟不同，可能会违反这种顺序。
 
-## The Rules for In-JVM (Local) Message Sends
+@@@ note
 
-### Be careful what you do with this section!
+Actor创建被视为从父对象发送到子对象的消息，其语义与前面讨论的相同。以可以与初始创建消息一起重新排序的方式向参与者发送消息意味着消息可能不会到达，因为参与者还不存在。消息可能太早到达的一个示例是创建远程部署的actor R1，将它的引用发送给另一个远程参与者R2，并让R2向R1发送一条消息。定义良好的排序的一个例子是父actor，它创建一个actor并立即向它发送一条消息。
 
-Relying on the stronger reliability in this section is not recommended since it
-will bind your application to local-only deployment: an application may have to
-be designed differently (as opposed to just employing some message exchange
-patterns local to some actors) in order to be fit for running on a cluster of
-machines. Our credo is “design once, deploy any way you wish”, and to achieve
-this you should only rely on @ref:[The General Rules](#the-general-rules).
+@@@
 
-### Reliability of Local Message Sends
+<a id="communication-of-failure"></a>
+#### 沟通失败
 
-The Akka test suite relies on not losing messages in the local context (and for
-non-error condition tests also for remote deployment), meaning that we
-actually do apply the best effort to keep our tests stable. A local `tell`
-operation can however fail for the same reasons as a normal method call can on
-the JVM:
+请注意，上面讨论的顺序保证只适用于actor之间的用户消息。一个actor的子actor的失败是通过特殊的系统消息进行通信的，这些系统消息的顺序与普通用户消息不同。尤其是：
+
+> 子actor`C`发送消息`M`给它的父actor`P`
+>
+> 子actor失败，由于故障`F`
+>
+> 父actor`P`可能收到两个事件，按顺序`M`，`F`或`F`，`M`
+
+这样的原因是，内部系统消息有自己的邮箱，因此用户和系统消息的入队调用顺序不能保证它们的出队时间顺序。
+
+<a id="the-rules-for-in-jvm-local-message-sends"></a>
+## JVM中(本地)消息的发送规则
+
+<a id="be-careful-what-you-do-with-this-section-"></a>
+### 请谨慎操作本节！
+
+本节中不推荐使用更强的可靠性，因为它会将应用程序绑定到本地部署：一个应用程序可能需要进行不同的设计(而不是仅仅对某些actor使用某些消息交换模式)以适应在一组机器上运行。我们的信条是"一次设计，按您希望的方式部署"，而要做到这一点，您仅应依靠 @ref:[通用规则](#the-general-rules)。
+
+<a id="reliability-of-local-message-sends"></a>
+### 本地消息发送的可靠性
+
+Akka测试套件依赖于在本地上下文中不丢失消息(对于非错误条件测试也适用于远程部署)，这意味着我们实际上已经尽了最大的努力来保持测试的稳定。然而，一个本地`tell`操作可能会失败，原因与JVM上普通方法调用失败的原因相同:
 
  * `StackOverflowError`
  * `OutOfMemoryError`
- * other `VirtualMachineError`
+ * 其他`VirtualMachineError`
 
-In addition, local sends can fail in Akka-specific ways:
+此外，本地发送可能以Akka特定的方式失败：
 
- * if the mailbox does not accept the message (e.g. full BoundedMailbox)
- * if the receiving actor fails while processing the message or is already
-terminated
+ * 如果邮箱不接受该消息（例如已经满了的BoundedMailbox）
+ * 如果接收方actor在处理消息时失败，或者已经终止
 
-While the first is a matter of configuration the second deserves some
-thought: the sender of a message does not get feedback if there was an
-exception while processing, that notification goes to the supervisor instead.
-This is in general not distinguishable from a lost message for an outside
-observer.
+虽然第一个是配置问题，但是第二个值得思考：如果处理过程中出现异常，则消息的发送方不会得到反馈，而是将通知发送给监督者。对于外部观察者来说，这通常与丢失的消息难以区分。
 
-### Ordering of Local Message Sends
+<a id="ordering-of-local-message-sends"></a>
+### 本地消息发送的顺序
 
-Assuming strict FIFO mailboxes the aforementioned caveat of non-transitivity of
-the message ordering guarantee is eliminated under certain conditions. As you
-will note, these are quite subtle as it stands, and it is even possible that
-future performance optimizations will invalidate this whole paragraph. The
-possibly non-exhaustive list of counter-indications is:
+假设使用严格的FIFO邮箱，在一定条件下消除了前述消息排序保证的非传递性警告。正如您将注意到的那样，这些都是非常微妙的，甚至有可能未来的性能优化会使整个段落无效。可能不完整的反指示列表是：
 
- * Before receiving the first reply from a top-level actor, there is a lock
-which protects an internal interim queue, and this lock is not fair; the
-implication is that enqueue requests from different senders which arrive
-during the actor’s construction (figuratively, the details are more involved)
-may be reordered depending on low-level thread scheduling. Since completely
-fair locks do not exist on the JVM this is unfixable.
- * The same mechanism is used during the construction of a Router, more
-precisely the routed ActorRef, hence the same problem exists for actors
-deployed with Routers.
- * As mentioned above, the problem occurs anywhere a lock is involved during
-enqueueing, which may also apply to custom mailboxes.
+ * 在收到来自顶级actor的第一条答复之前，有一个用于保护内部临时队列的锁，并且该锁是不公平的。这意味着来自不同发送方的请求将在actor构建期间到达(例如，涉及更多细节)可能会根据低级线程调度进行重新排序。因为JVM上不存在完全公平的锁，所以这个问题无法解决。
+ * 在一个路由器的构造过程中使用相同的机制，更确切地说是在路由的ActorRef的构造中，因此，对于部署了路由器的actor也存在同样的问题。
+ * 如上所述，这个问题发生在排队过程中涉及锁的任何地方，这也适用于自定义邮箱。
 
-This list has been compiled carefully, but other problematic scenarios may have
-escaped our analysis.
+该列表已经过仔细地编辑，但是其他有问题的情况可能会逃脱我们的分析。
 
-### How does Local Ordering relate to Network Ordering
+<a id="how-does-local-ordering-relate-to-network-ordering"></a>
+### 本地排序与网络排序有何关系
 
-The rule that *for a given pair of actors, messages sent directly from the first 
-to the second will not be received out-of-order* holds for messages sent over the
-network with the TCP based Akka remote transport protocol.
+该规则*对于给定的一对actor，从第一个actor直接发送到第二个actor的消息不会无序接收*，保存使用基于TCP的Akka远程传输协议通过网络发送的消息。
 
-As explained in the previous section local message sends obey transitive causal
-ordering under certain conditions. This ordering can be violated due to different
-message delivery latencies. For example:
+如前一节所述，本地消息在某些条件下发送会服从因果顺序。由于不同的消息传递延迟，可能会违反此顺序。例如：
 
-> Actor `A` on node-1 sends message `M1` to actor `C` on node-3
+> 节点1上的Actor`A`发送消息`M1`给节点3上的actor`C`
 >
-> Actor `A` on node-1 then sends message `M2` to actor `B` on node-2
+> 节点1上的Actor`A`然后发送消息`M2`给节点2上的actor`B`
 >
-> Actor `B` on node-2 forwards message `M2` to actor `C` on node-3
+> 节点2上的actor`B`转发消息`M2`给节点3上的actor`C`
 >
-> Actor `C` may receive `M1` and `M2` in any order
+> Actor`C`会收到`M1`和`M2`以任何顺序
 
-It might take longer time for `M1` to "travel" to node-3 than it takes
-for `M2` to "travel" to node-3 via node-2.
+`M1`“旅行”到节点3的时间可能比`M2`通过节点2“旅行”到节点3的时间要长。
 
-## Higher-level abstractions
+<a id="higher-level-abstractions"></a>
+## 更高层次的抽象
 
-Based on a small and consistent tool set in Akka's core, Akka also provides
-powerful, higher-level abstractions on top of it.
+基于Akka核心中的一个小型且一致的工具集，Akka还提供了强大的、更高层次的抽象。
 
-### Messaging Patterns
+<a id="messaging-patterns"></a>
+### 消息模式
 
-As discussed above a straight-forward answer to the requirement of reliable
-delivery is an explicit ACK–RETRY protocol. In its simplest form this requires
+如上所述，对可靠传递要求的直接答案是显式的ACK-RETRY协议。这需要最简单的形式
 
- * a way to identify individual messages to correlate message with
-acknowledgement
- * a retry mechanism which will resend messages if not acknowledged in time
- * a way for the receiver to detect and discard duplicates
+ * 一种识别单个消息以使消息与确认相关联的方法
+ * 一个重试机制，如果未及时确认，它将重发消息
+ * 一种接收者检测并丢弃重复项的方法
 
-The third becomes necessary by virtue of the acknowledgements not being guaranteed
-to arrive either. 
+第三个是必要的，因为确认也不能保证到达。
 
-An ACK-RETRY protocol with business-level acknowledgements and de-duplication using identifiers is
-supported by the @ref:[At-Least-Once Delivery](../persistence.md#at-least-once-delivery) of the Classic Akka Persistence module. 
-Corresponding functionality for typed has not yet been implemented (see [issue #20984](https://github.com/akka/akka/issues/20984)).
+经典Akka持久化模块的 @ref:[至少一次交付](../persistence.md#at-least-once-delivery)支持带有业务级确认和使用标识符的重复数据删除的一个ACK-RETRY协议。相应的类型化功能尚未实现(查看[issue #20984](https://github.com/akka/akka/issues/20984)).
 
-Another way of implementing the third part would be to make processing the messages
-idempotent on the level of the business logic.
+实现第三部分的另一种方法是使消息处理在业务逻辑级别上具有幂等性。
 
-### Event Sourcing
+<a id="event-sourcing"></a>
+### 事件溯源
 
-Event sourcing (and sharding) is what makes large websites scale to
-billions of users, and the idea is quite simple: when a component (think actor)
-processes a command it will generate a list of events representing the effect
-of the command. These events are stored in addition to being applied to the
-component’s state. The nice thing about this scheme is that events only ever
-are appended to the storage, nothing is ever mutated; this enables perfect
-replication and scaling of consumers of this event stream (i.e. other
-components may consume the event stream as a means to replicate the component’s
-state on a different continent or to react to changes). If the component’s
-state is lost—due to a machine failure or by being pushed out of a cache—it can
-be reconstructed by replaying the event stream (usually employing
-snapshots to speed up the process). @ref:[Event sourcing](../typed/persistence.md#event-sourcing-concepts) is supported by
-Akka Persistence.
+事件溯源(和分片)是使大型网站能够扩展到数十亿用户的原因，这个想法很简单：当一个组件(想象一下actor)处理一个命令时，它将生成一个表示命令效果的一系列事件。除了将这些事件应用于组件的状态之外，还将存储这些事件。这个方案的优点是，事件只会追加到存储中，不会发生任何变化；这样就可以完美地复制和扩展该事件流的消费者(例如，其他组件可能使用事件流作为在不同大陆复制组件状态或对更改做出反应的一种方法)。如果组件的状态丢失 — 由于机器故障或被推出一个缓存，它可以通过重播事件流来重新构建(通常使用快照来加速进程)。@ref:[事件溯源](../typed/persistence.md#event-sourcing-concepts)是由Akka持久化支持的。
 
-### Mailbox with Explicit Acknowledgement
+<a id="mailbox-with-explicit-acknowledgement"></a>
+### 带有显式确认的邮箱
 
-By implementing a custom mailbox type it is possible to retry message processing
-at the receiving actor’s end in order to handle temporary failures. This
-pattern is mostly useful in the local communication context where delivery
-guarantees are otherwise sufficient to fulfill the application’s requirements.
+通过实现自定义邮箱类型，可以在接收的actor端重试消息处理，以处理临时故障。这种模式在本地通信上下文中非常有用，因为交付保证足以满足应用程序的需求。
 
-Please note that the caveats for @ref:[The Rules for In-JVM (Local) Message Sends](#the-rules-for-in-jvm-local-message-sends)
-do apply.
+请注意，@ref:[JVM中(本地)消息发送规则](#the-rules-for-in-jvm-local-message-sends)的警告确实适用。
 
 <a id="deadletters"></a>
-## Dead Letters
+## 死信
 
-Messages which cannot be delivered (and for which this can be ascertained) will
-be delivered to a synthetic actor called `/deadLetters`. This delivery
-happens on a best-effort basis; it may fail even within the local JVM (e.g.
-during actor termination). Messages sent via unreliable network transports will
-be lost without turning up as dead letters.
+无法传递的消息(这是可以确定的)将被传递给一个名为`/deadLetters`的合成actor。这种交付是在尽力而为的基础上进行的；它甚至可能在本地JVM中失败(例如在actor终止期间)。通过不可靠的网络传输发送的消息将丢失，而不会变成死信。
 
-### What Should I Use Dead Letters For?
+<a id="what-should-i-use-dead-letters-for-"></a>
+### 我应该用死信做什么?
 
-The main use of this facility is for debugging, especially if an actor send
-does not arrive consistently (where usually inspecting the dead letters will
-tell you that the sender or recipient was set wrong somewhere along the way).
-In order to be useful for this purpose it is good practice to avoid sending to
-deadLetters where possible, i.e. run your application with a suitable dead
-letter logger (see more below) from time to time and clean up the log output.
-This exercise—like all else—requires judicious application of common sense: it
-may well be that avoiding to send to a terminated actor complicates the
-sender’s code more than is gained in debug output clarity.
+这个工具的主要用途是调试，尤其是当一个actor发送没有一致到达时(通常检查死信会告诉你发送者或接收者在发送过程中有错误)。为了达到这一目的，最好避免在可能的情况下发送死信，也就是说，用一个合适的死信日志器(见下文)不时地运行你的应用程序，并清理日志输出。这项练习和所有其他练习一样，需要明智地运用常识：很可能，避免发送给一个已终止的actor会使发送者的代码更加复杂，而不是在调试输出清晰度中获得的效果。
 
-The dead letter service follows the same rules with respect to delivery
-guarantees as all other message sends, hence it cannot be used to implement
-guaranteed delivery. 
+死信服务遵循与所有其他消息发送的交付保证相同的规则，因此它不能用于实现有保证的交付。
 
-### How do I Receive Dead Letters?
+<a id="how-do-i-receive-dead-letters-"></a>
+### 我如何收到死信？
 
-An actor can subscribe to class `akka.actor.DeadLetter` on the event
-stream, see @ref:[Event Stream](../event-bus.md#event-stream)
-for how to do that. The subscribed actor will then receive all dead
-letters published in the (local) system from that point onwards. Dead letters
-are not propagated over the network, if you want to collect them in one place
-you will have to subscribe one actor per network node and forward them
-manually. Also consider that dead letters are generated at that node which can
-determine that a send operation is failed, which for a remote send can be the
-local system (if no network connection can be established) or the remote one
-(if the actor you are sending to does not exist at that point in time).
+一个actor可以订阅事件流上的`akka.actor.DeadLetter`类，有关如何操作，请参见 @ref:[事件流](../event-bus.md#event-stream)。从那时起，订阅的actor将收到在(本地)系统中发布的所有死信。
+死信不会在网络上传播，如果您想在一个地方收集死信，您必须订阅每个网络节点的一个actor并手动转发它们。还要考虑死信是在该节点生成的，该节点可以确定发送操作失败，对于远程发送可以是本地系统。还应考虑在该节点上生成死信，该死信可以确定发送操作失败，对于远程发送，死信可以是本地系统(如果没有网络连接可以建立)或远程系统(如果您要发送给的参与者在当时不存在)。
 
-### Dead Letters Which are (Usually) not Worrisome
+<a id="dead-letters-which-are-usually-not-worrisome"></a>
+### 死信(通常)不令人担忧
 
-Every time an actor does not terminate by its own decision, there is a chance
-that some messages which it sends to itself are lost. There is one which
-happens quite easily in complex shutdown scenarios that is usually benign:
-seeing instances of a graceful stop command for an actor being dropped means that two
-stop requests were given, but only one can succeed. In the
-same vein, you might see `akka.actor.Terminated` messages from children
-while stopping a hierarchy of actors turning up in dead letters if the parent
-is still watching the child when the parent terminates.
+每当一个actor不根据自己的决定终止时，就有可能丢失一些它发送给自己的消息。在复杂的关机场景中，有一种情况很容易发生，通常是良性的：看到针对某个actor的优美的stop命令实例被删除，意味着给出了两个stop请求，但只有一个成功。同样，你可能会看到来自子actor的`akka.actor.Terminated`消息，同时阻止一个层次结构的actor以死信的形式出现，如果父actor终止时，父actor仍在监视子actor。

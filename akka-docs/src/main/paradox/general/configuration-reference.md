@@ -1,16 +1,12 @@
-# Default configuration
+<a id="default-configuration"></a>
+# 默认配置
 
-Each Akka module has a `reference.conf` file with the default values.
+每个Akka模块都有一个`reference.conf`文件，带有默认值。
 
-Make your edits/overrides in your `application.conf`. Don't override default values if
-you are not sure of the implications. [Akka Config Checker](https://doc.akka.io/docs/akka-enhancements/current/config-checker.html)
-is a useful tool for finding potential configuration issues.
+在`application.conf`中进行编辑/覆盖。如果您不确定其含义，不要覆盖默认值。[Akka配置检查器](https://doc.akka.io/docs/akka-enhancements/current/config-checker.html)
+是查找潜在配置问题的有用工具。
 
-The purpose of `reference.conf` files is for libraries, like Akka, to define default values that are used if
-an application doesn't define a more specific value. It's also a good place to document the existence and
-meaning of the configuration properties. One library must not try to override properties in its own `reference.conf`
-for properties originally defined by another library's `reference.conf`, because the effective value would be
-nondeterministic when loading the configuration.`
+`reference.conf`文件的用途是让库，比如Akka，定义默认值，如果一个应用程序未定义更具体的值，则使用默认值。它也是记录配置属性的存在和意义的好地方。一个库不能试图在自己的`reference.conf`中重写原本定义在另一个库的`reference.conf`中的属性，因为在加载配置时，有效值是不确定的。
 
 <a id="config-akka-actor"></a>
 ### akka-actor

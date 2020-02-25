@@ -54,7 +54,7 @@ Java
 请注意，加载快照失败也被这样处理，但是您可以禁用快照的加载，如果您知道序列化格式已经以不兼容的方式改变了。
 
 <a id="snapshot-deletion"></a>
-## Snapshot deletion
+## 快照删除
 
 为了释放空间，事件溯源的actor可以根据给定`RetentionCriteria`，自动删除较旧的快照。
 

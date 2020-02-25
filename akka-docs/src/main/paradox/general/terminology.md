@@ -1,110 +1,74 @@
-# Terminology, Concepts
+<a id="terminology-concepts"></a>
+# 术语，概念
 
-In this chapter we attempt to establish a common terminology to define a solid ground for communicating about concurrent,
-distributed systems which Akka targets. Please note that, for many of these terms, there is no single agreed definition.
-We seek to give working definitions that will be used in the scope of the Akka documentation.
+在本章中，我们尝试建立一个通用术语，为Akka所针对的并发，分布式系统进行通信奠定坚实的基础。请注意，对于这些术语，没有一个统一的定义。我们寻求给出将在Akka文档范围内使用的工作定义。
 
-## Concurrency vs. Parallelism
+<a id="concurrency-vs-parallelism"></a>
+## 并发与并行
 
-Concurrency and parallelism are related concepts, but there are small differences. *Concurrency* means that two or more
-tasks are making progress even though they might not be executing simultaneously. This can for example be realized with
-time slicing where parts of tasks are executed sequentially and mixed with
-parts of other tasks. *Parallelism* on the other hand arise when the execution can be truly simultaneous.
+并发和并行性是相关的概念，但是有很小的差异。*并发*意味着两个或多个任务正在取得进展，即使它们可能不会同时执行。例如，这可以通过时间分片来实现，在时间分片中，部分任务按顺序执行并与其他任务的一部分混合。*并行*在另一方面，执行可以真正同时发生时才会出现。
 
-## Asynchronous vs. Synchronous
+<a id="asynchronous-vs-synchronous">s</a>
+## 异步与同步
 
-A method call is considered *synchronous* if the caller cannot make progress until the method returns a value or throws
-an exception. On the other hand, an *asynchronous* call allows the caller to progress after a finite number of steps, and
-the completion of the method may be signalled via some additional mechanism (it might be a registered callback, a Future,
-or a message).
+如果在方法返回值或引发异常之前，调用者无法取得进展，则该方法调用被视为*同步*。在另一方面，一个异步调用允许调用者在有限数量的步骤后继续进行，并且该方法的完成可以通过一些其他机制(可能是一个注册的回调，一个Future或一条消息)来发出信号。
 
-A synchronous API may use blocking to implement synchrony, but this is not a necessity. A very CPU intensive task
-might give a similar behavior as blocking. In general, it is preferred to use asynchronous APIs, as they guarantee that
-the system is able to progress. Actors are asynchronous by nature: an actor can progress after a message send without
-waiting for the actual delivery to happen.
+一个同步API可以使用阻塞来实现同步，但这不是必须的。一个非常CPU密集型的任务可能会产生类似于阻塞的行为。一般来说，最好使用异步api，因为它们保证了系统能够正常运行。Actor本质上是异步的：一个actor可以在消息发送后继续处理，而无需等待实际的传递发生。
 
-## Non-blocking vs. Blocking
+<a id="non-blocking-vs-blocking"></a>
+## 非阻塞与阻塞
 
-We talk about *blocking* if the delay of one thread can indefinitely delay some of the other threads. A good example
-is a resource which can be used exclusively by one thread using mutual exclusion. If a thread holds on to the resource
-indefinitely (for example accidentally running an infinite loop) other threads waiting on the resource can not progress.
-In contrast, *non-blocking* means that no thread is able to indefinitely delay others.
+我们将讨论*阻塞*，如果一个线程的延迟可以无限期地延迟其他一些线程。一个很好的例子是可以由一个线程使用互斥独占使用的资源。如果线程无限期地占用资源(例如，意外运行一个无限循环)，则等待该资源的其他线程将无法进行。相反，*非阻塞*意味着没有线程能够无限期地延迟其他线程。
 
-Non-blocking operations are preferred to blocking ones, as the overall progress of the system is not trivially guaranteed
-when it contains blocking operations.
+非阻塞操作比阻塞操作更可取，因为当包含阻塞操作时，系统的总体进度无法得到保证。
 
-## Deadlock vs. Starvation vs. Live-lock
+<a id="deadlock-vs-starvation-vs-live-lock"></a>
+## 死锁，饥饿与活锁
 
-*Deadlock* arises when several participants are waiting on each other to reach a specific state to be able to progress.
-As none of them can progress without some other participant to reach a certain state (a "Catch-22" problem) all affected
-subsystems stall. Deadlock is closely related to *blocking*, as it is necessary that a participant thread be able to
-delay the progression of other threads indefinitely.
+当多个参与者互相等待，以达到特定的状态，从而能够继续进行时，就会出现*死锁*。如果没有其他actor达到某种状态(一个"Catch-22"问题)，所有受影响的子系统都将停止运行。死锁与*阻塞*密切相关，因为一个参与线程必须能够无限期地延迟其他线程的进程。
 
-In the case of *deadlock*, no participants can make progress, while in contrast *Starvation* happens, when there are
-participants that can make progress, but there might be one or more that cannot. Typical scenario is the case of a naive
-scheduling algorithm that always selects high-priority tasks over low-priority ones. If the number of incoming
-high-priority tasks is constantly high enough, no low-priority ones will be ever finished.
+在*死锁*的情况下，没有参与者能够取得进展。而相比之下，当有些参与者可以取得进展，但可能有一个或多个参与者不能取得进展时，就会出现*饥饿*。典型的场景是一个总是选择高优先级任务而越过低优先级任务的幼稚调度算法。如果传入的高优先级任务的数量一直足够高，则将永远不会完成低优先级的任务。
 
-*Livelock* is similar to *deadlock* as none of the participants make progress. The difference though is that instead of
-being frozen in a state of waiting for others to progress, the participants continuously change their state. An example
-scenario when two participants have two identical resources available. They each try to get the resource, but they also
-check if the other needs the resource, too. If the resource is requested by the other participant, they try to get
-the other instance of the resource. In the unfortunate case it might happen that the two participants "bounce" between
-the two resources, never acquiring it, but always yielding to the other.
+*活锁*类似于*活锁类似于死锁*，因为没有一个参与者取得进展。不过，区别在于，参与者不是停滞在等待他人进展的一个状态中，而是不断地改变他们的状态。一个示例场景，两个参与者有两个相同的可用资源。他们每个人都试图获得资源，但他们也会检查对方是否也需要资源。如果资源正在被其他参与者请求，则它们尝试获取资源的另一个实例。在不幸的情况下，可能会发生两个参与者在两个资源之间"反弹"，从未获取资源，而是总是屈服于另一个资源的情况。
 
-## Race Condition
+<a id="race-condition"></a>
+## 竞争条件
 
-We call it a *Race condition* when an assumption about the ordering of a set of events might be violated by external
-non-deterministic effects. Race conditions often arise when multiple threads have a shared mutable state, and the
-operations of thread on the state might be interleaved causing unexpected behavior. While this is a common case, shared
-state is not necessary to have race conditions. One example could be a client sending unordered packets (e.g UDP
-datagrams) `P1`, `P2` to a server. As the packets might potentially travel via different network routes, it is possible that
-the server receives `P2` first and `P1` afterwards. If the messages contain no information about their sending order it is
-impossible to determine by the server that they were sent in a different order. Depending on the meaning of the packets
-this can cause race conditions.
+当一组事件的顺序的假设可能被外部的不确定性影响破坏时，我们称之为*竞争条件*。当多个线程具有共享的可变状态时，竞争条件通常会出现，并且线程对该状态的操作可能会交叉进行，从而导致意外的行为。虽然这是一种常见的情况，但是共享状态并不一定要有竞争条件。一个例子是客户端发送无序的数据包(比如UDP数据报)`P1`，`P2`到一个服务器。由于这些包可能通过不同的网络路由传递，所以服务器可能先接收`P2`，然后再接收`P1`。如果消息没有包含关于其发送顺序的信息，则服务器不可能确定它们是以不同的顺序发送的。根据包的含义，这可能导致竞争条件。
 
 @@@ note
 
-The only guarantee that Akka provides about messages sent between a given pair of actors is that their order is
-always preserved. see @ref:[Message Delivery Reliability](message-delivery-reliability.md)
+对于给定的一对actor之间发送的消息，Akka提供的惟一保证是始终保留它们的顺序。请参阅 @ref:[消息传递可靠性](message-delivery-reliability.md)。
 
 @@@
 
-## Non-blocking Guarantees (Progress Conditions)
+<a id="non-blocking-guarantees-progress-conditions-"></a>
+## 非阻塞担保(进展条件)
 
-As discussed in the previous sections blocking is undesirable for several reasons, including the dangers of deadlocks
-and reduced throughput in the system. In the following sections we discuss various non-blocking properties with
-different strength.
+正如前面几节所讨论的，由于多种原因，阻塞是不可取的，包括死锁和系统吞吐量降低的危险。在下面几节中，我们将讨论不同强度的各种非阻塞特性。
 
-### Wait-freedom
+<a id="wait-freedom"></a>
+### 等待-自由
 
-A method is *wait-free* if every call is guaranteed to finish in a finite number of steps. If a method is
-*bounded wait-free* then the number of steps has a finite upper bound.
+一个方法是*wait-free* 如果保证每个调用在有限数量的步骤中完成。一个方法是*有界的wait-free*步骤的数量有一个有限的上限。
 
-From this definition it follows that wait-free methods are never blocking, therefore deadlock can not happen.
-Additionally, as each participant can progress after a finite number of steps (when the call finishes), wait-free
-methods are free of starvation.
+从这个定义可以得出，wait-free方法永远不会阻塞，因此不会发生死锁。此外，由于每个参与者都可以在有限的步骤之后(通话结束时)继续，因此wait-free的方法不会出现饥饿。
 
-### Lock-freedom
+<a id="lock-freedom"></a>
+### 锁-自由
 
-*Lock-freedom* is a weaker property than *wait-freedom*. In the case of lock-free calls, infinitely often some method
-finishes in a finite number of steps. This definition implies that no deadlock is possible for lock-free calls. On the
-other hand, the guarantee that *some call finishes* in a finite number of steps is not enough to guarantee that
-*all of them eventually finish*. In other words, lock-freedom is not enough to guarantee the lack of starvation.
+与*wait-freedom*相比，*Lock-freedom*是一个较弱的属性。
+在lock-free调用的情况下，某些无限的方法会以有限的步骤完成。这个定义意味着无锁调用不可能出现死锁。另一方面，保证*某些调用*在有限数量的步骤中完成并不足以保证*所有调用最终都完成*。换句话说，lock-freedom不足以保证缺乏饥饿。
 
-### Obstruction-freedom
+### 障碍-自由
 
-*Obstruction-freedom* is the weakest non-blocking guarantee discussed here. A method is called *obstruction-free* if
-there is a point in time after which it executes in isolation (other threads make no steps, e.g.: become suspended), it
-finishes in a bounded number of steps. All lock-free objects are obstruction-free, but the opposite is generally not
-true.
+*Obstruction-freedom*是此处讨论的最弱的无阻塞保证。
+如果在某个时间点之后，某个方法在隔离状态下执行，则称为*obstruction-free* 方法(其他线程不执行任何步骤，例如：变成暂停)，它以有限的步骤完成。所有lock-free的对象都是obstruction-free的，但通常情况下情况并非如此。
 
-*Optimistic concurrency control* (OCC) methods are usually obstruction-free. The OCC approach is that every participant
-tries to execute its operation on the shared object, but if a participant detects conflicts from others, it rolls back
-the modifications, and tries again according to some schedule. If there is a point in time, where one of the participants
-is the only one trying, the operation will succeed.
+*乐观并发控制*(OCC)方法通常是obstruction-free的。OCC方法是每个参与者都尝试在共享对象上执行其操作，但是如果一个参与者检测到来自其他对象的冲突，它就回滚修改，并根据某些调度再次尝试。如果有一个时间点，其中的一个参与者是唯一的尝试者，则该操作将成功。
 
-## Recommended literature
+<a id="recommended-literature"></a>
+## 推荐文献
 
- * The Art of Multiprocessor Programming, M. Herlihy and N Shavit, 2008. ISBN 978-0123705914
- * Java Concurrency in Practice, B. Goetz, T. Peierls, J. Bloch, J. Bowbeer, D. Holmes and D. Lea, 2006. ISBN 978-0321349606
+ * 多处理器编程的艺术, M. Herlihy and N Shavit, 2008. ISBN 978-0123705914
+ * Java并发实践, B. Goetz, T. Peierls, J. Bloch, J. Bowbeer, D. Holmes and D. Lea, 2006. ISBN 978-0321349606

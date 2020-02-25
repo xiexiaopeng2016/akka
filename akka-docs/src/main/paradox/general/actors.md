@@ -11,7 +11,7 @@ project.description: What is an Actor and sending messages between independent u
   2. 创建有限数量的新Actor
   3. 指定要应用于下一条消息的行为
 
-actor是 @ref:[状态](#state)，@ref:[行为](#behavior)，@ref:[邮箱](#mailbox)，@ref:[子Actor](#child-actors)和 @ref:[监督策略](#supervisor-strategy) 的容器。所有这些都封装在一个 @ref:[Actor引用](#actor-reference) 背后。一个值得注意的方面是actor具有明确的生命周期，当不再引用它们时，它们不会自动销毁。创建完一个后，您有责任确保它最终也将终止，这也使您可以控制 @ref:[当一个Actor终止时](#when-an-actor-terminates)时如何释放资源。
+actor是 @ref:[状态](#state), @ref:[行为](#behavior), @ref:[邮箱](#mailbox), @ref:[子Actor](#child-actors)和 @ref:[监督策略](#supervisor-strategy)的容器。所有这些都封装在一个 @ref:[Actor引用](#actor-reference) 背后。一个值得注意的方面是actor具有明确的生命周期，当不再引用它们时，它们不会自动销毁。创建完一个后，您有责任确保它最终也将终止，这也使您可以控制 @ref:[当一个Actor终止时](#when-an-actor-terminates)时如何释放资源。
 
 <a id="actor-reference"></a>
 ## Actor引用
@@ -31,108 +31,44 @@ Actor对象通常将包含一些变量，这些变量反映Actor可能处于的�
 
 另外，可以通过持久化接收到的消息，将参与者的状态自动恢复到重启之前的状态，且重启后重播(查看 @ref:[Event Sourcing](../typed/persistence.md))。
 
+<a id="behavior"></a>
 ## 行为
 
-Every time a message is processed, it is matched against the current behavior
-of the actor. Behavior means a function which defines the actions to be taken
-in reaction to the message at that point in time, say forward a request if the
-client is authorized, deny it otherwise. This behavior may change over time,
-e.g. because different clients obtain authorization over time, or because the
-actor may go into an “out-of-service” mode and later come back. These changes
-are achieved by either encoding them in state variables which are read from the
-behavior logic, or the function itself may be swapped out at runtime, by returning
-a different behavior to be used for next message. However, the initial behavior defined
-during construction of the actor object is special in the sense that a restart
-of the actor will reset its behavior to this initial one.
+每次处理消息时，都会将其与actor的当前行为进行匹配。行为指的是一个函数，它定义了在那个时间点对消息的响应所采取的操作，例如，如果客户端被授权，则转发一个请求，否则拒绝它。这种行为可能会随着时间的推移而改变，例如，由于不同的客户端随着时间的推移而获得授权，或者由于actor可能进入“停止服务”模式，并再后面回来。这些更改可以通过将它们编码到从行为逻辑中读取的状态变量中来实现，或者函数本身也可以在运行时换出，方法返回一个不同的行为，用于下一条消息。然而，在构造actor对象期间定义的初始行为是特殊的，因为重新启动actor会将其行为重置为初始行为。
 
-Messages can be sent to an @ref:[actor Reference](#actor-reference) and behind
-this façade there is a behavior that receives the message and acts upon it. The
-binding between Actor reference and behavior can change over time, but that is not
-visible on the outside.
+可以将消息发送到一个 @ref:[actor引用](#actor-reference)，在这个表面的背后，有一个接收消息并对其进行操作的行为。actor引用和行为之间的绑定可能会随着时间的推移而改变，但这在外部是不可见的。
 
-Actor references are parameterized and only messages that are of the specified type
-can be sent to them. The association between an actor reference and its type
-parameter must be made when the actor reference (and its Actor) is created.
-For this purpose each behavior is also parameterized with the type of messages
-it is able to process. Since the behavior can change behind the actor reference
-façade, designating the next behavior is a constrained operation: the successor
-must handle the same type of messages as its predecessor. This is necessary in
-order to not invalidate the actor references that refer to this Actor.
+Actor引用已参数化，并且只能将指定类型的消息发送给它们。创建一个actor引用(及其Actor)时，必须在actor引用与其类型参数之间建立关联。为此，每个行为还可以用它能够处理的消息类型参数化。
+由于行为可以在actor引用表面背后改变，因此指定下一个行为是受约束的操作：继任者必须处理与其前任相同类型的消息。为了不使引用此Actor的actor引用无效，这是必需的。
 
-What this enables is that whenever a message is sent to an Actor we can
-statically ensure that the type of the message is one that the Actor declares
-to handle—we can avoid the mistake of sending completely pointless messages.
-What we cannot statically ensure, though, is that the behavior behind the
-actor reference will be in a given state when our message is received. The
-fundamental reason is that the association between actor reference and behavior
-is a dynamic runtime property, the compiler cannot know it while it translates
-the source code.
+这可以实现的是，无论何时将消息发送给Actor，我们都可以静态地确保消息的类型是Actor声明要处理的类型 - 我们可以避免发送完全没有意义的信息的错误。但是，我们不能静态地确保的是，当接收到我们的消息时，actor引用背后的行为将处于给定的状态。根本原因是actor引用和行为之间的关联是动态的运行时属性，编译器在编译源代码时无法知道。
 
-This is the same as for normal Java objects with internal variables: when
-compiling the program we cannot know what their value will be, and if the
-result of a method call depends on those variables then the outcome is
-uncertain to a degree—we can only be certain that the returned value is of a
-given type.
+这与具有内部变量的普通Java对象相同：在编译程序时，我们不知道它们的值是什么，并且如果方法调用的结果取决于这些变量，那么结果在一定程度上是不确定的 — 我们只能确定返回的值是给定类型的。
 
-The reply message type of an Actor command is described by the type of the
-actor reference for the reply-to that is contained within the message. This
-allows a conversation to be described in terms of its types: the reply will
-be of type A, but it might also contain an address of type B, which then allows
-the other Actor to continue the conversation by sending a message of type B to
-this new actor reference. While we cannot statically express the “current” state
-of an Actor, we can express the current state of a protocol between two Actors,
-since that is just given by the last message type that was received or sent.
+一个Actor命令的回复消息类型由消息中包含的reply-to的Actor引用类型描述的。这允许根据它们的类型来描述一个对话：答复的类型将为A，但它也可能包含B类型的地址，然后允许其它actor通过向这个新的actor引用发送一个B类型的消息来继续对话。虽然我们不能静态地表示一个actor的“当前”状态，但是我们可以表示两个actor之间协议的当前状态，因为它是由接收或发送的最后一个消息类型给出的。
 
-## Mailbox
+<a id="mailbox"></a>
+## 邮箱
 
-An actor’s purpose is the processing of messages, and these messages were sent
-to the actor from other actors (or from outside the actor system). The piece
-which connects sender and receiver is the actor’s mailbox: each actor has
-exactly one mailbox to which all senders enqueue their messages. Enqueuing
-happens in the time-order of send operations, which means that messages sent
-from different actors may not have a defined order at runtime due to the
-apparent randomness of distributing actors across threads. Sending multiple
-messages to the same target from the same actor, on the other hand, will
-enqueue them in the same order.
+一个actor的目的是处理消息，这些消息是从其他actor(或actor系统外部)发送给actor的。
 
-There are different mailbox implementations to choose from, the default being a
-FIFO: the order of the messages processed by the actor matches the order in
-which they were enqueued. This is usually a good default, but applications may
-need to prioritize some messages over others. In this case, a priority mailbox
-will enqueue not always at the end but at a position as given by the message
-priority, which might even be at the front. While using such a queue, the order
-of messages processed will naturally be defined by the queue’s algorithm and in
-general not be FIFO.
+连接发送者和接收者的部分是actor的邮箱：每个actor都恰好只有一个邮箱，所有发送者都将他们的消息入队邮箱。入队按发送操作的时间顺序进行，这意味着从不同actor发送的消息在运行时可能没有定义的顺序，这是由于actor跨线程分布的明显随机性造成的。另一方面，从同一个actor向同一个目标发送多个消息将使它们以相同顺序入队。
 
-An important feature in which Akka differs from some other actor model
-implementations is that the current behavior must always handle the next
-dequeued message, there is no scanning the mailbox for the next matching one.
-Failure to handle a message will typically be treated as a failure, unless this
-behavior is overridden.
+有不同的邮箱实现可供选择，默认的是FIFO：actor处理的消息的顺序与入队的顺序相匹配。这通常是一个很好的默认设置，但是应用程序可能需要将某些消息优先于其他消息。在这种情况下，一个优先级邮箱将不总是入队在最后面，而是入队在邮件优先级给定的位置，该位置甚至可能在最前面。使用这种队列时，消息的处理顺序自然将由队列的算法定义，通常不是FIFO。
 
-## Child Actors
+Akka与某些其他actor模型实现不同的一个重要特性是，当前行为必须始终处理下一条出队的消息，无需扫描邮箱以查找下一条匹配的消息。处理一条消息失败通常被视为故障，除非此行为被覆盖。
 
-Each actor is potentially a parent: if it creates children for delegating
-sub-tasks, it will automatically supervise them. The list of children is
-maintained within the actor’s context and the actor has access to it.
-Modifications to the list are done by spawning or stopping children and
-these actions are reflected immediately. The actual creation and termination
-actions happen behind the scenes in an asynchronous way, so they do not “block”
-their parent.
+<a id="child-actors"></a>
+## 子Actor
 
-## Supervisor Strategy
+每个actor都可能是一个父actor：如果它创建了用于委派子任务的子actor，它会自动监督它们。子actor列表在actor的上下文中维护，actor可以访问它。对列表的修改是通过生成或停止子actor来完成的，这些操作将立即反映出来。实际的创建和终止操作以异步方式在幕后进行，因此它们不会“阻塞”它们的父actor。
 
-The final piece of an actor is its a strategy for handling unexpected exceptions - failures. 
-Fault handling is then done transparently by Akka, applying one of the strategies described 
-in @ref:[Fault Tolerance](../typed/fault-tolerance.md) for each failure.
+<a id="supervisor-strategy"></a>
+## 监督策略
 
-## When an Actor Terminates
+actor的最后一部分是处理意外异常的策略 - 故障。故障处理由Akka透明地完成，对每个故障应用 @ref:[故障容错](../typed/fault-tolerance.md)中描述的一个策略。
 
-Once an actor terminates, i.e. fails in a way which is not handled by a
-restart, stops itself or is stopped by its supervisor, it will free up its
-resources, draining all remaining messages from its mailbox into the system’s
-“dead letter mailbox” which will forward them to the EventStream as DeadLetters.
-The mailbox is then replaced within the actor reference with a system mailbox,
-redirecting all new messages to the EventStream as DeadLetters. This
-is done on a best effort basis, though, so do not rely on it in order to
-construct “guaranteed delivery”.
+<a id="when-an-actor-terminates"></a>
+## 当一个actor终止时
+
+一旦actor终止，例如，失败的方式不是通过重新启动来处理，而是自动停止或被其上级停止，它将释放其资源，将所有剩余的消息从其邮箱中抽出，放入系统的“死信邮箱”，该邮箱将把它们作为死信转发给事件流。然后在actor引用中使用一个系统邮箱替换邮箱，将所有新消息作为死信重定向到事件流。不过，这是在尽最大努力的基础上完成的，因此不要依赖它来构建“保证交付”。
